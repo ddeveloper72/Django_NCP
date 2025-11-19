@@ -544,8 +544,42 @@ class AzureFHIRIntegrationService:
                 if code:
                     return f"{system}|{code}"
         
-        # Fallback: use resource ID
-        return resource.get('id', 'unknown')
+        elif resource_type == 'Practitioner':
+            # Use practitioner identifiers as signature (same person across versions)
+            identifiers = resource.get('identifier', [])
+            if identifiers:
+                # Use first identifier as signature
+                id_system = identifiers[0].get('system', '')
+                id_value = identifiers[0].get('value', '')
+                if id_value:
+                    return f"Practitioner|{id_system}|{id_value}"
+            
+            # Fallback: use family name + given name
+            names = resource.get('name', [])
+            if names:
+                name = names[0]
+                family = name.get('family', '')
+                given = ' '.join(name.get('given', []))
+                if family and given:
+                    return f"Practitioner|{family}|{given}"
+        
+        elif resource_type == 'Organization':
+            # Use organization identifiers as signature
+            identifiers = resource.get('identifier', [])
+            if identifiers:
+                # Use first identifier as signature
+                id_system = identifiers[0].get('system', '')
+                id_value = identifiers[0].get('value', '')
+                if id_value:
+                    return f"Organization|{id_system}|{id_value}"
+            
+            # Fallback: use organization name
+            org_name = resource.get('name', '')
+            if org_name:
+                return f"Organization|{org_name}"
+        
+        # Fallback: use resource ID (will NOT deduplicate versions of same resource)
+        return f"{resource_type}|{resource.get('id', 'unknown')}"
     
     def _get_latest_version(self, entries: List[Dict]) -> Dict:
         """
@@ -597,13 +631,18 @@ class AzureFHIRIntegrationService:
         try:
             bundle_entries = []
             
-            # 1. Get Patient resource
+            # 1. Get Patient resource by identifier (not resource ID)
             try:
-                patient = self._make_request('GET', f"Patient/{patient_id}")
-                if patient:
+                search_params = {'identifier': patient_id}
+                patient_results = self._make_request('GET', 'Patient', params=search_params)
+                if patient_results and patient_results.get('entry'):
+                    patient = patient_results['entry'][0]['resource']
                     bundle_entries.append({'resource': patient})
-            except Exception:
-                logger.warning(f"Patient {patient_id} not found in Azure FHIR server")
+                    logger.info(f"Found Patient by identifier {patient_id}: {patient.get('id')}")
+                else:
+                    raise ValueError(f"No Patient found with identifier {patient_id}")
+            except Exception as e:
+                logger.warning(f"Patient {patient_id} not found in Azure FHIR server: {e}")
                 patient = {
                     'resourceType': 'Patient',
                     'id': patient_id,
@@ -696,7 +735,88 @@ class AzureFHIRIntegrationService:
                         logger.warning(f"Could not fetch Medication {med_id}: {e}")
                         continue
             
-            # 5. Create Patient Summary Bundle
+            # 5. Fetch Practitioner and Organization resources referenced in Composition
+            practitioner_references = set()
+            organization_references = set()
+            
+            # Extract references from Composition.author and other fields
+            for entry in bundle_entries:
+                resource = entry.get('resource', {})
+                resource_type = resource.get('resourceType')
+                
+                # From Composition authors
+                if resource_type == 'Composition':
+                    for author in resource.get('author', []):
+                        ref = author.get('reference', '')
+                        if ref.startswith('Practitioner/'):
+                            prac_id = ref.split('/')[-1]
+                            practitioner_references.add(prac_id)
+                
+                # From Composition custodian
+                if resource_type == 'Composition':
+                    custodian_ref = resource.get('custodian', {}).get('reference', '')
+                    if custodian_ref.startswith('Organization/'):
+                        org_id = custodian_ref.split('/')[-1]
+                        organization_references.add(org_id)
+            
+            # Search for Practitioners and Organizations with deduplication
+            # Get only the most recent version of each unique resource
+            try:
+                # Search for Practitioners - get all versions then filter
+                practitioner_search = self._make_request('GET', 'Practitioner', params={'_count': '100', '_sort': '-_lastUpdated'})
+                if practitioner_search and practitioner_search.get('entry'):
+                    # Filter to get only latest version of each practitioner
+                    practitioner_entries = self._filter_latest_versions(
+                        practitioner_search['entry'], 
+                        'Practitioner'
+                    )
+                    
+                    # Add to bundle (avoiding duplicates by ID)
+                    existing_ids = {e.get('resource', {}).get('id') for e in bundle_entries}
+                    for entry in practitioner_entries:
+                        resource = entry['resource']
+                        if resource.get('id') not in existing_ids:
+                            bundle_entries.append({'resource': resource})
+                            existing_ids.add(resource.get('id'))
+                            logger.info(f"Added Practitioner (latest): {resource.get('id')} v{resource.get('meta', {}).get('versionId', 'N/A')}")
+            except Exception as e:
+                logger.debug(f"Could not search Practitioners: {e}")
+            
+            # Fetch referenced Organizations
+            if organization_references:
+                logger.info(f"Fetching {len(organization_references)} referenced Organization resources")
+                for org_id in organization_references:
+                    try:
+                        organization = self._make_request('GET', f"Organization/{org_id}")
+                        if organization:
+                            bundle_entries.append({'resource': organization})
+                            logger.debug(f"Added Organization resource: {org_id}")
+                    except Exception as e:
+                        logger.warning(f"Could not fetch Organization {org_id}: {e}")
+                        continue
+            
+            # Search for Organizations with deduplication
+            try:
+                org_search = self._make_request('GET', 'Organization', params={'_count': '100', '_sort': '-_lastUpdated'})
+                if org_search and org_search.get('entry'):
+                    # Filter to get only latest version of each organization
+                    org_entries = self._filter_latest_versions(
+                        org_search['entry'],
+                        'Organization'
+                    )
+                    
+                    # Add to bundle (avoiding duplicates by ID)
+                    existing_ids = {e.get('resource', {}).get('id') for e in bundle_entries}
+                    for entry in org_entries:
+                        resource = entry['resource']
+                        if resource.get('id') not in existing_ids:
+                            bundle_entries.append({'resource': resource})
+                            existing_ids.add(resource.get('id'))
+                            logger.info(f"Added Organization (latest): {resource.get('id')} v{resource.get('meta', {}).get('versionId', 'N/A')}")
+            except Exception as e:
+                logger.debug(f"Could not search Organizations: {e}")
+            
+            # 7. Create Patient Summary Bundle
             summary_bundle = {
                 'resourceType': 'Bundle',
                 'id': f'patient-summary-{patient_id}',
@@ -711,7 +831,7 @@ class AzureFHIRIntegrationService:
                 }
             }
             
-            logger.info(f"Assembled patient summary bundle with {len(bundle_entries)} resources")
+            logger.info(f"Assembled patient summary bundle with {len(bundle_entries)} resources including Practitioners and Organizations")
             return summary_bundle
             
         except Exception as e:

@@ -138,31 +138,83 @@ Although being real choices for the different diseases and conditions, the selec
         <signatureCode code="S"/>
         <assignedEntity>
             <id extension="nnn" root="2.999"/>
-            <addr>
+            <!-- Medical License Number -->
+            <id extension="PT-RNPR-123456" root="2.16.620.1.101.10.3.1.1" assigningAuthorityName="RNPR - Registo Nacional de Profissionais de Saúde"/>
+            <!-- National Identification Number (NISS) -->
+            <id extension="12345678901" root="2.16.620.1.101.10.1.1" assigningAuthorityName="NISS - Número de Identificação da Segurança Social"/>
+            <!-- Ordem dos Médicos (Medical Association) Number -->
+            <id extension="OM-45678" root="2.16.620.1.101.10.3.2.1" assigningAuthorityName="Ordem dos Médicos"/>
+            
+            <!-- Practitioner Role/Specialty Code -->
+            <code code="394814009" displayName="General practice" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT">
+                <translation code="158965000" displayName="Medical practitioner" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT"/>
+            </code>
+            
+            <addr use="WP">
                 <streetAddressLine>3, Alameda Santo António dos Capuchos</streetAddressLine>
                 <city>Lisbon</city>
                 <postalCode>1169-050</postalCode>
                 <country>PT</country>
             </addr>
             <telecom value="tel:351211234568" use="WP"/>
-            <telecom value="mailto:medico@gmail.com"/>
+            <telecom value="tel:351911234567" use="MC"/>
+            <telecom value="mailto:medico@gmail.com" use="WP"/>
+            <telecom value="mailto:antonio.pereira@chlc.min-saude.pt" use="WP"/>
+            
             <!-- Author Information: Health Professional -->
             <assignedPerson>
                 <name>
-                    <family>Pereira</family>
+                    <prefix>Dr.</prefix>
                     <given>António</given>
+                    <given>José</given>
+                    <family>Pereira</family>
+                    <suffix>MD</suffix>
                 </name>
+                
+                <!-- Language Communication -->
+                <languageCommunication>
+                    <languageCode code="pt"/>
+                    <modeCode code="ESP" displayName="Expressed spoken" codeSystem="2.16.840.1.113883.5.60"/>
+                    <proficiencyLevelCode code="E" displayName="Excellent" codeSystem="2.16.840.1.113883.5.61"/>
+                    <preferenceInd value="true"/>
+                </languageCommunication>
+                <languageCommunication>
+                    <languageCode code="en"/>
+                    <modeCode code="ESP" displayName="Expressed spoken" codeSystem="2.16.840.1.113883.5.60"/>
+                    <proficiencyLevelCode code="G" displayName="Good" codeSystem="2.16.840.1.113883.5.61"/>
+                    <preferenceInd value="false"/>
+                </languageCommunication>
             </assignedPerson>
+            
             <representedOrganization>
                 <id root="2.999" extension="12345678"/>
+                <!-- Portuguese Hospital System ID -->
+                <id extension="PT-HOSP-106001" root="2.16.620.1.101.10.2.1.1" assigningAuthorityName="SPMS - Serviços Partilhados do Ministério da Saúde"/>
+                <!-- Tax Identification Number (NIPC) -->
+                <id extension="500066471" root="2.16.620.1.101.10.2.2.1" assigningAuthorityName="NIPC - Número de Identificação de Pessoa Coletiva"/>
+                
+                <!-- Organization Type Code -->
+                <standardIndustryClassCode code="22232009" displayName="Hospital" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT"/>
+                
                 <name>Centro Hospitalar de Lisboa Central</name>
+                <telecom value="tel:351217805000" use="WP"/>
                 <telecom value="mailto:hospital@gmail.com" use="WP"/>
-                <addr>
+                <telecom value="http://www.chlc.min-saude.pt" use="WP"/>
+                <addr use="WP">
                     <streetAddressLine>3, Alameda Santo António dos Capuchos</streetAddressLine>
                     <city>Lisbon</city>
+                    <state>Lisboa</state>
                     <postalCode>1169-050</postalCode>
                     <country>PT</country>
                 </addr>
+                
+                <!-- Parent Organization (SNS - Serviço Nacional de Saúde) -->
+                <asOrganizationPartOf>
+                    <wholeOrganization>
+                        <id extension="SNS" root="2.16.620.1.101.10.2.3.1"/>
+                        <name>Serviço Nacional de Saúde</name>
+                    </wholeOrganization>
+                </asOrganizationPartOf>
             </representedOrganization>
         </assignedEntity>
     </legalAuthenticator>

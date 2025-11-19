@@ -3156,6 +3156,33 @@ class FHIRBundleParser:
                     'full_address': self._format_address(address)
                 })
             
+            # Extract communication languages
+            communication = []
+            for comm in related_person.get('communication', []):
+                lang_obj = comm.get('language', {})
+                lang_code = None
+                lang_display = None
+                
+                if 'coding' in lang_obj and isinstance(lang_obj['coding'], list) and len(lang_obj['coding']) > 0:
+                    lang_code = lang_obj['coding'][0].get('code')
+                    lang_display = lang_obj['coding'][0].get('display')
+                if 'text' in lang_obj:
+                    lang_display = lang_obj['text']
+                
+                if lang_code or lang_display:
+                    communication.append({
+                        'code': lang_code,
+                        'display': lang_display or lang_code,
+                        'preferred': comm.get('preferred', False)
+                    })
+            
+            # Extract relationship period
+            period = related_person.get('period', {})
+            
+            # Extract gender and birthDate
+            gender = related_person.get('gender')
+            birth_date = related_person.get('birthDate')
+            
             # Build emergency contact entry
             emergency_contact = {
                 'id': related_person.get('id', ''),
@@ -3164,6 +3191,10 @@ class FHIRBundleParser:
                 'relationship': relationship_info,
                 'telecom': contact_telecoms,
                 'address': contact_addresses,
+                'communication': communication,
+                'period': period,
+                'gender': gender,
+                'birth_date': birth_date,
                 'patient_reference': related_person.get('patient', {}).get('reference', ''),
                 'source': 'FHIR RelatedPerson'
             }
@@ -3289,12 +3320,104 @@ class FHIRBundleParser:
                 }
                 practitioner_identifiers.append(formatted_identifier)
             
+            # Extract practitioner name components
+            name_data = practitioner.get('name', [])
+            prefix = None
+            suffix = None
+            if name_data and isinstance(name_data, list) and len(name_data) > 0:
+                first_name = name_data[0]
+                prefix = ', '.join(first_name.get('prefix', [])) if first_name.get('prefix') else None
+                suffix = ', '.join(first_name.get('suffix', [])) if first_name.get('suffix') else None
+            
+            # Extract communication languages
+            communication = []
+            for comm in practitioner.get('communication', []):
+                lang_code = None
+                lang_display = None
+                
+                # Handle both CodeableConcept and simple coding structure
+                if 'coding' in comm:
+                    if isinstance(comm['coding'], list) and len(comm['coding']) > 0:
+                        lang_code = comm['coding'][0].get('code')
+                        lang_display = comm['coding'][0].get('display')
+                elif 'language' in comm:
+                    lang_obj = comm['language']
+                    if 'coding' in lang_obj and isinstance(lang_obj['coding'], list) and len(lang_obj['coding']) > 0:
+                        lang_code = lang_obj['coding'][0].get('code')
+                        lang_display = lang_obj['coding'][0].get('display')
+                    if 'text' in lang_obj:
+                        lang_display = lang_obj['text']
+                
+                if 'text' in comm:
+                    lang_display = comm['text']
+                
+                if lang_code or lang_display:
+                    communication.append({
+                        'code': lang_code,
+                        'display': lang_display or lang_code,
+                        'preferred': comm.get('preferred', False)
+                    })
+            
+            # Process qualifications with enhanced details
+            qualifications = []
+            for qual in practitioner.get('qualification', []):
+                qual_code = qual.get('code', {})
+                
+                # Extract qualification text from code.text or coding display
+                qual_text = qual_code.get('text')
+                if not qual_text and 'coding' in qual_code:
+                    codings = qual_code['coding']
+                    if isinstance(codings, list) and len(codings) > 0:
+                        qual_text = codings[0].get('display')
+                
+                # Extract issuer organization
+                issuer = None
+                issuer_ref = qual.get('issuer', {})
+                if issuer_ref:
+                    issuer = {
+                        'reference': issuer_ref.get('reference'),
+                        'display': issuer_ref.get('display')
+                    }
+                
+                # Extract qualification period
+                period = qual.get('period', {})
+                
+                qualifications.append({
+                    'code': qual_code,
+                    'text': qual_text or 'Healthcare Professional',
+                    'identifier': qual.get('identifier', []),
+                    'issuer': issuer,
+                    'period': period
+                })
+            
+            # Extract role and specialty from qualifications for template compatibility
+            role = None
+            specialty = None
+            if qualifications:
+                # Use first qualification as primary role
+                role = qualifications[0].get('text', 'Healthcare Professional')
+                # If multiple qualifications, second one might be specialty
+                if len(qualifications) > 1:
+                    specialty = qualifications[1].get('text')
+            
+            # Extract organization name from organization_resources for display
+            organization = None
+            if organization_resources:
+                # Use first organization as practitioner's organization
+                organization = organization_resources[0].get('name', 'Healthcare Organization')
+            
             formatted_practitioner = {
                 'id': practitioner.get('id', 'Unknown'),
                 'name': self._format_practitioner_name(practitioner),
                 'family_name': self._extract_practitioner_family_name(practitioner),
                 'given_names': self._extract_practitioner_given_names(practitioner),
-                'qualification': practitioner.get('qualification', []),
+                'prefix': prefix,
+                'suffix': suffix,
+                'qualification': qualifications or practitioner.get('qualification', []),
+                'role': role,  # Primary role for template display
+                'specialty': specialty,  # Specialty for template display
+                'organization': organization,  # Organization name for template display
+                'communication': communication,
                 'addresses': practitioner_addresses,
                 'telecoms': practitioner_telecoms,
                 'identifiers': practitioner_identifiers,
@@ -3426,10 +3549,39 @@ class FHIRBundleParser:
                 }
                 organization_identifiers.append(formatted_identifier)
             
+            # Extract organization type with display text
+            org_types = []
+            for org_type in organization.get('type', []):
+                type_text = org_type.get('text')
+                if not type_text and 'coding' in org_type:
+                    codings = org_type['coding']
+                    if isinstance(codings, list) and len(codings) > 0:
+                        type_text = codings[0].get('display')
+                
+                org_types.append({
+                    'coding': org_type.get('coding', []),
+                    'text': type_text or 'Healthcare Organization'
+                })
+            
+            # Extract parent organization (partOf)
+            part_of = None
+            part_of_ref = organization.get('partOf', {})
+            if part_of_ref:
+                part_of = {
+                    'reference': part_of_ref.get('reference'),
+                    'display': part_of_ref.get('display'),
+                    'identifier': part_of_ref.get('identifier')
+                }
+            
+            # Extract aliases
+            aliases = organization.get('alias', [])
+            
             formatted_organization = {
                 'id': organization.get('id', 'Unknown'),
                 'name': organization.get('name', 'Unknown Organization'),
-                'type': organization.get('type', []),
+                'type': org_types or organization.get('type', []),
+                'part_of': part_of,
+                'alias': aliases,
                 'addresses': organization_addresses,
                 'telecoms': organization_telecoms,
                 'identifiers': organization_identifiers,
@@ -3473,8 +3625,16 @@ class FHIRBundleParser:
                                 break
                     
                     # If reference couldn't be resolved, provide informative fallback
+                    resolved_practitioner = None
                     if resolved_name:
                         display_name = resolved_name
+                        # Find the full practitioner data for role/specialty extraction
+                        if reference.startswith('Practitioner/'):
+                            practitioner_id = reference.split('/')[-1]
+                            for practitioner in healthcare_data['practitioners']:
+                                if practitioner.get('id') == practitioner_id:
+                                    resolved_practitioner = practitioner
+                                    break
                     else:
                         # Extract meaningful info from the reference
                         if reference.startswith('urn:uuid:'):
@@ -3489,15 +3649,51 @@ class FHIRBundleParser:
                         # Log the broken reference for debugging
                         logger.warning(f"FHIR Bundle: Could not resolve author reference '{reference}' - no matching Practitioner resource found in bundle")
                 
+                # Extract role and specialty from matched practitioner, or fallback to author type
+                role = None
+                specialty = None
+                organization = None
+                
+                if resolved_practitioner:
+                    # Use enhanced role/specialty from practitioner
+                    role = resolved_practitioner.get('role')
+                    specialty = resolved_practitioner.get('specialty')
+                    organization = resolved_practitioner.get('organization')
+                
+                # Fallback to author type if no practitioner role found
+                if not role:
+                    author_type = author.get('type', 'Author')
+                    # Filter out placeholder "nnn" values
+                    if author_type and author_type != 'nnn':
+                        role = author_type
+                    else:
+                        role = 'Healthcare Professional'
+                
                 healthcare_data['healthcare_team'].append({
                     'reference': reference,
-                    'display_name': display_name,  # Changed from 'display' to 'display_name' for template compatibility
-                    'role': author.get('type', 'Author')  # Changed from 'type' to 'role' for template compatibility
+                    'name': display_name,  # Use 'name' for template compatibility
+                    'role': role,
+                    'specialty': specialty,
+                    'organization': organization,
+                    'telecoms': resolved_practitioner.get('telecoms', []) if resolved_practitioner else [],
+                    'addresses': resolved_practitioner.get('addresses', []) if resolved_practitioner else []
                 })
+        
+        # GRACEFUL DEGRADATION: Handle missing Practitioner resources
+        # Azure FHIR validation may reject Practitioner uploads, so provide informative placeholders
+        if not healthcare_data['practitioners']:
+            logger.warning("No Practitioner resources found in bundle - this may be due to Azure FHIR validation issues")
+            
+            # Add placeholder indicating data unavailability
+            healthcare_data['practitioner_unavailable'] = True
+            healthcare_data['practitioner_unavailable_reason'] = (
+                "Healthcare Professional information is currently unavailable. "
+                "This may be due to temporary data synchronization issues."
+            )
         
         # FALLBACK: If no practitioners found, try to extract from composition authors
         if not healthcare_data['practitioners'] and composition_resources:
-            logger.info("No Practitioner resources found, attempting to extract from Composition authors")
+            logger.info("Attempting to extract practitioner info from Composition authors as fallback")
             
             for composition in composition_resources:
                 authors = composition.get('author', [])
@@ -3585,17 +3781,24 @@ class FHIRBundleParser:
             first_practitioner = healthcare_data['practitioners'][0]
             
             # Convert FHIR practitioner to CDA-style author_hcp structure
+            # Use the enhanced role, specialty, organization fields added in formatted_practitioner
             healthcare_data['author_hcp'] = {
                 'id': first_practitioner.get('id'),
                 'family_name': first_practitioner.get('family_name', 'Unknown'),
                 'given_name': ' '.join(first_practitioner.get('given_names', [])) if first_practitioner.get('given_names') else 'Unknown',
                 'full_name': first_practitioner.get('name', 'Unknown Healthcare Provider'),
+                'prefix': first_practitioner.get('prefix'),
+                'suffix': first_practitioner.get('suffix'),
                 'title': self._extract_practitioner_title(first_practitioner),
-                'role': self._extract_practitioner_role(first_practitioner),
+                'role': first_practitioner.get('role') or self._extract_practitioner_role(first_practitioner),
+                'specialty': first_practitioner.get('specialty'),
+                'organization': first_practitioner.get('organization'),
                 'identifiers': first_practitioner.get('identifiers', []),
                 'telecoms': first_practitioner.get('telecoms', []),
                 'addresses': first_practitioner.get('addresses', []),
-                'qualifications': first_practitioner.get('qualification', []),
+                'qualification': first_practitioner.get('qualification', []),
+                'qualifications': first_practitioner.get('qualification', []),  # Backwards compatibility
+                'communication': first_practitioner.get('communication', []),
                 'active': first_practitioner.get('active', True),
                 'source': 'fhir-practitioner',
                 'fhir_reference': f"Practitioner/{first_practitioner.get('id')}"

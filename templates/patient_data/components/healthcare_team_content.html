@@ -11,29 +11,97 @@
         {# 1. Assigned Author - Medical Doctor (from <author>) #}
         {% include 'patient_data/components/administrative/assigned_author.html' %}
         
-        {# 2. Custodian Organization (from <custodian>) #}
-        {% include 'patient_data/components/administrative/custodian.html' %}
-        
-        {# 3. Legal Authenticator - Document Signer (from <legalAuthenticator>) #}
+        {# 2. Legal Authenticator - Document Signer (from <legalAuthenticator>) #}
         {% include 'patient_data/components/administrative/legal_authenticator.html' %}
         
-        {# 4. Documentation Of - Service Event (from <documentationOf>) #}
+        {# 3. Documentation Of - Service Event (from <documentationOf>) #}
         {# NOTE: Requires CDAHeaderExtractor enhancement to extract documentation_of field #}
         {% include 'patient_data/components/administrative/documentation_of.html' %}
 
-        {# Healthcare Team Section - Direct from CDA Processing #}
+        {# CUSTODIAN ORGANIZATION - Collapsible Accordion #}
+        {% if custodian_organization.name %}
+        <div class="custodian-section mb-4">
+            <div class="collapsible-wrapper">
+                <input id="toggle-custodian" class="toggle-input" type="checkbox" checked>
+                <label for="toggle-custodian" class="collapsible-label-title">
+                    <div class="clinical-section-title-row">
+                        <div class="clinical-section-title">
+                            <i class="fa-solid fa-building-shield me-2"></i>
+                            <span>Custodian Organization</span>
+                        </div>
+                        <div class="clinical-badge-container">
+                            <span class="clinical-badge populated">1 Organization</span>
+                        </div>
+                    </div>
+                    <i class="fas fa-chevron-down toggle-icon" aria-hidden="true"></i>
+                </label>
+                <div class="collapsible-content-title">
+                    <div class="content-inner-title">
+                    <div class="mb-3">
+                        <h6 class="text-dark mb-2">
+                            <i class="fa-solid fa-hospital me-2 text-info"></i>
+                            {{ custodian_organization.name }}
+                        </h6>
+                        {% if custodian_organization.part_of %}
+                        <p class="small text-muted mb-0">
+                            Part of: {{ custodian_organization.part_of.display }}
+                        </p>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="contact-details">
+                        <h6 class="mb-2"><i class="fa-solid fa-address-book me-2"></i>Contact Details:</h6>
+                        {% if custodian_organization.contact %}
+                            {% for contact in custodian_organization.contact %}
+                                {% if contact.address %}
+                                <p class="mb-1">
+                                    <i class="fa-solid fa-location-dot me-2 text-muted"></i>
+                                    {% for line in contact.address.line %}{{ line }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                                </p>
+                                <p class="mb-1 ms-4">{{ contact.address.city }} {{ contact.address.postalCode }}</p>
+                                <p class="mb-2 ms-4">{{ contact.address.country }}</p>
+                                {% endif %}
+                                {% if contact.telecom %}
+                                    {% for telecom in contact.telecom %}
+                                        {% if telecom.system == 'email' %}
+                                        <p class="mb-1">
+                                            <i class="fa-solid fa-envelope me-2 text-muted"></i>
+                                            <strong>Email:</strong> {{ telecom.value }}
+                                        </p>
+                                        {% elif telecom.system == 'phone' %}
+                                        <p class="mb-1">
+                                            <i class="fa-solid fa-phone me-2 text-muted"></i>
+                                            <strong>Phone:</strong> {{ telecom.value }}
+                                        </p>
+                                        {% elif telecom.system == 'url' %}
+                                        <p class="mb-1">
+                                            <i class="fa-solid fa-globe me-2 text-muted"></i>
+                                            <strong>Web:</strong> <a href="{{ telecom.value }}" target="_blank" rel="noopener">{{ telecom.value }}</a>
+                                        </p>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {# Healthcare Team Section - Collapsible Accordion (Mobile-First) #}
         {% if healthcare_team %}
         <div class="healthcare-team-section mb-4">
             <div class="collapsible-wrapper">
-                <input id="toggle-healthcare-team-direct" class="toggle-input" type="checkbox" checked>
-                <label for="toggle-healthcare-team-direct" class="collapsible-label-title">
+                <input id="toggle-healthcare-team-new" class="toggle-input" type="checkbox" checked>
+                <label for="toggle-healthcare-team-new" class="collapsible-label-title">
                     <div class="clinical-section-title-row">
                         <div class="clinical-section-title">
-                            <i class="fa-solid fa-user-doctor me-2 text-primary"></i>
+                            <i class="fa-solid fa-user-doctor me-2"></i>
                             <span>Healthcare Team</span>
                         </div>
                         <div class="clinical-badge-container">
-                            <span class="clinical-badge populated">
+                            <span class="clinical-badge {% if healthcare_team|length > 0 %}populated{% else %}empty{% endif %}">
                                 {{ healthcare_team|length }} Provider{{ healthcare_team|length|pluralize }}
                             </span>
                         </div>
@@ -42,93 +110,70 @@
                 </label>
                 <div class="collapsible-content-title">
                     <div class="content-inner-title">
-                        
-                        {# Healthcare Team Members #}
-                        <div class="practitioners-table-container bg-white border rounded-3 shadow-sm overflow-hidden mb-4">
-                            <div class="table-responsive">
-                                <table class="table table-striped table-hover mb-0">
-                                    <thead class="table-primary">
-                                        <tr>
-                                            <th scope="col" class="fw-bold">
-                                                <i class="fa-solid fa-user-doctor me-2"></i>Healthcare Professional
-                                            </th>
-                                            <th scope="col" class="fw-bold">
-                                                <i class="fa-solid fa-briefcase me-2"></i>Role & Organization
-                                            </th>
-                                            <th scope="col" class="fw-bold">
-                                                <i class="fa-solid fa-phone me-2"></i>Contact Information
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for member in healthcare_team %}
-                                        <tr>
-                                            <td class="practitioner-name-cell">
-                                                <div class="practitioner-name-container">
-                                                    <h6 class="practitioner-name mb-1">
-                                                        <i class="fa-solid fa-user-md me-2 text-primary"></i>
-                                                        {{ member.name|default:"Unknown Provider" }}
-                                                    </h6>
-                                                    {% if member.roles %}
-                                                    <div class="practitioner-roles">
-                                                        {% for role in member.roles %}
-                                                        <span class="badge bg-secondary me-1">{{ role }}</span>
-                                                        {% endfor %}
-                                                    </div>
-                                                    {% endif %}
-                                                </div>
-                                            </td>
-                                            <td class="role-organization-cell">
-                                                <div class="role-info mb-2">
-                                                    <strong>{{ member.role|default:"Healthcare Provider" }}</strong>
-                                                </div>
-                                                {% if member.organization %}
-                                                <div class="organization-info">
-                                                    <i class="fa-solid fa-building me-1 text-muted"></i>
-                                                    {{ member.organization }}
-                                                </div>
-                                                {% endif %}
-                                            </td>
-                                            <td class="contact-cell">
-                                                {% if member.telecoms %}
-                                                <div class="contact-methods">
-                                                    {% for telecom in member.telecoms %}
-                                                    <div class="contact-item mb-1">
-                                                        {% if telecom.system == 'phone' %}
-                                                        <i class="fa-solid fa-phone me-1 text-success"></i>
-                                                        {% elif telecom.system == 'email' %}
-                                                        <i class="fa-solid fa-envelope me-1 text-info"></i>
-                                                        {% else %}
-                                                        <i class="fa-solid fa-link me-1 text-secondary"></i>
-                                                        {% endif %}
-                                                        <span class="contact-value">{{ telecom.value }}</span>
-                                                    </div>
-                                                    {% endfor %}
-                                                </div>
-                                                {% endif %}
-                                                
-                                                {% if member.addresses %}
-                                                <div class="address-info mt-2">
-                                                    {% for address in member.addresses %}
-                                                    <div class="address-item">
-                                                        <i class="fa-solid fa-map-marker-alt me-1 text-warning"></i>
-                                                        <small>
-                                                            {% for line in address.line %}{{ line }}{% if not forloop.last %}, {% endif %}{% endfor %}
-                                                            {% if address.city %}, {{ address.city }}{% endif %}
-                                                            {% if address.postal_code %} {{ address.postal_code }}{% endif %}
-                                                            {% if address.country %}, {{ address.country }}{% endif %}
-                                                        </small>
-                                                    </div>
-                                                    {% endfor %}
-                                                </div>
-                                                {% endif %}
-                                            </td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
+                    
+                    {# Healthcare Team Members - Card Style #}
+                    {% for member in healthcare_team %}
+                    <div class="{% if not forloop.last %}border-bottom pb-3 mb-3{% endif %}">
+                        <div class="mb-2">
+                            <h6 class="text-dark mb-1">
+                                <i class="fa-solid fa-user-md me-2 text-primary"></i>
+                                {{ member.name|default:"Unknown Provider" }}
+                            </h6>
+                            {# Role & Specialty Badges #}
+                            {% if member.role %}
+                            <span class="badge bg-primary">{{ member.role }}</span>
+                            {% endif %}
+                            {% if member.specialty %}
+                            <span class="badge bg-info ms-1">{{ member.specialty }}</span>
+                            {% endif %}
+                            {% if not member.role and not member.specialty %}
+                            <span class="badge bg-secondary">Healthcare Provider</span>
+                            {% endif %}
                         </div>
+                        
+                        {# Organization #}
+                        {% if member.organization %}
+                        <p class="mb-2 small text-muted">
+                            <i class="fa-solid fa-building me-2"></i>
+                            {{ member.organization }}
+                        </p>
+                        {% endif %}
+                        
+                        {# Contact Information #}
+                        <div class="contact-info">
+                            <h6 class="mb-2 small"><i class="fa-solid fa-address-book me-2"></i>Contact Information:</h6>
+                            {% if member.addresses %}
+                                {% for address in member.addresses %}
+                                <p class="mb-1 small">
+                                    <i class="fa-solid fa-location-dot me-2 text-muted"></i>
+                                    {% for line in address.line %}{{ line }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                                </p>
+                                <p class="mb-1 small ms-4">
+                                    {% if address.city %}{{ address.city }}{% endif %}
+                                    {% if address.postal_code %} {{ address.postal_code }}{% endif %}
+                                </p>
+                                <p class="mb-2 small ms-4">{% if address.country %}{{ address.country }}{% endif %}</p>
+                                {% endfor %}
+                            {% endif %}
+                            
+                            {% if member.telecoms %}
+                                {% for telecom in member.telecoms %}
+                                    {% if telecom.system == 'phone' %}
+                                    <p class="mb-1 small">
+                                        <i class="fa-solid fa-phone me-2 text-muted"></i>
+                                        <strong>Phone:</strong> {{ telecom.value }}
+                                    </p>
+                                    {% elif telecom.system == 'email' %}
+                                    <p class="mb-1 small">
+                                        <i class="fa-solid fa-envelope me-2 text-muted"></i>
+                                        <strong>Email:</strong> {{ telecom.value }}
+                                    </p>
+                                    {% endif %}
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
                         
                     </div>
                 </div>
@@ -136,7 +181,7 @@
         </div>
         {% endif %}
 
-        {# Healthcare Team Section - Legacy Format #}
+        {# Healthcare Team Section - Legacy Format with SCSS Design System #}
         {% if healthcare_data.practitioners or administrative_data.healthcare_providers %}
         <div class="healthcare-team-section mb-4">
             <div class="collapsible-wrapper">
@@ -144,7 +189,7 @@
                 <label for="toggle-healthcare-team" class="collapsible-label-title">
                     <div class="clinical-section-title-row">
                         <div class="clinical-section-title">
-                            <i class="fa-solid fa-user-doctor me-2 text-primary"></i>
+                            <i class="fa-solid fa-user-doctor me-2"></i>
                             <span>Healthcare Team</span>
                         </div>
                         <div class="clinical-badge-container">
@@ -164,79 +209,67 @@
                 <div class="collapsible-content-title">
                     <div class="content-inner-title">
                         
-                        {# Healthcare Practitioners #}
+                        {# Healthcare Practitioners - Card Style (Mobile-First) #}
                         {% if healthcare_data.practitioners %}
-                        <div class="practitioners-table-container bg-white border rounded-3 shadow-sm overflow-hidden mb-4">
-                            <div class="table-responsive">
-                                <table class="table table-striped table-hover mb-0">
-                                    <thead class="table-primary">
-                                        <tr>
-                                            <th scope="col" class="fw-bold">
-                                                <i class="fa-solid fa-user-doctor me-2"></i>Healthcare Professional
-                                            </th>
-                                            <th scope="col" class="fw-bold">
-                                                <i class="fa-solid fa-briefcase me-2"></i>Role & Specialty
-                                            </th>
-                                            <th scope="col" class="fw-bold">
-                                                <i class="fa-solid fa-building me-2"></i>Organization
-                                            </th>
-                                            <th scope="col" class="fw-bold">
-                                                <i class="fa-solid fa-phone me-2"></i>Contact
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for practitioner in healthcare_data.practitioners %}
-                                        <tr>
-                                            <td class="practitioner-name-cell">
-                                                <div class="practitioner-name-container">
-                                                    <div class="practitioner-title fw-bold text-primary mb-1">
-                                                        {{ practitioner.name|default:"Unknown Practitioner" }}
-                                                    </div>
-                                                    {% if practitioner.identifiers %}
-                                                        <div class="practitioner-id text-muted small">
-                                                            <i class="fa-solid fa-id-badge me-1"></i>
-                                                            {{ practitioner.identifiers.0.value }}
-                                                        </div>
-                                                    {% endif %}
-                                                </div>
-                                            </td>
-                                            <td class="practitioner-role-cell">
-                                                {% if practitioner.roles %}
-                                                    {% for role in practitioner.roles %}
-                                                        <span class="badge bg-primary me-1 mb-1">{{ role }}</span>
-                                                    {% endfor %}
-                                                {% elif practitioner.role %}
-                                                    <span class="badge bg-primary">{{ practitioner.role }}</span>
-                                                {% endif %}
-                                                {% if practitioner.specialty %}
-                                                    <div class="text-muted small mt-1">{{ practitioner.specialty }}</div>
-                                                {% endif %}
-                                            </td>
-                                            <td class="practitioner-org-cell">
-                                                {% if practitioner.organization %}
-                                                    <div class="fw-semibold">{{ practitioner.organization }}</div>
-                                                {% endif %}
-                                            </td>
-                                            <td class="practitioner-contact-cell">
-                                                {% if practitioner.telecoms %}
-                                                    {% for telecom in practitioner.telecoms %}
-                                                        <div class="small mb-1">
-                                                            {% if telecom.system == "phone" %}
-                                                                <i class="fa-solid fa-phone me-1"></i>
-                                                            {% elif telecom.system == "email" %}
-                                                                <i class="fa-solid fa-envelope me-1"></i>
-                                                            {% endif %}
-                                                            {{ telecom.value }}
-                                                        </div>
-                                                    {% endfor %}
-                                                {% endif %}
-                                            </td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
+                        <div class="practitioners-card-container mb-4">
+                            {% for practitioner in healthcare_data.practitioners %}
+                            <div class="practitioner-card {% if not forloop.last %}border-bottom pb-3 mb-3{% endif %}">
+                                <div class="mb-2">
+                                    <h6 class="text-dark mb-1">
+                                        <i class="fa-solid fa-user-md me-2 text-primary"></i>
+                                        {{ practitioner.name|default:"Unknown Practitioner" }}
+                                    </h6>
+                                    {% if practitioner.identifiers %}
+                                    <p class="text-muted small mb-2">
+                                        <i class="fa-solid fa-id-badge me-1"></i>
+                                        ID: {{ practitioner.identifiers.0.value }}
+                                    </p>
+                                    {% endif %}
+                                    
+                                    {# Role & Specialty Badges #}
+                                    <div class="mb-2">
+                                        {% if practitioner.roles %}
+                                            {% for role in practitioner.roles %}
+                                                <span class="badge bg-primary me-1 mb-1">{{ role }}</span>
+                                            {% endfor %}
+                                        {% elif practitioner.role %}
+                                            <span class="badge bg-primary">{{ practitioner.role }}</span>
+                                        {% endif %}
+                                        {% if practitioner.specialty %}
+                                            <span class="badge bg-info ms-1">{{ practitioner.specialty }}</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                {# Organization #}
+                                {% if practitioner.organization %}
+                                <p class="mb-2 small text-muted">
+                                    <i class="fa-solid fa-building me-2"></i>
+                                    {{ practitioner.organization }}
+                                </p>
+                                {% endif %}
+                                
+                                {# Contact Information #}
+                                {% if practitioner.telecoms %}
+                                <div class="contact-info">
+                                    <h6 class="mb-2 small"><i class="fa-solid fa-address-book me-2"></i>Contact Information:</h6>
+                                    {% for telecom in practitioner.telecoms %}
+                                        {% if telecom.system == "phone" %}
+                                        <p class="mb-1 small">
+                                            <i class="fa-solid fa-phone me-2 text-muted"></i>
+                                            <strong>Phone:</strong> {{ telecom.value }}
+                                        </p>
+                                        {% elif telecom.system == "email" %}
+                                        <p class="mb-1 small">
+                                            <i class="fa-solid fa-envelope me-2 text-muted"></i>
+                                            <strong>Email:</strong> {{ telecom.value }}
+                                        </p>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
                             </div>
+                            {% endfor %}
                         </div>
                         {% endif %}
 
@@ -279,15 +312,15 @@
         </div>
         {% endif %}
 
-        {# Healthcare Organizations Section #}
+        {# Healthcare Organizations Section - Collapsible Accordion #}
         {% if healthcare_data.organizations or administrative_data.organizations %}
         <div class="healthcare-organizations-section mb-4">
             <div class="collapsible-wrapper">
-                <input id="toggle-healthcare-orgs" class="toggle-input" type="checkbox">
-                <label for="toggle-healthcare-orgs" class="collapsible-label-title">
+                <input id="toggle-healthcare-organizations" class="toggle-input" type="checkbox" checked>
+                <label for="toggle-healthcare-organizations" class="collapsible-label-title">
                     <div class="clinical-section-title-row">
                         <div class="clinical-section-title">
-                            <i class="fa-solid fa-hospital me-2 text-secondary"></i>
+                            <i class="fa-solid fa-hospital me-2"></i>
                             <span>Healthcare Organizations</span>
                         </div>
                         <div class="clinical-badge-container">
@@ -306,48 +339,122 @@
                 </label>
                 <div class="collapsible-content-title">
                     <div class="content-inner-title">
-                        
-                        {# Display Organizations #}
-                        <div class="row">
-                            {% for organization in healthcare_data.organizations %}
-                            <div class="col-md-6 mb-3">
-                                <div class="card">
-                                    <div class="card-body">
-                                        <h6 class="card-title">
-                                            {{ organization.name|default:"Unknown Organization" }}
-                                        </h6>
-                                        {% if organization.type %}
-                                            {% for org_type in organization.type %}
-                                                <span class="badge bg-secondary me-1">{{ org_type.text }}</span>
-                                            {% endfor %}
-                                        {% endif %}
-                                        {% if organization.address %}
-                                            <div class="mt-2 small text-muted">
-                                                {% for addr in organization.address %}
-                                                    <p class="mb-1">{{ addr.text|default:addr.line.0 }}</p>
-                                                {% endfor %}
-                                            </div>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-                            {% endfor %}
-
-                            {% for organization in administrative_data.organizations %}
-                            <div class="col-md-6 mb-3">
-                                <div class="card">
-                                    <div class="card-body">
-                                        <h6 class="card-title">
-                                            {{ organization.name|default:"Unknown Organization" }}
-                                        </h6>
-                                        {% if organization.organization_type %}
-                                            <span class="badge bg-secondary">{{ organization.organization_type }}</span>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-                            {% endfor %}
+                    
+                    {# Display Organizations - Card Style #}
+                    {% for organization in healthcare_data.organizations %}
+                    <div class="{% if not forloop.last %}border-bottom pb-3 mb-3{% endif %}">
+                        <div class="mb-2">
+                            <h6 class="text-dark mb-1">
+                                <i class="fa-solid fa-building me-2 text-secondary"></i>
+                                {{ organization.name|default:"Unknown Organization" }}
+                            </h6>
+                            {% if organization.type %}
+                                {% for org_type in organization.type %}
+                                    <span class="badge bg-secondary me-1">{{ org_type.text|default:"Healthcare Organization" }}</span>
+                                {% endfor %}
+                            {% endif %}
+                            {% if organization.part_of %}
+                            <p class="small text-muted mb-0 mt-1">
+                                Part of: {{ organization.part_of.display }}
+                            </p>
+                            {% endif %}
                         </div>
+                        
+                        {# Contact Information #}
+                        <div class="contact-info">
+                            <h6 class="mb-2 small"><i class="fa-solid fa-address-book me-2"></i>Contact Details:</h6>
+                            {% if organization.contact %}
+                                {% for contact in organization.contact %}
+                                    {% if contact.address %}
+                                    <p class="mb-1 small">
+                                        <i class="fa-solid fa-location-dot me-2 text-muted"></i>
+                                        {% for line in contact.address.line %}{{ line }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                                    </p>
+                                    <p class="mb-1 small ms-4">{{ contact.address.city }} {{ contact.address.postalCode }}</p>
+                                    <p class="mb-2 small ms-4">{{ contact.address.country }}</p>
+                                    {% endif %}
+                                    {% if contact.telecom %}
+                                        {% for telecom in contact.telecom %}
+                                            {% if telecom.system == 'phone' %}
+                                            <p class="mb-1 small">
+                                                <i class="fa-solid fa-phone me-2 text-muted"></i>
+                                                <strong>Tel {{ telecom.use|title }}:</strong> {{ telecom.value }}
+                                            </p>
+                                            {% elif telecom.system == 'email' %}
+                                            <p class="mb-1 small">
+                                                <i class="fa-solid fa-envelope me-2 text-muted"></i>
+                                                <strong>Mail {{ telecom.use|title }}:</strong> {{ telecom.value }}
+                                            </p>
+                                            {% elif telecom.system == 'url' %}
+                                            <p class="mb-1 small">
+                                                <i class="fa-solid fa-globe me-2 text-muted"></i>
+                                                <strong>Web:</strong> <a href="{{ telecom.value }}" target="_blank" rel="noopener">{{ telecom.value }}</a>
+                                            </p>
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endif %}
+                                {% endfor %}
+                            {% elif organization.addresses %}
+                                {# Fallback to top-level addresses #}
+                                {% with address=organization.addresses.0 %}
+                                <p class="mb-1 small">
+                                    <i class="fa-solid fa-location-dot me-2 text-muted"></i>
+                                    {% for line in address.line %}{{ line }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                                    {% if not address.line and address.street %}{{ address.street }}{% endif %}
+                                </p>
+                                <p class="mb-1 small ms-4">{{ address.city }} {{ address.postal_code }}</p>
+                                <p class="mb-2 small ms-4">{{ address.country }}</p>
+                                {% endwith %}
+                                {% if organization.telecoms %}
+                                    {% for telecom in organization.telecoms %}
+                                        {% if telecom.system == 'phone' %}
+                                        <p class="mb-1 small">
+                                            <i class="fa-solid fa-phone me-2 text-muted"></i>
+                                            <strong>Tel:</strong> {{ telecom.value }}
+                                        </p>
+                                        {% elif telecom.system == 'email' %}
+                                        <p class="mb-1 small">
+                                            <i class="fa-solid fa-envelope me-2 text-muted"></i>
+                                            <strong>Mail:</strong> {{ telecom.value }}
+                                        </p>
+                                        {% elif telecom.system == 'url' %}
+                                        <p class="mb-1 small">
+                                            <i class="fa-solid fa-globe me-2 text-muted"></i>
+                                            <strong>Web:</strong> <a href="{{ telecom.value }}" target="_blank" rel="noopener">{{ telecom.value }}</a>
+                                        </p>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                    
+                    {# Legacy administrative organizations #}
+                    {% for organization in administrative_data.organizations %}
+                    <div class="{% if not forloop.last %}border-bottom pb-3 mb-3{% endif %}">
+                        <div class="mb-2">
+                            <h6 class="text-dark mb-1">
+                                <i class="fa-solid fa-building me-2 text-secondary"></i>
+                                {{ organization.name|default:"Unknown Organization" }}
+                            </h6>
+                            {% if organization.organization_type %}
+                            <span class="badge bg-secondary">{{ organization.organization_type }}</span>
+                            {% endif %}
+                        </div>
+                        {% if organization.address or organization.telecom %}
+                        <div class="contact-info">
+                            <h6 class="mb-2 small"><i class="fa-solid fa-address-book me-2"></i>Contact Details:</h6>
+                            {% if organization.address %}
+                            <p class="mb-1 small">{{ organization.address }}</p>
+                            {% endif %}
+                            {% if organization.telecom %}
+                            <p class="mb-1 small">{{ organization.telecom }}</p>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
 
                     </div>
                 </div>
@@ -356,18 +463,18 @@
         {% endif %}
 
         {# Document Metadata Section #}
-        {% if administrative_data.document_metadata %}
-        <div class="document-metadata-section">
+        {% if administrative_data %}
+        <div class="document-metadata-section mb-4">
             <div class="collapsible-wrapper">
                 <input id="toggle-document-metadata" class="toggle-input" type="checkbox">
                 <label for="toggle-document-metadata" class="collapsible-label-title">
                     <div class="clinical-section-title-row">
                         <div class="clinical-section-title">
-                            <i class="fa-solid fa-file-medical me-2 text-info"></i>
-                            <span>Document Information</span>
+                            <i class="fa-solid fa-file-medical me-2"></i>
+                            <span>Document Metadata</span>
                         </div>
                         <div class="clinical-badge-container">
-                            <span class="clinical-badge info">Metadata</span>
+                            <span class="clinical-badge extended">Metadata</span>
                         </div>
                     </div>
                     <i class="fas fa-chevron-down toggle-icon" aria-hidden="true"></i>

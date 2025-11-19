@@ -3,6 +3,24 @@
 <!-- Extended Patient Healthcare Team Component -->
 <!-- This component provides content for the Healthcare Team tab -->
 
+{# Graceful handling for unavailable practitioner data (Azure FHIR validation issues) #}
+{% if healthcare_data.practitioner_unavailable %}
+<div class="alert alert-info" role="alert">
+    <h6 class="alert-heading">
+        <i class="fa-solid fa-info-circle me-2"></i>
+        Healthcare Professional Information Temporarily Unavailable
+    </h6>
+    <p class="mb-0">
+        {{ healthcare_data.practitioner_unavailable_reason }}
+    </p>
+    <hr>
+    <p class="mb-0 small text-muted">
+        <i class="fa-solid fa-clock me-2"></i>
+        Organization and contact information may still be available below.
+    </p>
+</div>
+{% endif %}
+
 {% if healthcare_data and healthcare_data.practitioners or healthcare_data.organizations %}
 <!-- Single Unified Healthcare Information Section -->
 <div class="healthcare-info-unified">

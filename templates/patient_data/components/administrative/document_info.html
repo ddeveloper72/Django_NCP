@@ -1,0 +1,39 @@
+{# CDA Document Information Component #}
+{# Expected context: document_id, document_set_id, document_created_time #}
+
+{% if document_id or document_set_id or document_created_time %}
+<div class="document-info-section bg-white border rounded-3 shadow-sm overflow-hidden mb-3">
+    <div class="table-responsive">
+        <table class="table table-bordered mb-0">
+            <tbody>
+                {# Document Row #}
+                <tr>
+                    <td class="table-light fw-bold" style="width: 20%;">Document</td>
+                    <td style="width: 40%;">
+                        <div>
+                            {% if document_id %}
+                            <div class="mb-1">
+                                <strong><em>ID</em></strong> {{ document_id }}
+                            </div>
+                            {% endif %}
+                            {% if document_set_id %}
+                            <div class="mb-1">
+                                <strong><em>Set-ID</em></strong> {{ document_set_id }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </td>
+                    <td class="table-light fw-bold" style="width: 15%;">Created On</td>
+                    <td style="width: 25%;">
+                        {% if document_created_time %}
+                        {{ document_created_time }}
+                        {% else %}
+                        Unknown
+                        {% endif %}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
