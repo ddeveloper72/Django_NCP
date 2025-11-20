@@ -697,26 +697,27 @@ class AzureFHIRIntegrationService:
             
             # 2. Get Composition resource (try both identifier and UUID references)
             try:
-                # First try with identifier (most common for converted CDA)
-                search_params = {'subject': f"Patient/{patient_id}", '_count': '10'}
+                # CRITICAL: Use _sort=-_lastUpdated to get the newest composition
+                # Try with Azure UUID first (most reliable after duplicate cleanup)
+                search_params = {'subject': f"Patient/{azure_patient_id}", '_sort': '-_lastUpdated', '_count': '1'}
                 composition_results = self._make_request('GET', 'Composition', params=search_params)
                 
+                # If not found with UUID, try with identifier (fallback for old data)
+                if not composition_results or not composition_results.get('entry'):
+                    logger.debug(f"No composition found with UUID, trying identifier {patient_id}")
+                    search_params = {'subject': f"Patient/{patient_id}", '_sort': '-_lastUpdated', '_count': '1'}
+                    composition_results = self._make_request('GET', 'Composition', params=search_params)
+                
                 if composition_results and composition_results.get('entry'):
-                    # Take only latest composition
-                    composition_entries = composition_results['entry']
-                    sorted_compositions = sorted(
-                        composition_entries,
-                        key=lambda e: e.get('resource', {}).get('date', ''),
-                        reverse=True
-                    )
-                    
-                    if sorted_compositions:
-                        latest_composition = sorted_compositions[0]
-                        bundle_entries.append({'resource': latest_composition['resource']})
-                        logger.info(f"Added latest Composition to bundle")
+                    # Server returns latest by lastUpdated (most recently modified)
+                    latest_composition = composition_results['entry'][0]
+                    bundle_entries.append({'resource': latest_composition['resource']})
+                    comp_id = latest_composition['resource'].get('id')
+                    comp_updated = latest_composition['resource'].get('meta', {}).get('lastUpdated')
+                    logger.info(f"Added latest Composition to bundle: {comp_id} (lastUpdated: {comp_updated})")
                         
             except Exception:
-                logger.debug(f"No Composition resources found for patient {patient_id}")
+                logger.debug(f"No Composition resources found for patient {patient_id} or {azure_patient_id}")
             
             # 3. Get clinical resources
             clinical_resources = [
