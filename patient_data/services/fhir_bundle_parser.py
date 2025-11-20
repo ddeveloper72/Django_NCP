@@ -1819,6 +1819,42 @@ class FHIRBundleParser:
         if not observations:
             return []
         
+        # FIRST: Extract FHIR IPS summary counts from all observations BEFORE filtering
+        # These must be extracted before we skip summary count observations
+        live_births_count = None
+        abortions_count = None
+        
+        logger.debug(f"[PREGNANCY PLACEHOLDER DEBUG] Extracting summary counts from {len(observations)} observations")
+        
+        for obs in observations:
+            code_data = obs.get('code_data', {})
+            if isinstance(code_data.get('coding'), list) and code_data['coding']:
+                code = code_data['coding'][0].get('code', '')
+            else:
+                code = code_data.get('code', '')
+            
+            value_text = obs.get('value', '')
+            
+            # Extract live births count (11636-8)
+            if code == '11636-8':
+                try:
+                    # Convert to float first (handles "2.0"), then to int
+                    live_births_count = int(float(value_text)) if value_text else None
+                    logger.debug(f"[PREGNANCY] Found live births count: {live_births_count}")
+                except (ValueError, TypeError):
+                    live_births_count = value_text
+            
+            # Extract abortions count (11612-9)
+            if code == '11612-9':
+                try:
+                    # Convert to float first (handles "1.0"), then to int
+                    abortions_count = int(float(value_text)) if value_text else None
+                    logger.debug(f"[PREGNANCY] Found abortions count: {abortions_count}")
+                except (ValueError, TypeError):
+                    abortions_count = value_text
+        
+        logger.debug(f"[PREGNANCY PLACEHOLDER DEBUG] Summary counts: live_births={live_births_count}, abortions={abortions_count}")
+        
         # Group observations by delivery date to create cohesive pregnancy records
         pregnancy_groups = {}
         current_pregnancy_obs = []
@@ -1832,6 +1868,15 @@ class FHIRBundleParser:
                 code = code_data.get('code', '')
             
             observation_name = obs.get('observation_name', '').lower()
+            
+            # CRITICAL: Skip summary count observations - they don't represent individual pregnancies
+            # 11636-8 = Number of live births (summary count, not a specific pregnancy)
+            # 11612-9 = Number of abortions (summary count, not a specific pregnancy)
+            # These will be used LATER to create placeholder records if needed
+            # Also skip 11778-8 (Estimated delivery date) - it's for current pregnancy, not past delivery
+            if code in ['11636-8', '11612-9', '11637-6', '11638-4', '11639-2', '11778-8']:
+                logger.debug(f"[PREGNANCY] Skipping summary count/metadata observation: {observation_name} (code: {code})")
+                continue
             
             # Identify current pregnancy observations (no delivery date yet)
             # CRITICAL: 93857-1 (Date and time of obstetric delivery) is PAST pregnancy, NOT current
@@ -2006,32 +2051,65 @@ class FHIRBundleParser:
             
             pregnancy_records.append(pregnancy_record)
         
-        # Extract FHIR IPS summary counts from all observations
-        live_births_count = None
-        abortions_count = None
+        # CRITICAL FIX: Create placeholder records when summary counts exceed actual observations
+        # FHIR IPS may only provide summary counts (11636-8, 11612-9) without individual delivery observations
+        # Summary counts were extracted at the start of this function BEFORE filtering
+        logger.info(f"[PREGNANCY PLACEHOLDER] Current pregnancy_records count: {len(pregnancy_records)}")
+        logger.info(f"[PREGNANCY PLACEHOLDER] live_births_count={live_births_count}, abortions_count={abortions_count}")
         
-        for obs in observations:
-            code_data = obs.get('code_data', {})
-            if isinstance(code_data.get('coding'), list) and code_data['coding']:
-                code = code_data['coding'][0].get('code', '')
-            else:
-                code = code_data.get('code', '')
+        if live_births_count or abortions_count:
+            logger.info(f"[PREGNANCY PLACEHOLDER] Entering placeholder creation logic")
+            # Count existing outcomes
+            existing_livebirths = sum(1 for r in pregnancy_records if r.get('outcome') == 'Livebirth')
+            existing_terminations = sum(1 for r in pregnancy_records if r.get('outcome') == 'Termination of pregnancy')
             
-            value_text = obs.get('value', '')
+            # Create placeholder Livebirth records if count exceeds existing
+            if live_births_count and isinstance(live_births_count, (int, float)):
+                missing_livebirths = int(live_births_count) - existing_livebirths
+                if missing_livebirths > 0:
+                    logger.info(f"[PREGNANCY] Creating {missing_livebirths} placeholder Livebirth records from summary count")
+                    for i in range(missing_livebirths):
+                        placeholder_record = {
+                            'pregnancy_type': 'past',
+                            'observation_id': f"livebirth-placeholder-{i+1}",
+                            'resource_type': 'PregnancyGroup',
+                            'delivery_date': 'Not specified',
+                            'delivery_date_raw': '',
+                            'outcome': 'Livebirth',
+                            'outcome_code': '281050002',
+                            'gestational_age': None,
+                            'birth_weight': None,
+                            'delivery_method': None,
+                            'complications': 'None reported',
+                            'observation_date': 'Not specified',
+                            'data': {},
+                            '_is_placeholder': True  # Flag for UI to indicate limited data
+                        }
+                        pregnancy_records.append(placeholder_record)
             
-            # Extract live births count (11636-8)
-            if code == '11636-8':
-                try:
-                    live_births_count = int(value_text) if value_text else None
-                except (ValueError, TypeError):
-                    live_births_count = value_text
-            
-            # Extract abortions count (11612-9)
-            if code == '11612-9':
-                try:
-                    abortions_count = int(value_text) if value_text else None
-                except (ValueError, TypeError):
-                    abortions_count = value_text
+            # Create placeholder Termination records if count exceeds existing
+            if abortions_count and isinstance(abortions_count, (int, float)):
+                missing_terminations = int(abortions_count) - existing_terminations
+                if missing_terminations > 0:
+                    logger.info(f"[PREGNANCY] Creating {missing_terminations} placeholder Termination records from summary count")
+                    for i in range(missing_terminations):
+                        placeholder_record = {
+                            'pregnancy_type': 'past',
+                            'observation_id': f"termination-placeholder-{i+1}",
+                            'resource_type': 'PregnancyGroup',
+                            'delivery_date': 'Not specified',
+                            'delivery_date_raw': '',
+                            'outcome': 'Termination of pregnancy',
+                            'outcome_code': '57797005',
+                            'gestational_age': None,
+                            'birth_weight': None,
+                            'delivery_method': None,
+                            'complications': 'None reported',
+                            'observation_date': 'Not specified',
+                            'data': {},
+                            '_is_placeholder': True  # Flag for UI to indicate limited data
+                        }
+                        pregnancy_records.append(placeholder_record)
         
         # Process current pregnancy
         if current_pregnancy_obs:
