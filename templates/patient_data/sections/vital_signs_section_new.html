@@ -134,9 +134,9 @@
                             </div>
                             
                             {# LOINC Code - Support both FHIR (observation_code) and CDA (vital_code) #}
-                            {% with code=vital_sign.observation_code|default:'' system=vital_sign.observation_code_system|default:'' %}
+                            {% with code=vital_sign.observation_code|default:'' %}
                                 {% if not code %}
-                                    {% with code=vital_sign.vital_code|default:'' system=vital_sign.code_system|default:'' %}
+                                    {% with code=vital_sign.vital_code|default:'' %}
                                         {% if code %}
                                         <div class="col-lg-6">
                                             <div class="field-group">
@@ -147,9 +147,6 @@
                                                 <div class="field-content">
                                                     <div class="field-value">
                                                         <span class="badge bg-info">{{ code }}</span>
-                                                        {% if system %}
-                                                            <span class="text-muted ms-2 small">({{ system|truncatechars:30 }})</span>
-                                                        {% endif %}
                                                     </div>
                                                 </div>
                                             </div>
@@ -166,9 +163,6 @@
                                         <div class="field-content">
                                             <div class="field-value">
                                                 <span class="badge bg-info">{{ code }}</span>
-                                                {% if system %}
-                                                    <span class="text-muted ms-2 small">({{ system|truncatechars:30 }})</span>
-                                                {% endif %}
                                             </div>
                                         </div>
                                     </div>
