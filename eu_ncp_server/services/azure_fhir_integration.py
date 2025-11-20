@@ -338,39 +338,79 @@ class AzureFHIRIntegrationService:
         Search for patient documents (Compositions) in Azure FHIR server
         
         Args:
-            patient_id: Unique patient identifier
+            patient_id: Unique patient identifier (can be UUID or business identifier like 2-1234-W7)
             
         Returns:
             Search results with patient document information
         """
         try:
-            # Search for Compositions (patient documents) for this patient
+            # Search for Compositions using BOTH patient identifier and UUID
+            # Azure FHIR may have references stored as either:
+            # 1. Patient/{identifier} (e.g., Patient/2-1234-W7) - from CDA conversion
+            # 2. Patient/{uuid} (e.g., Patient/98ce4472-...) - from direct FHIR uploads
+            
+            search_results = None
+            documents = []
+            
+            # First, try searching with identifier directly (most common for converted CDA)
+            logger.info(f"Searching Compositions with subject=Patient/{patient_id}")
             fhir_params = {
                 'subject': f'Patient/{patient_id}',
                 '_count': '50'
             }
-            
             search_results = self._make_request('GET', 'Composition', params=fhir_params)
+            
+            if search_results and search_results.get('entry'):
+                documents.extend(search_results.get('entry', []))
+                logger.info(f"Found {len(documents)} Composition(s) using identifier reference")
+            
+            # If no results and patient_id doesn't look like a UUID, also try with UUID
+            if not documents and ('-' not in patient_id or len(patient_id.split('-')) != 5):
+                # Resolve identifier to Azure UUID
+                patient_search_params = {
+                    'identifier': patient_id,
+                    '_count': '1'
+                }
+                patient_results = self._make_request('GET', 'Patient', params=patient_search_params)
+                
+                if patient_results and patient_results.get('entry'):
+                    azure_patient_id = patient_results['entry'][0]['resource'].get('id')
+                    logger.info(f"Resolved patient identifier {patient_id} to Azure ID {azure_patient_id}, searching again...")
+                    
+                    # Try searching with UUID
+                    fhir_params = {
+                        'subject': f'Patient/{azure_patient_id}',
+                        '_count': '50'
+                    }
+                    search_results = self._make_request('GET', 'Composition', params=fhir_params)
+                    
+                    if search_results and search_results.get('entry'):
+                        documents.extend(search_results.get('entry', []))
+                        logger.info(f"Found {len(documents)} additional Composition(s) using UUID reference")
             
             if not search_results:
                 return {'total': 0, 'documents': [], 'patient_id': patient_id}
             
-            # Process composition results
-            documents = []
-            for entry in search_results.get('entry', []):
+            if not documents:
+                logger.warning(f"No Compositions found for patient {patient_id}")
+                return {'total': 0, 'documents': [], 'patient_id': patient_id}
+            
+            # Process composition results (extract doc info from entries)
+            processed_documents = []
+            for entry in documents:
                 resource = entry.get('resource', {})
                 if resource.get('resourceType') == 'Composition':
                     doc_info = self._extract_composition_info(resource)
-                    documents.append(doc_info)
+                    processed_documents.append(doc_info)
             
             result = {
-                'total': search_results.get('total', len(documents)),
-                'documents': documents,
+                'total': len(processed_documents),
+                'documents': processed_documents,
                 'patient_id': patient_id,
                 'search_timestamp': datetime.now(timezone.utc).isoformat()
             }
             
-            audit_logger.info(f"Patient document search in Azure FHIR: patient_id={patient_id}, results={len(documents)}")
+            audit_logger.info(f"Patient document search in Azure FHIR: patient_id={patient_id}, results={len(processed_documents)}")
             return result
             
         except Exception as e:
@@ -630,6 +670,7 @@ class AzureFHIRIntegrationService:
         
         try:
             bundle_entries = []
+            azure_patient_id = None  # Will hold the Azure UUID
             
             # 1. Get Patient resource by identifier (not resource ID)
             try:
@@ -637,8 +678,9 @@ class AzureFHIRIntegrationService:
                 patient_results = self._make_request('GET', 'Patient', params=search_params)
                 if patient_results and patient_results.get('entry'):
                     patient = patient_results['entry'][0]['resource']
+                    azure_patient_id = patient.get('id')  # Get the Azure UUID
                     bundle_entries.append({'resource': patient})
-                    logger.info(f"Found Patient by identifier {patient_id}: {patient.get('id')}")
+                    logger.info(f"Found Patient by identifier {patient_id}: Azure ID {azure_patient_id}")
                 else:
                     raise ValueError(f"No Patient found with identifier {patient_id}")
             except Exception as e:
@@ -650,10 +692,12 @@ class AzureFHIRIntegrationService:
                     'birthDate': '1980-01-01',
                     'gender': 'unknown'
                 }
+                azure_patient_id = patient_id  # Fallback
                 bundle_entries.append({'resource': patient})
             
-            # 2. Get Composition resource
+            # 2. Get Composition resource (try both identifier and UUID references)
             try:
+                # First try with identifier (most common for converted CDA)
                 search_params = {'subject': f"Patient/{patient_id}", '_count': '10'}
                 composition_results = self._make_request('GET', 'Composition', params=search_params)
                 
@@ -688,8 +732,10 @@ class AzureFHIRIntegrationService:
             
             for resource_type in clinical_resources:
                 try:
+                    # Use identifier format for search (Azure FHIR supports Patient/{identifier} format)
+                    # This matches how resources were uploaded from CDA conversion
                     search_params = {
-                        'patient': patient_id,
+                        'patient': patient_id,  # Azure FHIR resolves identifier references
                         '_sort': '-_lastUpdated',
                         '_count': '100'  # Get more to ensure we capture all versions
                     }

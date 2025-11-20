@@ -20,6 +20,7 @@ from datetime import datetime, timezone
 from typing import Dict, Any, List, Optional, Union
 from dataclasses import dataclass, asdict
 from patient_data.utils.date_formatter import ClinicalDateFormatter
+from translation_services.enhanced_cts_service import EnhancedCTSService
 
 logger = logging.getLogger("ehealth")
 
@@ -1674,8 +1675,10 @@ class FHIRBundleParser:
             method_text = method_data.get('display_text', '')
 
         # Extract code details for template compatibility
-        observation_code = code_data.get('code', '')
-        observation_code_system = code_data.get('system', '')
+        # code_data structure: {'primary_coding': {'code': ..., 'system': ...}, 'text': ...}
+        primary_coding = code_data.get('primary_coding', {})
+        observation_code = primary_coding.get('code', '')
+        observation_code_system = primary_coding.get('system', '')
         
         # Extract numeric value and unit for template compatibility
         value_numeric = None
@@ -1701,7 +1704,8 @@ class FHIRBundleParser:
             'effective_date': effective_date,
             'observation_time': effective_date,  # Template alias
             'effective_data': effective_data,
-            'category': category_text,
+            'category': observation.get('category', category_text),  # Preserve raw category for filtering
+            'category_text': category_text,  # Display text for UI
             'category_data': category_data,
             'reference_ranges': reference_ranges,
             'has_reference_ranges': bool(reference_ranges),
@@ -1766,9 +1770,23 @@ class FHIRBundleParser:
             if code and (code in pregnancy_loinc_codes or code in pregnancy_snomed_codes):
                 return True
         
-        # Check category for pregnancy/obstetric
-        category = observation.get('category', '').lower()
-        if 'pregnancy' in category or 'obstetric' in category:
+        # Check category for pregnancy/obstetric (handle both list and string formats)
+        category = observation.get('category', [])
+        category_text = ''
+        if isinstance(category, list):
+            # Extract display text from FHIR category structure
+            for cat in category:
+                if isinstance(cat, dict):
+                    codings = cat.get('coding', [])
+                    for coding in codings:
+                        if isinstance(coding, dict):
+                            display = coding.get('display', '')
+                            if display:
+                                category_text += display.lower() + ' '
+        elif isinstance(category, str):
+            category_text = category.lower()
+        
+        if 'pregnancy' in category_text or 'obstetric' in category_text:
             return True
         
         # Check observation name and display text
@@ -2070,6 +2088,134 @@ class FHIRBundleParser:
         logger.info(f"[PREGNANCY TRANSFORM] Transformed {len(observations)} pregnancy observations into {len(pregnancy_records)} pregnancy records ({len(pregnancy_groups)} past, {1 if current_pregnancy_obs else 0} current)")
         return pregnancy_records
     
+    def _transform_social_history_observations(self, observations: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """
+        Transform social history observations into CDA-style nested structure for template compatibility
+        
+        Uses Enhanced CTS Service to lookup LOINC codes in target language (English) from Master Value
+        Catalogue (MVC), ensuring language-independent clinical terminology across EU member states.
+        Falls back to FHIR code.text if MVC lookup fails.
+        
+        European Healthcare Context:
+        - Patient FHIR resources may have code.text in source country language (e.g., Portuguese)
+        - Healthcare professionals need terminology in their language (e.g., English for Ireland)
+        - LOINC codes are universal, MVC provides validated medical translations
+        - Future enhancement: Support displaying both source and target language
+        
+        Template expects nested structure:
+        - data.observation_type.display_value: Type (e.g., "Tobacco smoking status", "Alcoholic drinks per day")
+        - data.observation_value.display_value: Value (e.g., "0.5 (pack)/d")
+        - data.observation_time.display_value: Time/period (e.g., "15/04/2017 to 2022")
+        - data.status.display_value: Status (e.g., "Completed", "Final")
+        """
+        if not observations:
+            return []
+        
+        # Initialize Enhanced CTS service for language-independent MVC lookup
+        enhanced_cts = EnhancedCTSService()
+        LOINC_OID = "2.16.840.1.113883.6.1"
+        
+        transformed_observations = []
+        
+        for obs in observations:
+            # Extract observation code and name
+            observation_code = obs.get('observation_code', '')
+            observation_name = obs.get('observation_name', 'Social history observation')
+            
+            # Use MVC/CTS for language-independent LOINC lookup
+            # Prioritize universal LOINC codes over source country language text
+            if observation_code:
+                # Query Master Value Catalogue for English translation
+                mvc_data = enhanced_cts.get_comprehensive_code_data(
+                    code=observation_code,
+                    code_system_oid=LOINC_OID,
+                    target_language='en',  # Healthcare professional's language
+                    include_all_languages=True  # Future: support source language display
+                )
+                
+                if mvc_data and mvc_data.get('display_value'):
+                    observation_name = mvc_data['display_value']
+                    logger.info(f"[SOCIAL HISTORY MVC] Retrieved '{observation_name}' for LOINC {observation_code} from Master Value Catalogue")
+                else:
+                    # Fallback to FHIR code.coding[0].display (proper LOINC display)
+                    # code.text may be generic or in source language, prefer coding display
+                    code_data = obs.get('code_data', {})
+                    primary_coding = code_data.get('primary_coding', {})
+                    coding_display = primary_coding.get('display', '')
+                    
+                    if coding_display and coding_display != observation_name:
+                        observation_name = coding_display
+                        logger.info(f"[SOCIAL HISTORY FALLBACK] Using LOINC coding.display for {observation_code}: '{observation_name}'")
+                    else:
+                        # Last resort: use code.text (may be in source language)
+                        logger.info(f"[SOCIAL HISTORY FALLBACK] Using code.text for LOINC {observation_code}: '{observation_name}'")
+            else:
+                # No code available, log warning
+                logger.warning(f"[SOCIAL HISTORY] No LOINC code for observation: {observation_name}")
+            
+            # Extract effective period or datetime
+            effective_data = obs.get('effective_data', {})
+            observation_time = 'Not specified'
+            
+            if isinstance(effective_data, dict):
+                if effective_data.get('type') == 'period':
+                    # Handle effectivePeriod (e.g., "2017-04-15" to "2022")
+                    start = effective_data.get('start', '')
+                    end = effective_data.get('end', '')
+                    if start and end:
+                        # Format dates using ClinicalDateFormatter
+                        start_formatted = ClinicalDateFormatter.format_clinical_date(start)
+                        end_formatted = ClinicalDateFormatter.format_clinical_date(end)
+                        observation_time = f"{start_formatted} to {end_formatted}"
+                    elif start:
+                        start_formatted = ClinicalDateFormatter.format_clinical_date(start)
+                        observation_time = f"From {start_formatted}"
+                elif effective_data.get('type') == 'datetime':
+                    # Handle effectiveDateTime
+                    datetime_val = effective_data.get('value', '')
+                    if datetime_val:
+                        observation_time = ClinicalDateFormatter.format_clinical_date(datetime_val)
+            
+            # Build CDA-style nested structure
+            transformed_obs = {
+                'id': obs.get('id'),
+                'resource_type': 'Observation',
+                'observation_type': observation_name,
+                'observation_value': obs.get('value', 'Not specified'),
+                'observation_time': observation_time,
+                'status': obs.get('status', 'Unknown'),
+                # Nested data structure for CDA template compatibility
+                'data': {
+                    'observation_type': {
+                        'display_value': observation_name,
+                        'code': obs.get('observation_code', ''),
+                        'code_system': obs.get('observation_code_system', '')
+                    },
+                    'observation_value': {
+                        'display_value': obs.get('value', 'Not specified'),
+                        'numeric': obs.get('value_numeric'),
+                        'unit': obs.get('value_unit')
+                    },
+                    'observation_time': {
+                        'display_value': observation_time,
+                        'raw_data': effective_data
+                    },
+                    'status': {
+                        'display_value': obs.get('status', 'Unknown')
+                    }
+                },
+                # Preserve original flat structure for backwards compatibility
+                'category_text': obs.get('category_text', ''),
+                'code_data': obs.get('code_data', {}),
+                'value_data': obs.get('value_data', {}),
+                'effective_date': obs.get('effective_date', '')
+            }
+            
+            transformed_observations.append(transformed_obs)
+        
+        logger.info(f"[SOCIAL HISTORY TRANSFORM] Transformed {len(observations)} social history observations into CDA-style structure")
+        return transformed_observations
+    
     def _is_vital_sign(self, observation: Dict[str, Any]) -> bool:
         """Check if observation is a vital sign using LOINC codes and keywords"""
         # LOINC codes for vital signs (primary method)
@@ -2092,7 +2238,11 @@ class FHIRBundleParser:
         # Type check: category should be list of dicts, but might be a string
         if isinstance(category, str):
             logger.warning(f"[FHIR] Observation category is string instead of list: {category}")
-            category = []
+            # Match string category values (case-insensitive)
+            category_lower = category.lower()
+            if 'vital' in category_lower or category_lower == 'vital-signs':
+                return True
+            category = []  # Fallback to empty array for further processing
         
         for cat in category:
             # Type check: each category entry should be dict (CodeableConcept), not string
@@ -2129,7 +2279,11 @@ class FHIRBundleParser:
         
         # Type check: category should be list of dicts, but might be a string
         if isinstance(category, str):
-            category = []
+            # Match string category values (case-insensitive)
+            category_lower = category.lower()
+            if 'social' in category_lower or category_lower == 'social-history':
+                return True
+            category = []  # Fallback to empty array for further processing
         
         for cat in category:
             # Type check: each category entry should be dict (CodeableConcept)
@@ -2173,7 +2327,11 @@ class FHIRBundleParser:
         
         # Type check: category should be list of dicts, but might be a string
         if isinstance(category, str):
-            category = []
+            # Match string category values (case-insensitive)
+            category_lower = category.lower()
+            if 'lab' in category_lower or category_lower == 'laboratory':
+                return True
+            category = []  # Fallback to empty array for further processing
         
         for cat in category:
             # Type check: each category entry should be dict (CodeableConcept)
@@ -2201,7 +2359,11 @@ class FHIRBundleParser:
         
         # Type check: category should be list of dicts, but might be a string
         if isinstance(category, str):
-            category = []
+            # Match string category values (case-insensitive)
+            category_lower = category.lower()
+            if 'exam' in category_lower or 'physical' in category_lower:
+                return True
+            category = []  # Fallback to empty array for further processing
         
         for cat in category:
             # Type check: each category entry should be dict (CodeableConcept)
@@ -2422,29 +2584,41 @@ class FHIRBundleParser:
             elif section_type == 'observations' and hasattr(section_data, 'entries'):
                 clinical_arrays['observations'] = section_data.entries
                 
+                # Debug: Log all observations before filtering
+                logger.info(f"[OBS DEBUG] Processing {len(section_data.entries)} observations")
+                for obs in section_data.entries:
+                    obs_name = obs.get('observation_name', 'Unknown')
+                    obs_category = obs.get('category', 'No category')
+                    logger.info(f"[OBS] {obs_name} | Category: {obs_category}")
+                
                 # Filter for vital signs
                 clinical_arrays['vital_signs'] = [
                     obs for obs in section_data.entries 
                     if self._is_vital_sign(obs)
                 ]
+                logger.info(f"[FILTER] Vital signs: {len(clinical_arrays['vital_signs'])} observations")
                 
-                # Filter for social history
-                clinical_arrays['social_history'] = [
+                # Filter for social history and transform to CDA-style structure
+                social_history_observations = [
                     obs for obs in section_data.entries 
                     if self._is_social_history(obs)
                 ]
+                logger.info(f"[FILTER] Social history: {len(social_history_observations)} observations")
+                clinical_arrays['social_history'] = self._transform_social_history_observations(social_history_observations)
                 
                 # Filter for physical findings (physical examination observations)
                 clinical_arrays['physical_findings'] = [
                     obs for obs in section_data.entries 
                     if self._is_physical_finding(obs)
                 ]
+                logger.info(f"[FILTER] Physical findings: {len(clinical_arrays['physical_findings'])} observations")
                 
                 # Filter for laboratory results
                 clinical_arrays['laboratory_results'] = [
                     obs for obs in section_data.entries 
                     if self._is_laboratory_result(obs)
                 ]
+                logger.info(f"[FILTER] Laboratory results: {len(clinical_arrays['laboratory_results'])} observations")
                 
                 # Filter for pregnancy history (LOINC 10162-6 section) and transform to template structure
                 pregnancy_observations = [

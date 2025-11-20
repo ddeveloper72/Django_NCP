@@ -27,6 +27,18 @@ FALLBACK_TRANSLATIONS = {
         '73425007': 'Inactive',
         '765205004': 'Disorder in remission',
         '55561003': 'Active',
+    },
+    # LOINC codes (2.16.840.1.113883.6.1) - Social History
+    '2.16.840.1.113883.6.1': {
+        '72166-2': 'Tobacco use and exposure',
+        '74013-4': 'Alcohol intake',
+        '11341-5': 'Alcohol consumption',
+        '64617-5': 'Tobacco smoking status',
+        '39240-7': 'Occupation',
+        '11340-7': 'Employment status',
+        '21840-4': 'Physical activity',
+        '74012-6': 'Alcohol consumption quantity',
+        '82810-3': 'Pregnancy status',
     }
 }
 

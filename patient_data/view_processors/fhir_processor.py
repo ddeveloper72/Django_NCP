@@ -121,6 +121,24 @@ class FHIRViewProcessor:
             logger.info(f"[FHIR PROCESSOR] Successfully processed FHIR patient view for session {session_id}")
             logger.info(f"[VIEW PROCESSOR DEBUG] Final context source_country before render: {context.get('source_country')}")
             
+            # DEBUG: Log clinical section availability
+            clinical_sections_status = {
+                'problems': len(context.get('problems', [])),
+                'history_of_past_illness': len(context.get('history_of_past_illness', [])),
+                'immunizations': len(context.get('immunizations', [])),
+                'pregnancy_history': len(context.get('pregnancy_history', [])) if isinstance(context.get('pregnancy_history'), list) else 'dict',
+                'medications': len(context.get('medications', [])),
+                'allergies': len(context.get('allergies', [])),
+                'procedures': len(context.get('procedures', [])),
+                'vital_signs': len(context.get('vital_signs', [])),
+                'physical_findings': len(context.get('physical_findings', [])),
+                'social_history': len(context.get('social_history', [])),
+                'laboratory_results': len(context.get('laboratory_results', [])),
+                'medical_devices': len(context.get('medical_devices', [])),
+                'advance_directives': len(context.get('advance_directives', [])),
+            }
+            logger.info(f"[FHIR PROCESSOR] Clinical sections status: {clinical_sections_status}")
+            
             return render(request, 'patient_data/enhanced_patient_cda.html', context)
             
         except Exception as e:

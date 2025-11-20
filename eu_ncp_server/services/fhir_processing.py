@@ -452,20 +452,86 @@ class FHIRResourceProcessor:
         }
     
     def _format_quantity_display(self, quantity: Dict[str, Any]) -> str:
-        """Format quantity for human-readable display"""
+        """Format quantity for human-readable display with UCUM code translation"""
         if not quantity or not quantity.get('value'):
             return 'Unknown quantity'
         
         value = quantity.get('value')
-        unit = quantity.get('unit', quantity.get('code', ''))
+        unit_text = quantity.get('unit')
+        ucum_code = quantity.get('code', '')
         comparator = quantity.get('comparator', '')
+        
+        # CRITICAL: FHIR 'unit' field often contains UCUM codes, not human-readable text
+        # Always attempt translation through UCUM mapper first
+        if ucum_code:
+            translated_unit = self._ucum_to_readable(ucum_code)
+            # If mapper didn't change it (returned same code), check if unit_text is better
+            if translated_unit == ucum_code and unit_text and unit_text != ucum_code:
+                final_unit = unit_text
+            else:
+                final_unit = translated_unit
+        elif unit_text:
+            final_unit = unit_text
+        else:
+            final_unit = ''
         
         # Format display value
         display = f"{comparator}{value}"
-        if unit:
-            display += f" {unit}"
+        if final_unit:
+            display += f" {final_unit}"
         
         return display
+    
+    def _ucum_to_readable(self, ucum_code: str) -> str:
+        """
+        Convert UCUM codes to human-readable text
+        
+        Common UCUM codes in healthcare observations:
+        - /d = per day
+        - /wk = per week
+        - /mo = per month
+        - /yr = per year
+        - mg = milligram
+        - g = gram
+        - mL = milliliter
+        - L = liter
+        - cm = centimeter
+        - kg = kilogram
+        """
+        ucum_to_text = {
+            # Time-based rates
+            '/d': 'per day',
+            '/wk': 'per week',
+            '/mo': 'per month',
+            '/yr': 'per year',
+            '/h': 'per hour',
+            '/min': 'per minute',
+            # Compound units (packs per day, drinks per day)
+            '{pack}/d': 'packs per day',
+            '{drink}/d': 'drinks per day',
+            # Mass units
+            'mg': 'mg',
+            'g': 'g',
+            'kg': 'kg',
+            'ug': 'mcg',  # microgram
+            # Volume units
+            'mL': 'mL',
+            'L': 'L',
+            'dL': 'dL',
+            # Length units
+            'cm': 'cm',
+            'm': 'm',
+            'mm': 'mm',
+            # Pressure units
+            'mm[Hg]': 'mmHg',
+            # Percentage
+            '%': '%',
+            # Dimensionless (per unit)
+            '1': '',
+            '{count}': '',
+        }
+        
+        return ucum_to_text.get(ucum_code, ucum_code)
     
     def _is_ucum_quantity(self, quantity: Dict[str, Any]) -> bool:
         """Check if quantity uses UCUM system"""
