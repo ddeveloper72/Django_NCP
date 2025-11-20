@@ -2517,7 +2517,10 @@
                                         {% for result in laboratory_results %}
                                         <div class="lab-result-card mb-3 p-3 border rounded bg-white">
                                             <h6 class="lab-test-name text-dark mb-2">
-                                                {% if result.name %}
+                                                {# Support both FHIR (observation_name) and CDA (name, code.displayName) #}
+                                                {% if result.observation_name %}
+                                                    {{ result.observation_name }}
+                                                {% elif result.name %}
                                                     {{ result.name }}
                                                 {% elif result.code.displayName %}
                                                     {{ result.code.displayName }}
@@ -2529,19 +2532,40 @@
                                             <div class="text-muted mb-1">
                                                 <i class="fa-solid fa-chart-bar me-1"></i>
                                                 <strong>Result:</strong> {{ result.value }}
-                                                {% if result.unit %} {{ result.unit }}{% endif %}
+                                                {# Support both FHIR (value_unit) and CDA (unit) #}
+                                                {% if result.value_unit %}
+                                                    {{ result.value_unit }}
+                                                {% elif result.unit %}
+                                                    {{ result.unit }}
+                                                {% endif %}
                                             </div>
                                             {% endif %}
-                                            {% if result.reference_range %}
+                                            {% if result.reference_range or result.reference_ranges %}
                                             <div class="text-muted mb-1">
                                                 <i class="fa-solid fa-ruler me-1"></i>
-                                                <strong>Reference Range:</strong> {{ result.reference_range }}
+                                                <strong>Reference Range:</strong>
+                                                {# FHIR uses reference_ranges array, CDA uses reference_range string #}
+                                                {% if result.reference_ranges and result.reference_ranges|length > 0 %}
+                                                    {{ result.reference_ranges.0.display }}
+                                                {% elif result.reference_range %}
+                                                    {{ result.reference_range }}
+                                                {% else %}
+                                                    Not specified
+                                                {% endif %}
                                             </div>
                                             {% endif %}
-                                            {% if result.effective_time %}
+                                            {% if result.effective_date or result.effective_time or result.observation_time %}
                                             <div class="text-muted">
                                                 <i class="fa-solid fa-calendar me-1"></i>
-                                                <strong>Date:</strong> {{ result.effective_time }}
+                                                <strong>Date:</strong>
+                                                {# Support FHIR (effective_date, observation_time) and CDA (effective_time) #}
+                                                {% if result.effective_date %}
+                                                    {{ result.effective_date }}
+                                                {% elif result.observation_time %}
+                                                    {{ result.observation_time }}
+                                                {% elif result.effective_time %}
+                                                    {{ result.effective_time }}
+                                                {% endif %}
                                             </div>
                                             {% endif %}
                                         </div>
