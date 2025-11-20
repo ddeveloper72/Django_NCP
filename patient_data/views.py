@@ -2747,7 +2747,9 @@ def patient_details_view(request, patient_id):
                         f"[PATIENT_DETAILS] FHIR clinical arrays extracted: "
                         f"problems={len(clinical_arrays['problems'])}, "
                         f"allergies={len(clinical_arrays['allergies'])}, "
-                        f"medications={len(clinical_arrays['medications'])}"
+                        f"medications={len(clinical_arrays['medications'])}, "
+                        f"laboratory_results={len(clinical_arrays.get('laboratory_results', []))}, "
+                        f"vital_signs={len(clinical_arrays.get('vital_signs', []))}"
                     )
             
             # FALLBACK: Use CDA content if no FHIR bundle
@@ -2861,6 +2863,13 @@ def patient_details_view(request, patient_id):
                         logger.info(f"[DEBUG_MED_{i}] data.ingredient_display: {data.get('ingredient_display', 'MISSING')}")
                     else:
                         logger.info(f"[DEBUG_MED_{i}] NO DATA FIELD")
+            
+            # DEBUG: Log laboratory results before adding to context
+            lab_results = clinical_arrays.get("laboratory_results", [])
+            logger.info(f"[CONTEXT_DEBUG] Laboratory results count: {len(lab_results)}")
+            if lab_results:
+                logger.info(f"[CONTEXT_DEBUG] First lab result keys: {list(lab_results[0].keys())}")
+                logger.info(f"[CONTEXT_DEBUG] First lab result data: {lab_results[0]}")
             
             context.update(
                 {
