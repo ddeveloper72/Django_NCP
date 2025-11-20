@@ -58,12 +58,28 @@
                                     </h5>
                                 </div>
                                 <div class="vital-sign-value-section">
-                                    {% if vital_sign.value %}
-                                        <span class="badge bg-success fs-6">{{ vital_sign.value }} {{ vital_sign.unit|default:'' }}</span>
+                                    {% if vital_sign.has_components and vital_sign.component %}
+                                        {# Multi-component vital signs (e.g., blood pressure) #}
+                                        <div class="d-flex flex-wrap gap-2">
+                                            {% for comp in vital_sign.component %}
+                                                {% if comp.valueQuantity %}
+                                                    <span class="badge bg-success fs-6">
+                                                        {% if comp.code.coding.0.display %}
+                                                            {{ comp.code.coding.0.display|truncatewords:2 }}: 
+                                                        {% endif %}
+                                                        {{ comp.valueQuantity.value }} {{ comp.valueQuantity.unit }}
+                                                    </span>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                    {% elif vital_sign.value_numeric and vital_sign.value_unit %}
+                                        <span class="badge bg-success fs-6">{{ vital_sign.value_numeric }} {{ vital_sign.value_unit }}</span>
+                                    {% elif vital_sign.value %}
+                                        <span class="badge bg-success fs-6">{{ vital_sign.value }}</span>
                                     {% elif vital_sign.data.value.display_value %}
                                         <span class="badge bg-success fs-6">{{ vital_sign.data.value.display_value }}</span>
                                     {% else %}
-                                        <span class="badge bg-secondary fs-6">No Value</span>
+                                        <span class="badge bg-secondary fs-6">No value</span>
                                     {% endif %}
                                 </div>
                             </div>
@@ -80,12 +96,24 @@
                                         <span class="field-label">Measurement</span>
                                     </div>
                                     <div class="field-content">
-                                        {% if vital_sign.value and vital_sign.unit %}
-                                            <div class="field-value fw-bold text-success">{{ vital_sign.value }} {{ vital_sign.unit }}</div>
-                                        {% elif vital_sign.data.value.display_value %}
-                                            <div class="field-value fw-bold text-success">{{ vital_sign.data.value.display_value }}</div>
+                                        {% if vital_sign.has_components and vital_sign.component %}
+                                            {# Multi-component vital signs (e.g., blood pressure) #}
+                                            {% for comp in vital_sign.component %}
+                                                {% if comp.valueQuantity %}
+                                                    <div class="field-value fw-bold text-success mb-1">
+                                                        {% if comp.code.coding.0.display %}
+                                                            <span class="text-muted small">{{ comp.code.coding.0.display }}:</span>
+                                                        {% endif %}
+                                                        {{ comp.valueQuantity.value }} {{ comp.valueQuantity.unit }}
+                                                    </div>
+                                                {% endif %}
+                                            {% endfor %}
+                                        {% elif vital_sign.value_numeric and vital_sign.value_unit %}
+                                            <div class="field-value fw-bold text-success">{{ vital_sign.value_numeric }} {{ vital_sign.value_unit }}</div>
                                         {% elif vital_sign.value %}
                                             <div class="field-value fw-bold text-success">{{ vital_sign.value }}</div>
+                                        {% elif vital_sign.data.value.display_value %}
+                                            <div class="field-value fw-bold text-success">{{ vital_sign.data.value.display_value }}</div>
                                         {% else %}
                                             <div class="field-value text-muted">Not recorded</div>
                                         {% endif %}
@@ -94,7 +122,7 @@
                             </div>
                             
                             {# LOINC Code #}
-                            {% if vital_sign.vital_code %}
+                            {% if vital_sign.observation_code or vital_sign.vital_code %}
                             <div class="col-lg-6">
                                 <div class="field-group">
                                     <div class="field-header">
@@ -103,9 +131,9 @@
                                     </div>
                                     <div class="field-content">
                                         <div class="field-value">
-                                            <span class="badge bg-info">{{ vital_sign.vital_code }}</span>
-                                            {% if vital_sign.code_system %}
-                                                <span class="text-muted ms-2 small">({{ vital_sign.code_system }})</span>
+                                            <span class="badge bg-info">{{ vital_sign.observation_code|default:vital_sign.vital_code }}</span>
+                                            {% if vital_sign.observation_code_system or vital_sign.code_system %}
+                                                <span class="text-muted ms-2 small">({{ vital_sign.observation_code_system|default:vital_sign.code_system }})</span>
                                             {% endif %}
                                         </div>
                                     </div>
@@ -121,7 +149,11 @@
                                         <span class="field-label">Date Measured</span>
                                     </div>
                                     <div class="field-content">
-                                        {% if vital_sign.data.date.display_value %}
+                                        {% if vital_sign.effective_date %}
+                                            <div class="field-value">{{ vital_sign.effective_date }}</div>
+                                        {% elif vital_sign.observation_time %}
+                                            <div class="field-value">{{ vital_sign.observation_time }}</div>
+                                        {% elif vital_sign.data.date.display_value %}
                                             <div class="field-value">{{ vital_sign.data.date.display_value }}</div>
                                         {% elif vital_sign.date %}
                                             <div class="field-value">{{ vital_sign.date }}</div>
