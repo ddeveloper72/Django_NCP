@@ -579,6 +579,11 @@ class AzureFHIRIntegrationService:
                     effective_date = resource.get('effectiveDateTime', resource.get('effectivePeriod', {}).get('start', ''))
                     if effective_date and code:
                         return f"{system}|{code}|{effective_date}"
+                    else:
+                        # No effective date - use observation ID to ensure each observation is unique
+                        # This prevents deduplication of multiple pregnancy observations with same code
+                        obs_id = resource.get('id', 'unknown')
+                        return f"{system}|{code}|{obs_id}"
                 
                 # For other observations, use code only
                 if code:
@@ -733,14 +738,20 @@ class AzureFHIRIntegrationService:
             
             for resource_type in clinical_resources:
                 try:
-                    # Use identifier format for search (Azure FHIR supports Patient/{identifier} format)
-                    # This matches how resources were uploaded from CDA conversion
+                    # CRITICAL: Use Azure patient UUID for search (after duplicate cleanup)
+                    # Try UUID first, fallback to identifier if needed
                     search_params = {
-                        'patient': patient_id,  # Azure FHIR resolves identifier references
+                        'patient': azure_patient_id,  # Use Azure UUID for reliable results
                         '_sort': '-_lastUpdated',
                         '_count': '100'  # Get more to ensure we capture all versions
                     }
                     search_results = self._make_request('GET', resource_type, params=search_params)
+                    
+                    # If no results with UUID, try with business identifier (fallback for old data)
+                    if not search_results or not search_results.get('entry'):
+                        logger.debug(f"No {resource_type} found with UUID, trying identifier {patient_id}")
+                        search_params['patient'] = patient_id
+                        search_results = self._make_request('GET', resource_type, params=search_params)
                     
                     if search_results and search_results.get('entry'):
                         entries = search_results['entry']
