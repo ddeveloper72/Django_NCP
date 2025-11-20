@@ -35,7 +35,10 @@
                                 <div class="result-name-section flex-grow-1 me-3">
                                     <h5 class="result-name text-secondary mb-1 fw-bold">
                                         <i class="fa-solid fa-vial me-2"></i>
-                                        {% if result.data.test.display_value %}
+                                        {# Support FHIR (observation_name) and CDA (data.test/display_name/name) #}
+                                        {% if result.observation_name %}
+                                            {{ result.observation_name }}
+                                        {% elif result.data.test.display_value %}
                                             {{ result.data.test.display_value }}
                                         {% elif result.data.test.value %}
                                             {{ result.data.test.value }}
@@ -49,7 +52,18 @@
                                     </h5>
                                 </div>
                                 <div class="result-status-section">
-                                    {% if result.data.interpretation.display_value %}
+                                    {# Support FHIR (interpretation flat string) and CDA (data.interpretation.display_value) #}
+                                    {% if result.interpretation %}
+                                        {% if "High" in result.interpretation or "Abnormal" in result.interpretation %}
+                                            <span class="badge bg-warning fs-6">{{ result.interpretation }}</span>
+                                        {% elif "Low" in result.interpretation %}
+                                            <span class="badge bg-info fs-6">{{ result.interpretation }}</span>
+                                        {% elif "Normal" in result.interpretation %}
+                                            <span class="badge bg-success fs-6">{{ result.interpretation }}</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary fs-6">{{ result.interpretation }}</span>
+                                        {% endif %}
+                                    {% elif result.data.interpretation.display_value %}
                                         {% if "High" in result.data.interpretation.display_value or "Abnormal" in result.data.interpretation.display_value %}
                                             <span class="badge bg-warning fs-6">{{ result.data.interpretation.display_value }}</span>
                                         {% elif "Low" in result.data.interpretation.display_value %}
@@ -59,8 +73,6 @@
                                         {% else %}
                                             <span class="badge bg-secondary fs-6">{{ result.data.interpretation.display_value }}</span>
                                         {% endif %}
-                                    {% elif result.interpretation %}
-                                        <span class="badge bg-secondary fs-6">{{ result.interpretation }}</span>
                                     {% else %}
                                         <span class="badge bg-secondary fs-6">Result</span>
                                     {% endif %}
@@ -79,7 +91,10 @@
                                         <span class="field-label">Result Value</span>
                                     </div>
                                     <div class="field-content">
-                                        {% if result.value and result.unit %}
+                                        {# Support FHIR (value/value_unit) and CDA (data.value/value+unit) #}
+                                        {% if result.value and result.value_unit %}
+                                            <div class="field-value fw-bold text-primary">{{ result.value }} {{ result.value_unit }}</div>
+                                        {% elif result.value and result.unit %}
                                             <div class="field-value fw-bold text-primary">{{ result.value }} {{ result.unit }}</div>
                                         {% elif result.data.value.display_value %}
                                             <div class="field-value fw-bold text-primary">{{ result.data.value.display_value }}</div>
@@ -100,7 +115,10 @@
                                         <span class="field-label">Reference Range</span>
                                     </div>
                                     <div class="field-content">
-                                        {% if result.data.reference_range.display_value %}
+                                        {# Support FHIR (reference_ranges array) and CDA (data.reference_range/reference_range) #}
+                                        {% if result.reference_ranges and result.reference_ranges|length > 0 %}
+                                            <div class="field-value">{{ result.reference_ranges.0.display }}</div>
+                                        {% elif result.data.reference_range.display_value %}
                                             <div class="field-value">{{ result.data.reference_range.display_value }}</div>
                                         {% elif result.reference_range %}
                                             <div class="field-value">{{ result.reference_range }}</div>
@@ -111,7 +129,7 @@
                                 </div>
                             </div>
                             
-                            {# Test Date #}
+                            {# Test Date - Support both FHIR (effective_date/observation_time) and CDA (data.date/date) #}
                             <div class="col-lg-6">
                                 <div class="field-group">
                                     <div class="field-header">
@@ -119,7 +137,11 @@
                                         <span class="field-label">Test Date</span>
                                     </div>
                                     <div class="field-content">
-                                        {% if result.data.date.display_value %}
+                                        {% if result.effective_date %}
+                                            <div class="field-value">{{ result.effective_date }}</div>
+                                        {% elif result.observation_time %}
+                                            <div class="field-value">{{ result.observation_time }}</div>
+                                        {% elif result.data.date.display_value %}
                                             <div class="field-value">{{ result.data.date.display_value }}</div>
                                         {% elif result.date %}
                                             <div class="field-value">{{ result.date }}</div>
