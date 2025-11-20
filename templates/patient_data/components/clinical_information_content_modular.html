@@ -30,8 +30,10 @@
         {% include 'patient_data/sections/vital_signs_section_new.html' with section_data=vital_signs section_count=vital_signs|length section_type='vital_signs' section_title='Vital Signs' %}
     {% endif %}
     
-    {# Results/Lab Results Section #}
-    {% if results and results|length > 0 %}
+    {# Results/Lab Results Section - Support both 'laboratory_results' (FHIR) and 'results' (CDA) #}
+    {% if laboratory_results and laboratory_results|length > 0 %}
+        {% include 'patient_data/sections/results_section_new.html' with section_data=laboratory_results section_count=laboratory_results|length section_type='laboratory_results' section_title='Laboratory Results' %}
+    {% elif results and results|length > 0 %}
         {% include 'patient_data/sections/results_section_new.html' with section_data=results section_count=results|length section_type='results' section_title='Laboratory Results' %}
     {% endif %}
     
@@ -66,7 +68,7 @@
     {% endif %}
     
     {# Empty State - No Clinical Data #}
-    {% if not medications and not problems and not allergies and not procedures and not vital_signs and not results and not immunizations and not medical_devices and not past_illness and not pregnancy_history and not social_history and not advance_directives and not functional_status %}
+    {% if not medications and not problems and not allergies and not procedures and not vital_signs and not results and not laboratory_results and not immunizations and not medical_devices and not past_illness and not pregnancy_history and not social_history and not advance_directives and not functional_status %}
     <div class="empty-clinical-state text-center p-5">
         <i class="fa-solid fa-file-medical fa-4x text-muted mb-4"></i>
         <h4 class="text-muted mb-3">No Clinical Information Available</h4>
