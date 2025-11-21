@@ -218,24 +218,26 @@ STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
 
-# Django Compressor settings for SASS compilation
+# Django Compressor settings for SASS compilation (local development only)
 STATICFILES_FINDERS = [
     "django.contrib.staticfiles.finders.FileSystemFinder",
     "django.contrib.staticfiles.finders.AppDirectoriesFinder",
-    "compressor.finders.CompressorFinder",
 ]
 
-COMPRESS_PRECOMPILERS = (("text/x-scss", "django_libsass.SassCompiler"),)
-
-# Only enable compression in production to avoid caching issues during development
-COMPRESS_ENABLED = not DEBUG
-
-# Additional compression settings to avoid cache issues
-COMPRESS_OFFLINE = False
-COMPRESS_CSS_HASHING_METHOD = "mtime"
+# Only add compressor in development (requires native dependencies)
+if DEVELOPMENT:
+    STATICFILES_FINDERS.append("compressor.finders.CompressorFinder")
+    COMPRESS_PRECOMPILERS = (("text/x-scss", "django_libsass.SassCompiler"),)
+    COMPRESS_ENABLED = False  # Disabled in development
+    COMPRESS_OFFLINE = False
+    COMPRESS_CSS_HASHING_METHOD = "mtime"
 
 # WhiteNoise configuration for production static files
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+# Use simpler storage on Heroku to avoid manifest issues
+if DEVELOPMENT:
+    STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
+else:
+    STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
 
 # Media files
 MEDIA_URL = "media/"
