@@ -122,7 +122,7 @@ if os.getenv("DATABASE_URL"):
         )
     }
 elif not DEVELOPMENT and os.getenv("AZURE_SQL_SERVER"):
-    # Azure SQL Database configuration using mssql-django (Microsoft's official adapter)
+    # Azure SQL Database configuration using mssql-django with pymssql (pure Python - no ODBC needed!)
     DATABASES = {
         "default": {
             "ENGINE": "mssql",
@@ -132,8 +132,8 @@ elif not DEVELOPMENT and os.getenv("AZURE_SQL_SERVER"):
             "HOST": os.getenv("AZURE_SQL_SERVER"),
             "PORT": os.getenv("AZURE_SQL_PORT", "1433"),
             "OPTIONS": {
-                "driver": "ODBC Driver 18 for SQL Server",
-                "extra_params": "Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;",
+                "driver": "pymssql",
+                "extra_params": "TDS_Version=7.4;",
             },
         }
     }

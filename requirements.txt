@@ -24,6 +24,7 @@ gunicorn==23.0.0
 whitenoise==6.8.2
 # Azure SQL Database support
 mssql-django==1.6
+pymssql==2.3.1
 fhir.resources==8.1.0
 fhir_core==1.1.4
 fhirclient==4.3.1
