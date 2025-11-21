@@ -65,8 +65,9 @@ Write-Host "Generating Django SECRET_KEY..." -ForegroundColor Yellow
 $SecretKey = python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
 heroku config:set "SECRET_KEY=$SecretKey"
 
-# Set DEBUG and ALLOWED_HOSTS
+# Set DEBUG, DEVELOPMENT, and ALLOWED_HOSTS
 heroku config:set "DEBUG=False"
+heroku config:set "DEVELOPMENT=False"
 $AppInfo = heroku info -s | Out-String
 $AppDomain = ($AppInfo -split "`n" | Where-Object { $_ -match "web_url=" }) -replace "web_url=https://", "" -replace "/", ""
 heroku config:set "ALLOWED_HOSTS=.herokuapp.com,$AppDomain"

@@ -62,8 +62,9 @@ echo "Generating Django SECRET_KEY..."
 SECRET_KEY=$(python3 -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())')
 heroku config:set SECRET_KEY="$SECRET_KEY"
 
-# Set DEBUG and ALLOWED_HOSTS
+# Set DEBUG, DEVELOPMENT, and ALLOWED_HOSTS
 heroku config:set DEBUG=False
+heroku config:set DEVELOPMENT=False
 APP_DOMAIN=$(heroku info -s | grep web_url | cut -d= -f2 | sed 's~https://~~' | sed 's~/~~')
 heroku config:set ALLOWED_HOSTS=".herokuapp.com,$APP_DOMAIN"
 

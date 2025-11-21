@@ -45,6 +45,7 @@ python -c "from django.core.management.utils import get_random_secret_key; print
 # Set Django configuration
 heroku config:set SECRET_KEY="[generated-key-from-above]"
 heroku config:set DEBUG=False
+heroku config:set DEVELOPMENT=False
 heroku config:set ALLOWED_HOSTS=".herokuapp.com"
 
 # Set Azure SQL connection (replace USERNAME and PASSWORD)

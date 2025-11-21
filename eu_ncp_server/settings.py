@@ -108,8 +108,10 @@ WSGI_APPLICATION = "eu_ncp_server.wsgi.application"
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 # Configure database based on environment
+DEVELOPMENT = os.getenv("DEVELOPMENT", "True") == "True"
+
 if os.getenv("DATABASE_URL"):
-    # Heroku PostgreSQL or Azure SQL via DATABASE_URL
+    # Heroku PostgreSQL or Azure SQL via DATABASE_URL (Production)
     import dj_database_url
     DATABASES = {
         "default": dj_database_url.config(
@@ -119,8 +121,40 @@ if os.getenv("DATABASE_URL"):
             ssl_require=True,
         )
     }
-elif os.getenv("AZURE_SQL_SERVER"):
+elif not DEVELOPMENT and os.getenv("AZURE_SQL_SERVER"):
     # Azure SQL Database direct configuration
+    # Try to find best available ODBC driver
+    import pyodbc
+    available_drivers = pyodbc.drivers()
+    
+    # Prefer newer drivers, fallback to older ones
+    driver_priority = [
+        "ODBC Driver 18 for SQL Server",
+        "ODBC Driver 17 for SQL Server",
+        "ODBC Driver 13 for SQL Server",
+        "SQL Server Native Client 11.0",
+        "SQL Server",
+    ]
+    
+    selected_driver = None
+    for driver in driver_priority:
+        if driver in available_drivers:
+            selected_driver = driver
+            break
+    
+    if not selected_driver:
+        raise RuntimeError(f"No SQL Server ODBC driver found. Available: {available_drivers}")
+    
+    # Build connection options based on driver
+    db_options = {"driver": selected_driver}
+    
+    # Modern drivers (17+) support these parameters
+    if "17" in selected_driver or "18" in selected_driver:
+        db_options["extra_params"] = "Encrypt=yes;TrustServerCertificate=yes;Connection Timeout=30;"
+    else:
+        # Older drivers need different format
+        db_options["host_is_server"] = True
+    
     DATABASES = {
         "default": {
             "ENGINE": "mssql",
@@ -129,20 +163,19 @@ elif os.getenv("AZURE_SQL_SERVER"):
             "PASSWORD": os.getenv("AZURE_SQL_PASSWORD"),
             "HOST": os.getenv("AZURE_SQL_SERVER"),
             "PORT": os.getenv("AZURE_SQL_PORT", "1433"),
-            "OPTIONS": {
-                "driver": "ODBC Driver 18 for SQL Server",
-                "extra_params": "Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;",
-            },
+            "OPTIONS": db_options,
         }
     }
+    print(f"🗄️  Using Azure SQL Database (Production Mode): {os.getenv('AZURE_SQL_DATABASE')}")
 else:
-    # Local SQLite for development
+    # Local SQLite for development (DEVELOPMENT=True)
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
             "NAME": BASE_DIR / "db.sqlite3",
         }
     }
+    print("📝 Using SQLite database (Development Mode)")
 
 
 # Password validation
