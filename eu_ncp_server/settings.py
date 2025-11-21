@@ -128,12 +128,15 @@ elif not DEVELOPMENT and os.getenv("AZURE_SQL_SERVER"):
     available_drivers = pyodbc.drivers()
     
     # Prefer newer drivers, fallback to older ones
+    # FreeTDS is used on Linux (Heroku), Microsoft drivers on Windows
     driver_priority = [
-        "ODBC Driver 18 for SQL Server",
-        "ODBC Driver 17 for SQL Server",
-        "ODBC Driver 13 for SQL Server",
-        "SQL Server Native Client 11.0",
-        "SQL Server",
+        "ODBC Driver 18 for SQL Server",  # Windows/modern Linux
+        "ODBC Driver 17 for SQL Server",  # Windows/Linux
+        "ODBC Driver 13 for SQL Server",  # Windows/Linux
+        "FreeTDS",                        # Linux (Heroku)
+        "TDS",                            # FreeTDS alternative name
+        "SQL Server Native Client 11.0",  # Windows legacy
+        "SQL Server",                     # Windows fallback
     ]
     
     selected_driver = None
@@ -148,8 +151,12 @@ elif not DEVELOPMENT and os.getenv("AZURE_SQL_SERVER"):
     # Build connection options based on driver
     db_options = {"driver": selected_driver}
     
-    # Modern drivers (17+) support these parameters
-    if "17" in selected_driver or "18" in selected_driver:
+    # Configure based on driver type
+    if "FreeTDS" in selected_driver or "TDS" in selected_driver:
+        # FreeTDS (Linux/Heroku) - simpler options
+        db_options["extra_params"] = "TDS_Version=7.4;"
+    elif "17" in selected_driver or "18" in selected_driver:
+        # Modern Microsoft drivers
         db_options["extra_params"] = "Encrypt=yes;TrustServerCertificate=yes;Connection Timeout=30;"
     else:
         # Older drivers need different format
