@@ -123,7 +123,13 @@ if os.getenv("DATABASE_URL"):
     }
 elif not DEVELOPMENT and os.getenv("AZURE_SQL_SERVER"):
     # Azure SQL Database configuration using django-mssql-backend
-    # Uses pytds (pure Python TDS implementation) - no ODBC drivers needed!
+    # Uses FreeTDS ODBC driver from Aptfile
+    import glob
+    
+    # Find FreeTDS library dynamically
+    freetds_paths = glob.glob("/app/.apt/usr/lib/**/libtdsodbc.so", recursive=True)
+    freetds_driver = freetds_paths[0] if freetds_paths else "/usr/lib/x86_64-linux-gnu/odbc/libtdsodbc.so"
+    
     DATABASES = {
         "default": {
             "ENGINE": "sql_server.pyodbc",
@@ -133,13 +139,14 @@ elif not DEVELOPMENT and os.getenv("AZURE_SQL_SERVER"):
             "HOST": os.getenv("AZURE_SQL_SERVER"),
             "PORT": os.getenv("AZURE_SQL_PORT", "1433"),
             "OPTIONS": {
-                "driver": "FreeTDS",
+                "driver": freetds_driver,
                 "host_is_server": True,
                 "extra_params": "TDS_Version=8.0;",
             },
         }
     }
     print(f"🗄️  Using Azure SQL Database (Production Mode): {os.getenv('AZURE_SQL_DATABASE')}")
+    print(f"🔧 FreeTDS driver: {freetds_driver}")
 else:
     # Local SQLite for development (DEVELOPMENT=True)
     DATABASES = {
