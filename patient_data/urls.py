@@ -18,7 +18,12 @@ from .cda_test_views import (
     smart_patient_search_view,
     test_patients_view,
 )
-from .debug_views import debug_cda_index
+
+# Import debug views only if available (development mode)
+try:
+    from .debug_views import debug_cda_index
+except ImportError:
+    debug_cda_index = None
 
 sys.path.append(os.path.dirname(__file__))
 # from debug_session_view import debug_session_view  # Temporarily disabled
@@ -46,8 +51,8 @@ from .view_modules.enhanced_cda_view import (
 app_name = "patient_data"
 
 urlpatterns = [
-    # Debug views
-    path("debug/cda-index/", debug_cda_index, name="debug_cda_index"),
+    # Debug views (only in development)
+    *([path("debug/cda-index/", debug_cda_index, name="debug_cda_index")] if debug_cda_index else []),
     # path("debug/session/", debug_session_view, name="debug_session"),  # Temporarily disabled
     path("debug/session-manager/", session_manager_view, name="session_manager"),
     # Clinical Data Debugger
