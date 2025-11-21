@@ -121,8 +121,20 @@ if os.getenv("DATABASE_URL"):
             ssl_require=True,
         )
     }
+elif not DEVELOPMENT and os.getenv("DATABASE_URL"):
+    # Heroku Postgres configuration (standard for Heroku deployments)
+    import dj_database_url
+    DATABASES = {
+        "default": dj_database_url.config(
+            default=os.getenv("DATABASE_URL"),
+            conn_max_age=600,
+            conn_health_checks=True,
+            ssl_require=True,
+        )
+    }
+    print(f"🗄️  Using Heroku Postgres Database (Production Mode)")
 elif not DEVELOPMENT and os.getenv("AZURE_SQL_SERVER"):
-    # Azure SQL Database configuration using mssql-django with pymssql (pure Python - no ODBC needed!)
+    # Azure SQL Database configuration (for local development or Azure deployments)
     DATABASES = {
         "default": {
             "ENGINE": "mssql",
@@ -132,12 +144,12 @@ elif not DEVELOPMENT and os.getenv("AZURE_SQL_SERVER"):
             "HOST": os.getenv("AZURE_SQL_SERVER"),
             "PORT": os.getenv("AZURE_SQL_PORT", "1433"),
             "OPTIONS": {
-                "driver": "pymssql",
-                "extra_params": "TDS_Version=7.4;",
+                "driver": "ODBC Driver 18 for SQL Server",
+                "extra_params": "Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;",
             },
         }
     }
-    print(f"🗄️  Using Azure SQL Database (Production Mode): {os.getenv('AZURE_SQL_DATABASE')}")
+    print(f"🗄️  Using Azure SQL Database (Development Mode): {os.getenv('AZURE_SQL_DATABASE')}")
 else:
     # Local SQLite for development (DEVELOPMENT=True)
     DATABASES = {
