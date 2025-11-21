@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+# bin/post_compile
+# This script runs after the buildpack compiles the app
+
+echo "-----> Post-compile: Configuring FreeTDS ODBC driver"
+
+# Find the actual FreeTDS library location
+FREETDS_LIB=$(find /app/.apt/usr/lib -name "libtdsodbc.so" 2>/dev/null | head -n1)
+
+if [ -z "$FREETDS_LIB" ]; then
+    echo "       Searching system paths..."
+    FREETDS_LIB=$(find /usr/lib -name "libtdsodbc.so" 2>/dev/null | head -n1)
+fi
+
+if [ ! -z "$FREETDS_LIB" ]; then
+    echo "       Found FreeTDS library at: $FREETDS_LIB"
+    
+    # Create ODBC configuration with correct path
+    cat > /app/.odbcinst.ini <<EOF
+[FreeTDS]
+Description = FreeTDS Driver for SQL Server
+Driver = $FREETDS_LIB
+UsageCount = 1
+EOF
+    
+    echo "       Created .odbcinst.ini with FreeTDS driver"
+else
+    echo "       WARNING: FreeTDS library not found!"
+    echo "       Listing apt library contents:"
+    find /app/.apt/usr/lib -name "*tds*" 2>/dev/null | head -10
+fi
+
+echo "-----> Post-compile: Done"
