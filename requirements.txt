@@ -23,7 +23,7 @@ dj-database-url==2.3.0
 gunicorn==23.0.0
 whitenoise==6.8.2
 # Azure SQL Database support
-mssql-django==2.0.0
+mssql-django==1.6
 pyodbc==5.2.0
 fhir.resources==8.1.0
 fhir_core==1.1.4
