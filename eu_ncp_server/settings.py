@@ -122,65 +122,21 @@ if os.getenv("DATABASE_URL"):
         )
     }
 elif not DEVELOPMENT and os.getenv("AZURE_SQL_SERVER"):
-    # Azure SQL Database direct configuration
-    # Try to find best available ODBC driver
-    import pyodbc
-    import sys
-    
-    available_drivers = pyodbc.drivers()
-    print(f"🔍 Detecting ODBC drivers on {sys.platform}...")
-    print(f"Available drivers: {available_drivers}")
-    
-    # Prefer newer drivers, fallback to older ones
-    # FreeTDS is used on Linux (Heroku), Microsoft drivers on Windows
-    driver_priority = [
-        "ODBC Driver 18 for SQL Server",  # Windows/modern Linux
-        "ODBC Driver 17 for SQL Server",  # Windows/Linux
-        "ODBC Driver 13 for SQL Server",  # Windows/Linux
-        "FreeTDS",                        # Linux (Heroku)
-        "TDS",                            # FreeTDS alternative name
-        "SQL Server Native Client 11.0",  # Windows legacy
-        "SQL Server",                     # Windows fallback
-    ]
-    
-    selected_driver = None
-    for driver in driver_priority:
-        if driver in available_drivers:
-            selected_driver = driver
-            print(f"✅ Selected ODBC driver: {selected_driver}")
-            break
-    
-    if not selected_driver:
-        import os as os_mod
-        print(f"❌ ODBC Environment:")
-        print(f"  ODBCSYSINI: {os_mod.environ.get('ODBCSYSINI', 'not set')}")
-        print(f"  ODBCINI: {os_mod.environ.get('ODBCINI', 'not set')}")
-        print(f"  ODBCINSTINI: {os_mod.environ.get('ODBCINSTINI', 'not set')}")
-        raise RuntimeError(f"No SQL Server ODBC driver found. Available: {available_drivers}")
-    
-    # Build connection options based on driver
-    db_options = {"driver": selected_driver}
-    
-    # Configure based on driver type
-    if "FreeTDS" in selected_driver or "TDS" in selected_driver:
-        # FreeTDS (Linux/Heroku) - simpler options
-        db_options["extra_params"] = "TDS_Version=7.4;"
-    elif "17" in selected_driver or "18" in selected_driver:
-        # Modern Microsoft drivers
-        db_options["extra_params"] = "Encrypt=yes;TrustServerCertificate=yes;Connection Timeout=30;"
-    else:
-        # Older drivers need different format
-        db_options["host_is_server"] = True
-    
+    # Azure SQL Database configuration using django-mssql-backend
+    # Uses pytds (pure Python TDS implementation) - no ODBC drivers needed!
     DATABASES = {
         "default": {
-            "ENGINE": "mssql",
+            "ENGINE": "sql_server.pyodbc",
             "NAME": os.getenv("AZURE_SQL_DATABASE", "eHealth"),
             "USER": os.getenv("AZURE_SQL_USER"),
             "PASSWORD": os.getenv("AZURE_SQL_PASSWORD"),
             "HOST": os.getenv("AZURE_SQL_SERVER"),
             "PORT": os.getenv("AZURE_SQL_PORT", "1433"),
-            "OPTIONS": db_options,
+            "OPTIONS": {
+                "driver": "FreeTDS",
+                "host_is_server": True,
+                "extra_params": "TDS_Version=8.0;",
+            },
         }
     }
     print(f"🗄️  Using Azure SQL Database (Production Mode): {os.getenv('AZURE_SQL_DATABASE')}")
