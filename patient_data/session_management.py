@@ -40,16 +40,18 @@ PRODUCTION_SESSION_CONFIG = {
 }
 
 
-def get_session_config() -> Dict[str, Any]:
+def get_session_config(debug_mode: bool = False) -> Dict[str, Any]:
     """Get session configuration based on environment"""
-    if getattr(settings, "DEBUG", False):
+    if debug_mode:
         return DEVELOPMENT_SESSION_CONFIG
     return PRODUCTION_SESSION_CONFIG
 
 
 def configure_session_settings(django_settings_dict):
     """Apply session configuration to Django settings"""
-    config = get_session_config()
+    # Get DEBUG from the settings dict being configured, not from django.conf.settings
+    debug_mode = django_settings_dict.get("DEBUG", False)
+    config = get_session_config(debug_mode=debug_mode)
 
     # Apply session settings
     for key, value in config.items():
