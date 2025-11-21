@@ -2581,6 +2581,19 @@ def patient_details_view(request, patient_id):
     # Log session data status
     if match_data:
         logger.info("Found session data for patient %s", patient_id)
+        
+        # CHECK: If patient has multiple L1 documents, redirect to document selection page
+        l1_documents = match_data.get("l1_documents", [])
+        l3_documents = match_data.get("l3_documents", [])
+        
+        if len(l1_documents) > 1:
+            # Multiple L1 documents available - redirect to selection page
+            logger.info(f"Patient {patient_id} has {len(l1_documents)} L1 documents - redirecting to selection page")
+            return redirect("patient_data:select_document", patient_id=patient_id)
+        elif len(l1_documents) == 1 and len(l3_documents) > 0:
+            # Has both L1 and L3 - redirect to selection page to let user choose
+            logger.info(f"Patient {patient_id} has L1 and L3 documents - redirecting to selection page")
+            return redirect("patient_data:select_document", patient_id=patient_id)
     else:
         logger.warning("No session data found for patient %s", patient_id)
 
@@ -6732,9 +6745,19 @@ def select_document_view(request, patient_id):
                     match_data["selected_l1_index"] = document_index
                     # Update preferred CDA type to L1 since user selected an L1 document
                     match_data["preferred_cda_type"] = "L1"
-                    # Update displayed metadata to reflect selected document
-                    match_data["file_path"] = selected_doc["path"]
-                    match_data["cda_type"] = "L1"
+                    # Load the actual CDA content from the selected document
+                    try:
+                        with open(selected_doc["path"], "r", encoding="utf-8") as f:
+                            l1_content = f.read()
+                        match_data["l1_cda_content"] = l1_content
+                        match_data["cda_content"] = l1_content  # Set as active content
+                        match_data["file_path"] = selected_doc["path"]
+                        logger.info(f"Loaded L1 document {document_index + 1}: {selected_doc['path']}")
+                    except Exception as e:
+                        logger.error(f"Error loading L1 document: {e}")
+                        messages.error(request, "Error loading selected document.")
+                        return redirect("patient_data:select_document", patient_id=patient_id)
+                    
                     request.session[session_key] = match_data
                     messages.success(
                         request, f"Selected L1 document {document_index + 1}"
@@ -6746,16 +6769,26 @@ def select_document_view(request, patient_id):
                     match_data["selected_l3_index"] = document_index
                     # Update preferred CDA type to L3 since user selected an L3 document
                     match_data["preferred_cda_type"] = "L3"
-                    # Update displayed metadata to reflect selected document
-                    match_data["file_path"] = selected_doc["path"]
-                    match_data["cda_type"] = "L3"
+                    # Load the actual CDA content from the selected document
+                    try:
+                        with open(selected_doc["path"], "r", encoding="utf-8") as f:
+                            l3_content = f.read()
+                        match_data["l3_cda_content"] = l3_content
+                        match_data["cda_content"] = l3_content  # Set as active content
+                        match_data["file_path"] = selected_doc["path"]
+                        logger.info(f"Loaded L3 document {document_index + 1}: {selected_doc['path']}")
+                    except Exception as e:
+                        logger.error(f"Error loading L3 document: {e}")
+                        messages.error(request, "Error loading selected document.")
+                        return redirect("patient_data:select_document", patient_id=patient_id)
+                    
                     request.session[session_key] = match_data
                     messages.success(
                         request, f"Selected L3 document {document_index + 1}"
                     )
 
-            # Redirect back to patient details to show the selected document
-            return redirect("patient_data:patient_details", patient_id=patient_id)
+            # Redirect to the CDA viewer to show the selected document
+            return redirect("patient_data:patient_cda", session_id=patient_id)
 
         # GET request - show document selection form
         context = {
