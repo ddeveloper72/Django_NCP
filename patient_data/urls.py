@@ -26,42 +26,78 @@ except ImportError:
     debug_cda_index = None
 
 sys.path.append(os.path.dirname(__file__))
-# from debug_session_view import debug_session_view  # Temporarily disabled
 
-from .clean_cda_views import clean_patient_cda_view
-from .clinical_data_debugger import clinical_data_api, clinical_data_debugger
-from .development_views import session_manager_view
-from .enhanced_cda_display import EnhancedCDADisplayView
-from .service_based_enhanced_cda_display import ServiceBasedEnhancedCDADisplayView
-from .simplified_clinical_view import SimplifiedClinicalDataView
-from .view_modules import enhanced_cda_translation_views
-from .view_modules.cda_views import (
-    available_cda_files,
-    cda_translation_api,
-    cda_translation_display,
-    patient_search_with_cda,
-)
-from .view_modules.enhanced_cda_view import (
-    EnhancedCDADocumentView,
-    export_translated_cda,
-    get_section_translation,
-    toggle_translation_view,
-)
+# Import development/debug views - make all conditional for production
+try:
+    from .clean_cda_views import clean_patient_cda_view
+except ImportError:
+    clean_patient_cda_view = None
+
+try:
+    from .clinical_data_debugger import clinical_data_api, clinical_data_debugger
+except ImportError:
+    clinical_data_api = None
+    clinical_data_debugger = None
+
+try:
+    from .development_views import session_manager_view
+except ImportError:
+    session_manager_view = None
+
+try:
+    from .enhanced_cda_display import EnhancedCDADisplayView
+except ImportError:
+    EnhancedCDADisplayView = None
+
+try:
+    from .service_based_enhanced_cda_display import ServiceBasedEnhancedCDADisplayView
+except ImportError:
+    ServiceBasedEnhancedCDADisplayView = None
+
+try:
+    from .simplified_clinical_view import SimplifiedClinicalDataView
+except ImportError:
+    SimplifiedClinicalDataView = None
+
+try:
+    from .view_modules import enhanced_cda_translation_views
+except ImportError:
+    enhanced_cda_translation_views = None
+
+try:
+    from .view_modules.cda_views import (
+        available_cda_files,
+        cda_translation_api,
+        cda_translation_display,
+        patient_search_with_cda,
+    )
+except ImportError:
+    available_cda_files = None
+    cda_translation_api = None
+    cda_translation_display = None
+    patient_search_with_cda = None
+
+try:
+    from .view_modules.enhanced_cda_view import (
+        EnhancedCDADocumentView,
+        export_translated_cda,
+        get_section_translation,
+        toggle_translation_view,
+    )
+except ImportError:
+    EnhancedCDADocumentView = None
+    export_translated_cda = None
+    get_section_translation = None
+    toggle_translation_view = None
 
 app_name = "patient_data"
 
 urlpatterns = [
     # Debug views (only in development)
     *([path("debug/cda-index/", debug_cda_index, name="debug_cda_index")] if debug_cda_index else []),
-    # path("debug/session/", debug_session_view, name="debug_session"),  # Temporarily disabled
-    path("debug/session-manager/", session_manager_view, name="session_manager"),
-    # Clinical Data Debugger
-    path(
-        "debug/clinical/<str:session_id>/",
-        clinical_data_debugger,
-        name="clinical_data_debugger",
-    ),
-    path("api/clinical/<str:session_id>/", clinical_data_api, name="clinical_data_api"),
+    *([path("debug/session-manager/", session_manager_view, name="session_manager")] if session_manager_view else []),
+    *([path("debug/clinical/<str:session_id>/", clinical_data_debugger, name="clinical_data_debugger")] if clinical_data_debugger else []),
+    *([path("api/clinical/<str:session_id>/", clinical_data_api, name="clinical_data_api")] if clinical_data_api else []),
     # Test CDA Documents Management
     path("test-patients/", test_patients_view, name="test_patients"),
     path("refresh-cda-index/", refresh_cda_index_view, name="refresh_cda_index"),
@@ -91,20 +127,12 @@ urlpatterns = [
         main_views.select_document_view,
         name="select_document",
     ),
-    # Clean CDA view with structured data extraction
-    path("clean/<str:patient_id>/", clean_patient_cda_view, name="clean_cda_view"),
+    # Clean CDA view with structured data extraction (development only)
+    *([path("clean/<str:patient_id>/", clean_patient_cda_view, name="clean_cda_view")] if clean_patient_cda_view else []),
     # Enhanced CDA Display with Patient ID (using our working view) - MUST BE BEFORE GENERIC PATTERN
-    path(
-        "cda/enhanced_display/<str:patient_id>/",
-        EnhancedCDADisplayView.as_view(),
-        name="enhanced_cda_display_with_id",
-    ),
+    *([path("cda/enhanced_display/<str:patient_id>/", EnhancedCDADisplayView.as_view(), name="enhanced_cda_display_with_id")] if EnhancedCDADisplayView else []),
     # Service-Based Enhanced CDA Display (NEW) - Uses structured extraction services
-    path(
-        "cda/service_based/<str:patient_id>/",
-        ServiceBasedEnhancedCDADisplayView.as_view(),
-        name="service_based_enhanced_cda_display",
-    ),
+    *([path("cda/service_based/<str:patient_id>/", ServiceBasedEnhancedCDADisplayView.as_view(), name="service_based_enhanced_cda_display")] if ServiceBasedEnhancedCDADisplayView else []),
     # Interoperable Healthcare Data Service (NEWEST) - Complete CDA/FHIR interoperable service
     path(
         "healthcare/<str:patient_id>/",
@@ -116,12 +144,8 @@ urlpatterns = [
         main_views.InteroperableHealthcareView.as_view(),
         name="interoperable_healthcare_data_typed",
     ),
-    # Simplified Clinical Data View - MUST BE BEFORE GENERIC PATTERN
-    path(
-        "cda/simplified/<str:patient_id>/",
-        SimplifiedClinicalDataView.as_view(),
-        name="simplified_clinical_view",
-    ),
+    # Simplified Clinical Data View - MUST BE BEFORE GENERIC PATTERN (development only)
+    *([path("cda/simplified/<str:patient_id>/", SimplifiedClinicalDataView.as_view(), name="simplified_clinical_view")] if SimplifiedClinicalDataView else []),
     # Specific CDA type view (GENERIC PATTERN - KEEP AFTER SPECIFIC PATTERNS)
     path(
         "cda/<str:session_id>/<str:cda_type>/",
@@ -202,27 +226,11 @@ urlpatterns = [
         main_views.enhanced_cda_display,
         name="enhanced_cda_display",
     ),
-    # Enhanced CDA Translation Views
-    path(
-        "cda/enhanced/<str:patient_id>/",
-        EnhancedCDADocumentView.as_view(),
-        name="enhanced_cda_view",
-    ),
-    path(
-        "cda/translate-toggle/<str:patient_id>/",
-        toggle_translation_view,
-        name="toggle_translation_view",
-    ),
-    path(
-        "cda/section/<str:patient_id>/<str:section_id>/",
-        get_section_translation,
-        name="get_section_translation",
-    ),
-    path(
-        "cda/export/<str:patient_id>/",
-        export_translated_cda,
-        name="export_translated_cda",
-    ),
+    # Enhanced CDA Translation Views (development only)
+    *([path("cda/enhanced/<str:patient_id>/", EnhancedCDADocumentView.as_view(), name="enhanced_cda_view")] if EnhancedCDADocumentView else []),
+    *([path("cda/translate-toggle/<str:patient_id>/", toggle_translation_view, name="toggle_translation_view")] if toggle_translation_view else []),
+    *([path("cda/section/<str:patient_id>/<str:section_id>/", get_section_translation, name="get_section_translation")] if get_section_translation else []),
+    *([path("cda/export/<str:patient_id>/", export_translated_cda, name="export_translated_cda")] if export_translated_cda else []),
     path(
         "cda/translate-section/",
         enhanced_cda_translation_views.translate_cda_section_ajax,
@@ -238,11 +246,7 @@ urlpatterns = [
         enhanced_cda_translation_views.translation_api_status,
         name="translation_api_status",
     ),
-    path(
-        "translation/batch/",
-        enhanced_cda_translation_views.batch_translate_documents,
-        name="batch_translate_documents",
-    ),
+    *([path("translation/batch/", enhanced_cda_translation_views.batch_translate_documents, name="batch_translate_documents")] if enhanced_cda_translation_views else []),
     # Legacy search interface (can be removed if not needed)
     path("search/", main_views.patient_search_view, name="patient_search"),
     path(
@@ -250,31 +254,15 @@ urlpatterns = [
         main_views.patient_search_results,
         name="patient_search_results",
     ),
-    # New CDA Translation Views (Country-based)
-    path(
-        "cda/country/<str:country_code>/",
-        cda_translation_display,
-        name="cda_country_display",
-    ),
-    path(
-        "cda/country/<str:country_code>/<str:patient_id>/",
-        cda_translation_display,
-        name="cda_country_patient_display",
-    ),
-    # CDA Translation API Endpoints
-    path(
-        "api/cda/country/<str:country_code>/",
-        cda_translation_api,
-        name="cda_country_api",
-    ),
-    path(
-        "api/cda/country/<str:country_code>/<str:patient_id>/",
-        cda_translation_api,
-        name="cda_country_patient_api",
-    ),
-    path("api/cda/available/", available_cda_files, name="cda_available"),
-    # Enhanced Patient Search with CDA Links
-    path("search/enhanced/", patient_search_with_cda, name="patient_search_enhanced"),
+    # New CDA Translation Views (Country-based) - development only
+    *([path("cda/country/<str:country_code>/", cda_translation_display, name="cda_country_display")] if cda_translation_display else []),
+    *([path("cda/country/<str:country_code>/<str:patient_id>/", cda_translation_display, name="cda_country_patient_display")] if cda_translation_display else []),
+    # CDA Translation API Endpoints - development only
+    *([path("api/cda/country/<str:country_code>/", cda_translation_api, name="cda_country_api")] if cda_translation_api else []),
+    *([path("api/cda/country/<str:country_code>/<str:patient_id>/", cda_translation_api, name="cda_country_patient_api")] if cda_translation_api else []),
+    *([path("api/cda/available/", available_cda_files, name="cda_available")] if available_cda_files else []),
+    # Enhanced Patient Search with CDA Links - development only
+    *([path("search/enhanced/", patient_search_with_cda, name="patient_search_enhanced")] if patient_search_with_cda else []),
     # CDA Document Upload
     path("upload-cda/", main_views.upload_cda_document, name="upload_cda_document"),
     path(
