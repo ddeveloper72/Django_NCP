@@ -13,6 +13,10 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.AlterUniqueTogether(
+            name="documenttranslation",
+            unique_together=None,
+        ),
         migrations.RemoveField(
             model_name="documenttranslation",
             name="document",
@@ -24,10 +28,6 @@ class Migration(migrations.Migration):
         migrations.RemoveField(
             model_name="clinicaldocumentrequest",
             name="requesting_user",
-        ),
-        migrations.AlterUniqueTogether(
-            name="documenttranslation",
-            unique_together=None,
         ),
         migrations.CreateModel(
             name="ClinicalSectionConfig",
