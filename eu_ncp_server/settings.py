@@ -125,7 +125,11 @@ elif not DEVELOPMENT and os.getenv("AZURE_SQL_SERVER"):
     # Azure SQL Database direct configuration
     # Try to find best available ODBC driver
     import pyodbc
+    import sys
+    
     available_drivers = pyodbc.drivers()
+    print(f"🔍 Detecting ODBC drivers on {sys.platform}...")
+    print(f"Available drivers: {available_drivers}")
     
     # Prefer newer drivers, fallback to older ones
     # FreeTDS is used on Linux (Heroku), Microsoft drivers on Windows
@@ -143,9 +147,15 @@ elif not DEVELOPMENT and os.getenv("AZURE_SQL_SERVER"):
     for driver in driver_priority:
         if driver in available_drivers:
             selected_driver = driver
+            print(f"✅ Selected ODBC driver: {selected_driver}")
             break
     
     if not selected_driver:
+        import os as os_mod
+        print(f"❌ ODBC Environment:")
+        print(f"  ODBCSYSINI: {os_mod.environ.get('ODBCSYSINI', 'not set')}")
+        print(f"  ODBCINI: {os_mod.environ.get('ODBCINI', 'not set')}")
+        print(f"  ODBCINSTINI: {os_mod.environ.get('ODBCINSTINI', 'not set')}")
         raise RuntimeError(f"No SQL Server ODBC driver found. Available: {available_drivers}")
     
     # Build connection options based on driver
