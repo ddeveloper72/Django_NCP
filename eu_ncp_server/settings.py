@@ -332,20 +332,10 @@ CORS_ALLOWED_ORIGINS = [
 CORS_ALLOW_ALL_ORIGINS = DEBUG  # Only in development
 
 # Logging configuration
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "formatters": {
-        "verbose": {
-            "format": "{levelname} {asctime} {module} {process:d} {thread:d} {message}",
-            "style": "{",
-        },
-        "simple": {
-            "format": "{levelname} {message}",
-            "style": "{",
-        },
-    },
-    "handlers": {
+# Use console logging on Heroku (ephemeral filesystem), file logging in development
+if DEVELOPMENT:
+    # Development: use file handlers
+    log_handlers = {
         "file": {
             "level": "INFO",
             "class": "logging.FileHandler",
@@ -363,45 +353,69 @@ LOGGING = {
             "class": "logging.StreamHandler",
             "formatter": "simple",
         },
+    }
+else:
+    # Production/Heroku: console only (logs captured by platform)
+    log_handlers = {
+        "console": {
+            "level": "INFO",
+            "class": "logging.StreamHandler",
+            "formatter": "verbose",
+        },
+    }
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "{levelname} {asctime} {module} {process:d} {thread:d} {message}",
+            "style": "{",
+        },
+        "simple": {
+            "format": "{levelname} {message}",
+            "style": "{",
+        },
     },
+    "handlers": log_handlers,
     "root": {
-        "handlers": ["console", "file"],
+        "handlers": ["console"] if not DEVELOPMENT else ["console", "file"],
         "level": os.getenv("LOG_LEVEL", "INFO"),
     },
     "loggers": {
         "audit": {
-            "handlers": ["audit_file"],
+            "handlers": ["console"] if not DEVELOPMENT else ["audit_file"],
             "level": "INFO",
             "propagate": False,
         },
         "ehealth": {
-            "handlers": ["console", "file"],
+            "handlers": ["console"] if not DEVELOPMENT else ["console", "file"],
             "level": "INFO",
             "propagate": False,
         },
         "patient_data.session": {
-            "handlers": ["console", "file"],
+            "handlers": ["console"] if not DEVELOPMENT else ["console", "file"],
             "level": "INFO",
             "propagate": False,
         },
         "patient_data.security": {
-            "handlers": ["console", "file"],
+            "handlers": ["console"] if not DEVELOPMENT else ["console", "file"],
             "level": "WARNING",
             "propagate": False,
         },
         # CRITICAL: GDPR Session Isolation Audit Logging
         "patient_data.middleware.session_isolation": {
-            "handlers": ["console", "file", "audit_file"],
+            "handlers": ["console"] if not DEVELOPMENT else ["console", "file", "audit_file"],
             "level": "INFO",
             "propagate": False,
         },
         "django.template": {
-            "handlers": ["console", "file"],
+            "handlers": ["console"] if not DEVELOPMENT else ["console", "file"],
             "level": "DEBUG",
             "propagate": False,
         },
         "jinja2": {
-            "handlers": ["console", "file"],
+            "handlers": ["console"] if not DEVELOPMENT else ["console", "file"],
             "level": "DEBUG",
             "propagate": False,
         },
