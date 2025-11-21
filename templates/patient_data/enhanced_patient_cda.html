@@ -352,10 +352,12 @@
                     <!-- Original Document Tab Content - For L1 documents -->
                     <div class="tab-pane fade" id="original-doc-content" role="tabpanel" aria-labelledby="original-doc-tab">
                         <div class="p-4">
-                            <div class="alert alert-primary">
-                                <i class="fa-solid fa-info-circle me-2"></i>
-                                <strong>What is an L1 Document?</strong>
-                                <p class="mb-0">This L1 CDA document contains 1 Original Clinical Document (OrCD). These are the original clinical documents from the source healthcare system in their native format.</p>
+                            <div class="alert alert-primary d-flex align-items-start">
+                                <i class="fa-solid fa-info-circle alert-icon me-3 mt-1"></i>
+                                <div class="flex-grow-1">
+                                    <h5 class="alert-heading mb-2">What is an L1 Document?</h5>
+                                    <p class="mb-0">This L1 CDA document contains 1 Original Clinical Document (OrCD). These are the original clinical documents from the source healthcare system in their native format.</p>
+                                </div>
                             </div>
                             
                             {% if session_id and has_l1_cda %}
