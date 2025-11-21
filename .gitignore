@@ -45,6 +45,8 @@ venv.bak/
 .env.test
 .env.production
 .env.azure
+.env.heroku
+.env.staging
 
 # IDE
 .vscode/

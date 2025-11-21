@@ -63,6 +63,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -106,12 +107,42 @@ WSGI_APPLICATION = "eu_ncp_server.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+# Configure database based on environment
+if os.getenv("DATABASE_URL"):
+    # Heroku PostgreSQL or Azure SQL via DATABASE_URL
+    import dj_database_url
+    DATABASES = {
+        "default": dj_database_url.config(
+            default=os.getenv("DATABASE_URL"),
+            conn_max_age=600,
+            conn_health_checks=True,
+            ssl_require=True,
+        )
     }
-}
+elif os.getenv("AZURE_SQL_SERVER"):
+    # Azure SQL Database direct configuration
+    DATABASES = {
+        "default": {
+            "ENGINE": "mssql",
+            "NAME": os.getenv("AZURE_SQL_DATABASE", "eHealth"),
+            "USER": os.getenv("AZURE_SQL_USER"),
+            "PASSWORD": os.getenv("AZURE_SQL_PASSWORD"),
+            "HOST": os.getenv("AZURE_SQL_SERVER"),
+            "PORT": os.getenv("AZURE_SQL_PORT", "1433"),
+            "OPTIONS": {
+                "driver": "ODBC Driver 18 for SQL Server",
+                "extra_params": "Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;",
+            },
+        }
+    }
+else:
+    # Local SQLite for development
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
 
 
 # Password validation
@@ -169,6 +200,9 @@ COMPRESS_ENABLED = not DEBUG
 # Additional compression settings to avoid cache issues
 COMPRESS_OFFLINE = False
 COMPRESS_CSS_HASHING_METHOD = "mtime"
+
+# WhiteNoise configuration for production static files
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # Media files
 MEDIA_URL = "media/"
