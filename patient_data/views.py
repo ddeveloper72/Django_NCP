@@ -2334,7 +2334,7 @@ def direct_patient_view(request, patient_id):
             "l3_cda_content": getattr(match, "l3_cda_content", None),
             "l1_cda_path": getattr(match, "l1_cda_path", None),
             "l3_cda_path": getattr(match, "l3_cda_path", None),
-            "preferred_cda_type": "L3",
+            "preferred_cda_type": getattr(match, "preferred_cda_type", "L3"),  # Use actual detected type
             "has_l1": getattr(match, "has_l1", False),
             "has_l3": getattr(match, "has_l3", True),
             # Enhanced multiple document support
@@ -2505,7 +2505,7 @@ def patient_details_view(request, patient_id):
                         "file_path": search_result.file_path,
                         "confidence_score": search_result.confidence_score,
                         "country_code": target_patient["country_code"],
-                        "preferred_cda_type": "L3",
+                        "preferred_cda_type": search_result.preferred_cda_type,  # Use actual detected type instead of hardcoded L3
                         "has_l1": search_result.has_l1,
                         "has_l3": search_result.has_l3,
                     }
