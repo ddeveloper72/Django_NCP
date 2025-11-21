@@ -21,7 +21,12 @@ from .models import PatientData
 from .services.cda_parser_service import CDAParserService
 from .services.enhanced_cda_xml_parser import EnhancedCDAXMLParser
 from .services.ps_table_renderer import PSTableRenderer
-from .services.structured_cda_extractor import StructuredCDAExtractor
+
+# Optional import for structured_cda_extractor (may not exist in all environments)
+try:
+    from .services.structured_cda_extractor import StructuredCDAExtractor
+except ImportError:
+    StructuredCDAExtractor = None
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +38,7 @@ class ClinicalDataExtractor:
         self.enhanced_parser = EnhancedCDAXMLParser()
         self.ps_renderer = PSTableRenderer()
         self.cda_parser = CDAParserService()
-        self.structured_extractor = StructuredCDAExtractor()
+        self.structured_extractor = StructuredCDAExtractor() if StructuredCDAExtractor else None
 
     def extract_comprehensive_clinical_data(
         self, cda_content: str, session_data: dict = None
@@ -133,23 +138,28 @@ class ClinicalDataExtractor:
                 }
 
             # Method 4: Structured CDA Extractor (NEW - captures rich hierarchical data)
-            try:
-                structured_data = self.structured_extractor.extract_structured_entries(
-                    cda_content
-                )
-                extraction_results["extraction_methods"].append(
-                    "structured_cda_extractor"
-                )
-                extraction_results["clinical_sections"]["structured_extractor"] = (
-                    self._analyze_structured_extractor_data(structured_data)
-                )
-                logger.info(
-                    "Successfully extracted structured data using Structured CDA Extractor"
-                )
-            except Exception as e:
-                logger.error(f"Structured CDA Extractor failed: {e}")
+            if self.structured_extractor:
+                try:
+                    structured_data = self.structured_extractor.extract_structured_entries(
+                        cda_content
+                    )
+                    extraction_results["extraction_methods"].append(
+                        "structured_cda_extractor"
+                    )
+                    extraction_results["clinical_sections"]["structured_extractor"] = (
+                        self._analyze_structured_extractor_data(structured_data)
+                    )
+                    logger.info(
+                        "Successfully extracted structured data using Structured CDA Extractor"
+                    )
+                except Exception as e:
+                    logger.error(f"Structured CDA Extractor failed: {e}")
+                    extraction_results["clinical_sections"]["structured_extractor"] = {
+                        "error": str(e)
+                    }
+            else:
                 extraction_results["clinical_sections"]["structured_extractor"] = {
-                    "error": str(e)
+                    "error": "StructuredCDAExtractor not available"
                 }
 
             # Analyze coding systems and terminologies
