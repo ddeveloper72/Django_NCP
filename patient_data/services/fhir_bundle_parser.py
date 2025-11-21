@@ -268,6 +268,10 @@ class FHIRBundleParser:
                 }
             }
             
+            # Add clinical arrays to top level for direct access
+            # This makes them compatible with templates expecting flat structure
+            enhanced_sections.update(clinical_arrays)
+            
             logger.info(f"FHIR Bundle parsed successfully: {len(clinical_sections)} sections, {enhanced_sections['bundle_metadata']['resource_count']} resources")
             logger.info(f"Extended data extracted: admin={bool(administrative_data)}, contact={bool(contact_data)}, healthcare={bool(healthcare_data)}")
             
@@ -2399,7 +2403,13 @@ class FHIRBundleParser:
         return any(keyword in observation_text for keyword in social_keywords)
     
     def _is_laboratory_result(self, observation: Dict[str, Any]) -> bool:
-        """Check if observation is a laboratory result"""
+        """
+        Check if observation is a laboratory result or diagnostic imaging result
+        
+        Includes both laboratory tests (blood work, urinalysis, etc.) and 
+        diagnostic imaging (MRI, CT, X-ray, etc.) as both are typically 
+        displayed in the Laboratory Results section of clinical documents.
+        """
         # Check category first (most reliable)
         category = observation.get('category', [])
         
@@ -2407,7 +2417,7 @@ class FHIRBundleParser:
         if isinstance(category, str):
             # Match string category values (case-insensitive)
             category_lower = category.lower()
-            if 'lab' in category_lower or category_lower == 'laboratory':
+            if 'lab' in category_lower or category_lower in ['laboratory', 'imaging']:
                 return True
             category = []  # Fallback to empty array for further processing
         
@@ -2418,13 +2428,15 @@ class FHIRBundleParser:
             
             coding = cat.get('coding', [])
             for code in coding:
-                if code.get('code') in ['laboratory', 'lab']:
+                # Include both laboratory and imaging categories
+                if code.get('code') in ['laboratory', 'lab', 'imaging']:
                     return True
         
-        # Common lab result LOINC patterns
+        # Common lab result and imaging LOINC patterns
         lab_keywords = [
             'blood', 'serum', 'plasma', 'urine', 'hemoglobin', 'glucose',
-            'cholesterol', 'creatinine', 'panel', 'group', 'test', 'lab'
+            'cholesterol', 'creatinine', 'panel', 'group', 'test', 'lab',
+            'mri', 'ct', 'x-ray', 'ultrasound', 'imaging', 'scan', 'radiolog'
         ]
         
         observation_text = str(observation.get('code', {})).lower()
