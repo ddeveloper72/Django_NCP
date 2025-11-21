@@ -232,6 +232,7 @@
                                 <i class="fa-solid fa-arrow-left"></i> Back to Patient Data
                             </a>
                         </div>
+                        {% if debug %}
                         <div>
                             <a href="{% url 'patient_data:refresh_cda_index' %}" class="btn btn-outline-primary">
                                 <i class="fa-solid fa-sync"></i> Refresh Index
@@ -240,6 +241,7 @@
                                 <i class="fa-solid fa-bug"></i> Debug Index
                             </a>
                         </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
