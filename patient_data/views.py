@@ -2954,6 +2954,32 @@ def patient_details_view(request, patient_id):
                 else:
                     logger.info("[ENHANCED_MEDICATIONS] No enhanced medications found in context or session")
             
+            # ENHANCED PROBLEMS: Check if enhanced problems already in context (from CDA processor), 
+            # otherwise check session for enhanced problems and override if available
+            if 'problems' in context and len(context['problems']) > 0:
+                # Check if first problem has enhanced data structure (from CDA processor)
+                first_problem = context['problems'][0]
+                if 'data' in first_problem and isinstance(first_problem['data'], dict):
+                    logger.info(f"[ENHANCED_PROBLEMS] Using {len(context['problems'])} enhanced problems already in context from CDA processor")
+                    logger.info(f"[ENHANCED_PROBLEMS] First problem: {first_problem.get('data', {}).get('problem_name', {}).get('value', 'Unknown')}")
+                else:
+                    # Fallback to session-based enhanced problems
+                    enhanced_problems = request.session.get('enhanced_problems')
+                    if enhanced_problems:
+                        logger.info(f"[ENHANCED_PROBLEMS] Found {len(enhanced_problems)} enhanced problems in session, overriding clinical arrays")
+                        context["problems"] = enhanced_problems
+                        logger.info(f"[ENHANCED_PROBLEMS] First problem: {enhanced_problems[0].get('problem_description', enhanced_problems[0].get('name', 'Unknown'))} - Code: {enhanced_problems[0].get('problem_code', 'N/A')} - Onset: {enhanced_problems[0].get('onset_date', 'N/A')}")
+                    else:
+                        logger.info("[ENHANCED_PROBLEMS] No enhanced problems found in session, using clinical arrays")
+            else:
+                # No problems in context, check session
+                enhanced_problems = request.session.get('enhanced_problems')
+                if enhanced_problems:
+                    logger.info(f"[ENHANCED_PROBLEMS] Found {len(enhanced_problems)} enhanced problems in session")
+                    context["problems"] = enhanced_problems
+                else:
+                    logger.info("[ENHANCED_PROBLEMS] No enhanced problems found in context or session")
+            
             # PHASE 3B: Add administrative and healthcare data to context for Healthcare Team & Contacts tab
             context.update({
                 "administrative_data": administrative_data,
