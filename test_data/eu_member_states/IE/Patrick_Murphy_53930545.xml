@@ -1,908 +1,990 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<ClinicalDocument xmlns="urn:hl7-org:v3" xmlns:ext="urn:hl7-EE-DL-Ext:v1"
-    xmlns:mif="urn:hl7-org:v3/mif" xmlns:pharm="urn:hl7-org:pharm"
-    xmlns:sch="http://www.ascc.net/xml/schematron"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    <realmCode code="IE" />
-    <typeId extension="POCD_HD000040" root="2.16.840.1.113883.1.3" />
-    <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.1.3" />
-    <templateId root="1.3.6.1.4.1.19376.1.5.3.1.1.1" />
-    <id extension="20250522.1" root="2.16.17.710.813.1000.990.1.1" />
-    <code code="60591-5" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC"
-        displayName="Patient Summary" />
-    <title>Patient Summary</title>
-    <effectiveTime value="20240125173045+0100" />
-    <confidentialityCode code="R" codeSystem="2.16.840.1.113883.5.25"
-        codeSystemName="Confidentiality" displayName="restricted" />
-    <languageCode code="en-IE" />
-    <recordTarget>
-        <patientRole>
-            <id extension="539305455995368085" root="1.2.372.980010.1.2" />
-            <addr>
-                <streetAddressLine>New Vista, Prosperous Road</streetAddressLine>
-                <city>Clane</city>
-                <postalCode>W91 XP83</postalCode>
-                <state>Co Kildare</state>
-                <country>IE</country>
-            </addr>
-            <telecom use="HP" value="tel:+353-87-34376462" />
-            <patient>
-                <name>
-                    <family>Murphy</family>
-                    <given>Patrick</given>
-                </name>
-                <administrativeGenderCode code="M" codeSystem="2.16.840.1.113883.5.1"
-                    codeSystemName="AdministrativeGender" codeSystemVersion="913-20091020"
-                    displayName="Male" />
-                <birthTime value="19770807" />
-                <languageCommunication>
-                    <templateId root="1.3.6.1.4.1.19376.1.5.3.1.2.1" />
-                    <languageCode code="en-IE" />
-                </languageCommunication>
-            </patient>
-        </patientRole>
-    </recordTarget>
-    <author>
-        <time value="20231020163045+0100" />
-        <assignedAuthor>
-            <id extension="author.gov.ie" root="2.16.17.710.813.1000.990.1.3" />
-            <addr>
-                <streetAddressLine>Barrack St, Marshes Lower</streetAddressLine>
-                <city>Dundalk</city>
-                <postalCode nullFlavor="UNK" />
-                <state>Co Louth</state>
-                <country>IE</country>
-            </addr>
-            <telecom use="WP" value="tel:0" />
-            <assignedPerson>
-                <name>
-                    <family>Molloney</family>
-                    <given>David</given>
-                    <prefix nullFlavor="NA" />
-                    <suffix nullFlavor="NA" />
-                </name>
-            </assignedPerson>
-            <representedOrganization classCode="ORG" determinerCode="INSTANCE">
-                <id extension="mhec.gov.ie"
-                    root="2.16.17.710.813.1000.990.1.2.1" />
-                <name>Health Service Executive</name>
-                <telecom use="WP" value="tel:0" />
-                <addr>
-                    <streetAddressLine>Barrack St, Marshes Lower</streetAddressLine>
-                    <city>Dundalk</city>
-                    <postalCode nullFlavor="UNK" />
-                    <country>IE</country>
-                </addr>
-            </representedOrganization>
-        </assignedAuthor>
-    </author>
-    <custodian>
-        <assignedCustodian>
-            <representedCustodianOrganization classCode="ORG" determinerCode="INSTANCE">
-                <id extension="mhec.gov.ie" root="2.16.17.710.813.1000.990.1.5" />
-                <name>Health Service Executive</name>
-                <telecom use="WP" value="tel:0" />
-                <addr>
-                    <streetAddressLine>Dr. Steeven's Hospital, Steeven's Lane</streetAddressLine>
-                    <city>Dublin 8</city>
-                    <postalCode>D08 W2A8</postalCode>
-                    <state nullFlavor="UNK" />
-                    <country>IE</country>
-                </addr>
-            </representedCustodianOrganization>
-        </assignedCustodian>
-    </custodian>
-    <legalAuthenticator>
-        <time value="20231020133045+0100" />
-        <signatureCode code="S" />
+<?xml version='1.0' encoding='UTF-8'?>
+<ClinicalDocument xmlns="urn:hl7-org:v3" xmlns:ext="urn:hl7-EE-DL-Ext:v1" xmlns:mif="urn:hl7-org:v3/mif" xmlns:pharm="urn:hl7-org:pharm" xmlns:sch="http://www.ascc.net/xml/schematron" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <realmCode code="IE"/>
+  <typeId extension="POCD_HD000040" root="2.16.840.1.113883.1.3"/>
+  <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.1.3"/>
+  <templateId root="1.3.6.1.4.1.19376.1.5.3.1.1.1"/>
+  <id extension="20250522.1" root="2.16.17.710.813.1000.990.1.1"/>
+  <code code="60591-5" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Patient Summary"/>
+  <title>Patient Summary</title>
+  <effectiveTime value="20240125173045+0100"/>
+  <confidentialityCode code="R" codeSystem="2.16.840.1.113883.5.25" codeSystemName="Confidentiality" displayName="restricted"/>
+  <languageCode code="en-IE"/>
+  <recordTarget>
+    <patientRole>
+      <id extension="539305455995368085" root="1.2.372.980010.1.2"/>
+      <addr>
+        <streetAddressLine>New Vista, Prosperous Road</streetAddressLine>
+        <city>Clane</city>
+        <postalCode>W91 XP83</postalCode>
+        <state>Co Kildare</state>
+        <country>IE</country>
+      </addr>
+      <telecom use="HP" value="tel:+353-87-34376462"/>
+      <patient>
+        <name>
+          <family>Murphy</family>
+          <given>Patrick</given>
+        </name>
+        <administrativeGenderCode code="M" codeSystem="2.16.840.1.113883.5.1" codeSystemName="AdministrativeGender" codeSystemVersion="913-20091020" displayName="Male"/>
+        <birthTime value="19770807"/>
+        <languageCommunication>
+          <templateId root="1.3.6.1.4.1.19376.1.5.3.1.2.1"/>
+          <languageCode code="en-IE"/>
+        </languageCommunication>
+      </patient>
+    </patientRole>
+  </recordTarget>
+  <author>
+    <time value="20231020163045+0100"/>
+    <assignedAuthor>
+      <id extension="author.gov.ie" root="2.16.17.710.813.1000.990.1.3"/>
+      <addr>
+        <streetAddressLine>Barrack St, Marshes Lower</streetAddressLine>
+        <city>Dundalk</city>
+        <postalCode nullFlavor="UNK"/>
+        <state>Co Louth</state>
+        <country>IE</country>
+      </addr>
+      <telecom use="WP" value="tel:0"/>
+      <assignedPerson>
+        <name>
+          <family>Molloney</family>
+          <given>David</given>
+          <prefix nullFlavor="NA"/>
+          <suffix nullFlavor="NA"/>
+        </name>
+      </assignedPerson>
+      <representedOrganization classCode="ORG" determinerCode="INSTANCE">
+        <id extension="mhec.gov.ie" root="2.16.17.710.813.1000.990.1.2.1"/>
+        <name>Health Service Executive</name>
+        <telecom use="WP" value="tel:0"/>
+        <addr>
+          <streetAddressLine>Barrack St, Marshes Lower</streetAddressLine>
+          <city>Dundalk</city>
+          <postalCode nullFlavor="UNK"/>
+          <country>IE</country>
+        </addr>
+      </representedOrganization>
+    </assignedAuthor>
+  </author>
+  <custodian>
+    <assignedCustodian>
+      <representedCustodianOrganization classCode="ORG" determinerCode="INSTANCE">
+        <id extension="mhec.gov.ie" root="2.16.17.710.813.1000.990.1.5"/>
+        <name>Health Service Executive</name>
+        <telecom use="WP" value="tel:0"/>
+        <addr>
+          <streetAddressLine>Dr. Steeven's Hospital, Steeven's Lane</streetAddressLine>
+          <city>Dublin 8</city>
+          <postalCode>D08 W2A8</postalCode>
+          <state nullFlavor="UNK"/>
+          <country>IE</country>
+        </addr>
+      </representedCustodianOrganization>
+    </assignedCustodian>
+  </custodian>
+  <legalAuthenticator>
+    <time value="20231020133045+0100"/>
+    <signatureCode code="S"/>
+    <assignedEntity>
+      <id extension="legal.authenticator.gov.ie" root="2.16.17.710.813.1000.990.1.4"/>
+      <addr>
+        <streetAddressLine>Block 1, Miesian Plaza, 50 - 58 Lower Baggot Street</streetAddressLine>
+        <city>Dublin 2</city>
+        <postalCode>D02 XW14</postalCode>
+        <state>Dublin</state>
+        <country>IE</country>
+      </addr>
+      <telecom use="WP" value="tel:0"/>
+      <assignedPerson>
+        <name>
+          <family>MacNeill</family>
+          <given>Minister Carroll</given>
+        </name>
+      </assignedPerson>
+      <representedOrganization classCode="ORG" determinerCode="INSTANCE">
+        <id extension="mhec.gov.ie" root="2.16.17.710.813.1000.990.1.3.1"/>
+        <name>Department of Health</name>
+        <telecom use="WP" value="tel:0"/>
+        <addr>
+          <streetAddressLine>Block 1, Miesian Plaza, 50 - 58 Lower Baggot Street</streetAddressLine>
+          <city>Dublin 2</city>
+          <postalCode>D02 XW14</postalCode>
+          <state>Dublin</state>
+          <country>IE</country>
+        </addr>
+      </representedOrganization>
+    </assignedEntity>
+  </legalAuthenticator>
+  <!-- Guardians -->
+  <participant typeCode="IND">
+    <templateId root="1.3.6.1.4.1.19376.1.5.3.1.2.4"/>
+    <time value="20070213"/>
+    <associatedEntity classCode="NOK">
+      <addr>
+        <streetAddressLine>New Vista, Prosperous Road</streetAddressLine>
+        <city>Clane</city>
+        <postalCode>W91 XP83</postalCode>
+        <state>Co Kildare</state>
+        <country>IE</country>
+      </addr>
+      <telecom use="HP" value="tel:+353-87-9875465"/>
+      <associatedPerson>
+        <name>
+          <family>Murphy</family>
+          <given>Mary</given>
+        </name>
+      </associatedPerson>
+    </associatedEntity>
+  </participant>
+  <documentationOf typeCode="DOC">
+    <serviceEvent classCode="PCPR" moodCode="EVN">
+      <effectiveTime>
+        <low nullFlavor="UNK"/>
+        <high value="20200121"/>
+      </effectiveTime>
+      <performer typeCode="PRF">
+        <functionCode code="221" codeSystem="2.16.840.1.113883.2.9.6.2.7" codeSystemName="ISCO" displayName="Medical doctors"/>
         <assignedEntity>
-            <id extension="legal.authenticator.gov.ie" root="2.16.17.710.813.1000.990.1.4" />
+          <id extension="legal.authenticator.gov.ie" root="2.16.17.710.813.1000.990.1.4"/>
+          <addr>
+            <streetAddressLine>Main Street</streetAddressLine>
+            <city>Clane</city>
+            <postalCode>W91 PY74</postalCode>
+            <state>Co Kildare</state>
+            <country>IE</country>
+          </addr>
+          <telecom use="WP" value="tel:045-1234567"/>
+          <assignedPerson>
+            <name>
+              <family>O'Sullivan</family>
+              <given>Sean</given>
+            </name>
+          </assignedPerson>
+          <representedOrganization classCode="ORG" determinerCode="INSTANCE">
+            <id extension="mhec.gov.ie" root="2.16.17.710.813.1000.990.1.4.1"/>
+            <name>The Woods Surgery</name>
+            <telecom use="WP" value="tel:045-1234567"/>
             <addr>
-                <streetAddressLine>Block 1, Miesian Plaza, 50 - 58 Lower Baggot Street</streetAddressLine>
-                <city>Dublin 2</city>
-                <postalCode>D02 XW14</postalCode>
-                <state>Dublin</state>
-                <country>IE</country>
+              <streetAddressLine>Main Street</streetAddressLine>
+              <city>Clane</city>
+              <postalCode>W91 PY74</postalCode>
+              <state>Co Kildare</state>
+              <country>IE</country>
             </addr>
-            <telecom use="WP" value="tel:0" />
-            <assignedPerson>
-                <name>
-                    <family>MacNeill</family>
-                    <given>Minister Carroll</given>
-                </name>
-            </assignedPerson>
-            <representedOrganization classCode="ORG" determinerCode="INSTANCE">
-                <id extension="mhec.gov.ie" root="2.16.17.710.813.1000.990.1.3.1" />
-                <name>Department of Health</name>
-                <telecom use="WP" value="tel:0" />
-                <addr>
-                    <streetAddressLine>Block 1, Miesian Plaza, 50 - 58 Lower Baggot Street</streetAddressLine>
-                    <city>Dublin 2</city>
-                    <postalCode>D02 XW14</postalCode>
-                    <state>Dublin</state>
-                    <country>IE</country>
-                </addr>
-            </representedOrganization>
+          </representedOrganization>
         </assignedEntity>
-    </legalAuthenticator>
-    <!-- Guardians -->
-    <participant typeCode="IND">
-        <templateId root='1.3.6.1.4.1.19376.1.5.3.1.2.4' />
-        <time value='20070213' />
-        <associatedEntity classCode="NOK">
-            <addr>
-                <streetAddressLine>New Vista, Prosperous Road</streetAddressLine>
-                <city>Clane</city>
-                <postalCode>W91 XP83</postalCode>
-                <state>Co Kildare</state>
-                <country>IE</country>
-            </addr>
-            <telecom use="HP" value="tel:+353-87-9875465" />
-            <associatedPerson>
-                <name>
-                    <family>Murphy</family>
-                    <given>Mary</given>
-                </name>
-            </associatedPerson>
-        </associatedEntity>
-    </participant>
-    <documentationOf typeCode="DOC">
-        <serviceEvent classCode="PCPR" moodCode="EVN">
-            <effectiveTime>
-                <low nullFlavor="UNK" />
-                <high value="20200121" />
-            </effectiveTime>
-            <performer typeCode="PRF">
-                <functionCode code="221" codeSystem="2.16.840.1.113883.2.9.6.2.7"
-                    codeSystemName="ISCO" displayName="Medical doctors" />
-                <assignedEntity>
-                    <id extension="legal.authenticator.gov.ie" root="2.16.17.710.813.1000.990.1.4" />
-                    <addr>
-                        <streetAddressLine>Main Street</streetAddressLine>
-                        <city>Clane</city>
-                        <postalCode>W91 PY74</postalCode>
-                        <state>Co Kildare</state>
-                        <country>IE</country>
-                    </addr>
-                    <telecom use="WP" value="tel:045-1234567" />
-                    <assignedPerson>
-                        <name>
-                            <family>O'Sullivan</family>
-                            <given>Sean</given>
-                        </name>
-                    </assignedPerson>
-                    <representedOrganization classCode="ORG" determinerCode="INSTANCE">
-                        <id extension="mhec.gov.ie" root="2.16.17.710.813.1000.990.1.4.1" />
-                        <name>The Woods Surgery</name>
-                        <telecom use="WP" value="tel:045-1234567" />
-                        <addr>
-                            <streetAddressLine>Main Street</streetAddressLine>
-                            <city>Clane</city>
-                            <postalCode>W91 PY74</postalCode>
-                            <state>Co Kildare</state>
-                            <country>IE</country>
-                        </addr>
-                    </representedOrganization>
-                </assignedEntity>
-            </performer>
-        </serviceEvent>
-    </documentationOf>
-    <relatedDocument typeCode="XFRM">
-        <parentDocument>
-            <id extension="539305455995368085.ORIGINAL" root="2.16.17.710.813.1000.990.1.1" />
-        </parentDocument>
-    </relatedDocument>
-    <component>
-        <structuredBody>
-            <!-- History of medication use -->
-            <component>
-                <section>
-                    <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.2.3" />
-                    <templateId root="2.16.840.1.113883.10.20.1.8" />
-                    <id extension="medication" root="2.16.17.710.813.1000.990.1.8" />
-                    <code code="10160-0" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC"
-                        displayName="History of medication use" />
-                    <title>History of medication use</title>
-                    <text>
-                        <paragraph ID="medication-1">
+      </performer>
+    </serviceEvent>
+  </documentationOf>
+  <relatedDocument typeCode="XFRM">
+    <parentDocument>
+      <id extension="539305455995368085.ORIGINAL" root="2.16.17.710.813.1000.990.1.1"/>
+    </parentDocument>
+  </relatedDocument>
+  <component>
+    <structuredBody>
+      <!-- History of medication use -->
+      <component>
+        <section>
+          <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.2.3"/>
+          <templateId root="2.16.840.1.113883.10.20.1.8"/>
+          <id extension="medication" root="2.16.17.710.813.1000.990.1.8"/>
+          <code code="10160-0" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="History of medication use"/>
+          <title>History of medication use</title>
+          <text>
+            <paragraph ID="medication-1">
                             Lantus Solostar: Insulin Glargine 100mg/ml, Pre-filled pen : 1 unit, 1
                             per day : 2024-01-01 to 2025-01-01 : Type 2 diabetes mellitus
                             (injection)
                         </paragraph>
-                        <table border="1" width="100%">
-                            <thead>
-                                <tr>
-                                    <th>Name (Class)</th>
-                                    <th>Active Ingredient [Strength]</th>
-                                    <th>Dose Form [Package]</th>
-                                    <th>Units per Intake</th>
-                                    <th>Dosage Frequency</th>
-                                    <th>Route of Administration</th>
-                                    <th>Duration of Treatment</th>
-                                    <th>Medication Reason</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr ID="medication.1">
-                                    <td valign="top" ID="medication.1.name">Lantus Solostar</td>
-                                    <td valign="top">
-                                        <content ID="medication.1.ingredient" language="en-GB">Insulin
-                                        Glargine</content> 100mg/ml <br />
+            <table border="1" width="100%">
+              <thead>
+                <tr>
+                  <th>Name (Class)</th>
+                  <th>Active Ingredient [Strength]</th>
+                  <th>Dose Form [Package]</th>
+                  <th>Units per Intake</th>
+                  <th>Dosage Frequency</th>
+                  <th>Route of Administration</th>
+                  <th>Duration of Treatment</th>
+                  <th>Medication Reason</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr ID="medication.1">
+                  <td valign="top" ID="medication.1.name">Lantus Solostar</td>
+                  <td valign="top"><content ID="medication.1.ingredient" language="en-GB">Insulin
+                                        Glargine</content> 100mg/ml <br/>
                                     </td>
-                                    <td>
-                                        <content ID="medication.1.form" language="en-GB">Pre-filled
+                  <td>
+                    <content ID="medication.1.form" language="en-GB">Pre-filled
                                             pen</content>
-                                    </td>
-                                    <td ID="medication.1.units">1 unit</td>
-                                    <td ID="medication.1.frequency">1 per day</td>
-                                    <td>
-                                        <content ID="medication.1.route" language="en-GB">Injection</content>
-                                        <br />
-                                    </td>
-                                    <td ID="medication.1.duration">2024-01-01 to 2025-01-01</td>
-                                    <td>
-                                        <content ID="medication.1.reason" language="en-GB">Type 2
+                  </td>
+                  <td ID="medication.1.units">1 unit</td>
+                  <td ID="medication.1.frequency">1 per day</td>
+                  <td>
+                    <content ID="medication.1.route" language="en-GB">Injection</content>
+                    <br/>
+                  </td>
+                  <td ID="medication.1.duration">2024-01-01 to 2025-01-01</td>
+                  <td>
+                    <content ID="medication.1.reason" language="en-GB">Type 2
                                             diabetes
                                             mellitus</content>
-                                        <br />
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </text>
-                    <entry typeCode="DRIV">
-                        <substanceAdministration classCode="SBADM" moodCode="EVN">
-                            <!-- <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.4" />
+                    <br/>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </text>
+          <entry typeCode="DRIV">
+            <substanceAdministration classCode="SBADM" moodCode="EVN">
+              <!-- <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.4" />
                             <templateId root="2.16.840.1.113883.10.20.1.24" />
                             <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.7" />
                             <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.7.1" /> -->
-                            <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.4" />
-                            <templateId root="2.16.840.1.113883.10.20.1.24" />
-                            <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.7.1" />
-                            <id extension="medication.1" root="2.16.17.710.813.1000.990.1.8" />
-                            <code code="DRUG" codeSystem="2.16.840.1.113883.5.4"
-                                codeSystemName="ActCode" displayName="Drug" />
-                            <text>
-                                <reference value="#medication.1" />
-                            </text>
-                            <statusCode code="active" />
-                            <effectiveTime xmlns:urn="urn:hl7-org:v3"
-                                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                                xsi:type="IVL_TS">
-                                <low value="20240101" />
-                                <high value="20250101" />
-                            </effectiveTime>
-                            <effectiveTime xmlns:urn="urn:hl7-org:v3"
-                                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                                operator="A" xsi:type="PIVL_TS">
-                                <period value="1" unit="d" />
-                            </effectiveTime>
-                            <routeCode code="C38200" codeSystem="2.16.840.1.113883.5.112"
-                                codeSystemName="RouteOfAdministration"
-                                displayName="Subcutaneous route">
-                                <originalText>
-                                    <reference value="#medication.1.route" />
-                                </originalText>
-                            </routeCode>
-                            <doseQuantity>
-                                <low unit="{mg/mL}" value="1" />
-                                <high unit="{mg/mL}" value="1" />
-                            </doseQuantity>
-                            <rateQuantity nullFlavor="NA" />
-                            <consumable typeCode="CSM">
-                                <manufacturedProduct classCode="MANU">
-                                    <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.31" />
-                                    <manufacturedMaterial classCode="MMAT" determinerCode="KIND">
-                                        <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.32" />
-                                        <code code="245830202" codeSystem="2.16.840.1.113883.6.96"
-                                            codeSystemName="SNOMED CT"
-                                            displayName="LANTUS Solostar INJ.SOL 100 IU/ML " />
-                                        <name>LANTUS Solostar INJ.SOL 100 IU/ML </name>
-                                        <pharm:desc>100 IU/ML </pharm:desc>
-                                        <pharm:formCode code="11201000"
-                                            codeSystem="0.4.0.127.0.16.1.1.2.1"
-                                            codeSystemName="EDQM"
-                                            displayName="Solution for Injection" />
-                                        <pharm:asContent classCode="CONT">
-                                            <pharm:quantity value="3" unit="Pen" xsi:type="PQ" />
-                                            <pharm:containerPackagedProduct classCode="CONT"
-                                                determinerCode="KIND">
-                                                <pharm:formCode code="30009000" displayName="Box"
-                                                    codeSystem="0.4.0.127.0.16.1.1.2.1">
-                                                    <originalText>
-                                                        <reference value="#medication.1.form" />
-                                                    </originalText>
-                                                </pharm:formCode>
-                                            </pharm:containerPackagedProduct>
-                                        </pharm:asContent>
-                                        <pharm:ingredient classCode="ACTI">
-                                            <pharm:quantity>
-                                                <numerator value="100" unit="[IU]" xsi:type="PQ" />
-                                                <denominator value="1" unit="ML" xsi:type="PQ" />
-                                            </pharm:quantity>
-                                            <pharm:ingredientSubstance classCode="MMAT"
-                                                determinerCode="KIND">
-                                                <pharm:code code="A10AE04"
-                                                    codeSystem="2.16.840.1.113883.6.73"
-                                                    codeSystemName="Anatomical Therapeutic Chemical">
-                                                    <originalText>
-                                                        <reference value="#medication.1.ingredient" />
-                                                    </originalText>
-                                                </pharm:code>
-                                                <pharm:name>INSULIN GLARGINE</pharm:name>
-                                            </pharm:ingredientSubstance>
-                                        </pharm:ingredient>
-                                    </manufacturedMaterial>
-                                </manufacturedProduct>
-                            </consumable>
-                            <entryRelationship typeCode="RSON">
-                                <observation classCode="OBS" moodCode="EVN">
-                                    <templateId root='2.16.840.1.113883.10.20.1.57' />
-                                    <templateId root='2.16.840.1.113883.10.20.1.50' />
-                                    <templateId root='1.3.6.1.4.1.19376.1.5.3.1.4.1.1' />
-                                    <id root="2.999.1.1.1" />
-                                    <code code="73211009" codeSystem="2.16.840.1.113883.6.96" />
-                                    <text>
-                                        <reference value="#medication.1.reason" />
-                                    </text>
-                                    <statusCode code="completed" />
-                                    <effectiveTime>
-                                        <low value="20240101" />
-                                        <high value="20250101" />
-                                    </effectiveTime>
-                                    <value code="73211009" codeSystem="2.16.840.1.113883.6.96"
-                                        xsi:type="CD" />
-                                </observation>
-                            </entryRelationship>
-                        </substanceAdministration>
-                    </entry>
-                </section>
-            </component>
-            <!-- Allergies and other adverse reactions -->
-            <component>
-                <section>
-                    <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.2.12" />
-                    <templateId root="1.3.6.1.4.1.19376.1.5.3.1.3.13" />
-                    <id extension="allergy" root="2.16.17.710.813.1000.990.1.9" />
-                    <code code="48765-2" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC"
-                        displayName="Allergies and other adverse reactions" />
-                    <title>Allergies and other adverse reactions</title>
-                    <text>
-                        <paragraph ID="allergy.1">
+              <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.4"/>
+              <templateId root="2.16.840.1.113883.10.20.1.24"/>
+              <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.7.1"/>
+              <id extension="medication.1" root="2.16.17.710.813.1000.990.1.8"/>
+              <code code="DRUG" codeSystem="2.16.840.1.113883.5.4" codeSystemName="ActCode" displayName="Drug"/>
+              <text>
+                <reference value="#medication.1"/>
+              </text>
+              <statusCode code="active"/>
+              <effectiveTime xmlns:urn="urn:hl7-org:v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="IVL_TS">
+                <low value="20240101"/>
+                <high value="20250101"/>
+              </effectiveTime>
+              <effectiveTime xmlns:urn="urn:hl7-org:v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" operator="A" xsi:type="PIVL_TS">
+                <period value="1" unit="d"/>
+              </effectiveTime>
+              <routeCode code="C38200" codeSystem="2.16.840.1.113883.5.112" codeSystemName="RouteOfAdministration" displayName="Subcutaneous route">
+                <originalText>
+                  <reference value="#medication.1.route"/>
+                </originalText>
+              </routeCode>
+              <doseQuantity>
+                <low unit="{mg/mL}" value="1"/>
+                <high unit="{mg/mL}" value="1"/>
+              </doseQuantity>
+              <rateQuantity nullFlavor="NA"/>
+              <consumable typeCode="CSM">
+                <manufacturedProduct classCode="MANU">
+                  <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.31"/>
+                  <manufacturedMaterial classCode="MMAT" determinerCode="KIND">
+                    <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.32"/>
+                    <code code="245830202" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" displayName="LANTUS Solostar INJ.SOL 100 IU/ML "/>
+                    <name>LANTUS Solostar INJ.SOL 100 IU/ML </name>
+                    <pharm:desc>100 IU/ML </pharm:desc>
+                    <pharm:formCode code="11201000" codeSystem="0.4.0.127.0.16.1.1.2.1" codeSystemName="EDQM" displayName="Solution for Injection"/>
+                    <pharm:asContent classCode="CONT">
+                      <pharm:quantity value="3" unit="Pen" xsi:type="PQ"/>
+                      <pharm:containerPackagedProduct classCode="CONT" determinerCode="KIND">
+                        <pharm:formCode code="30009000" displayName="Box" codeSystem="0.4.0.127.0.16.1.1.2.1">
+                          <originalText>
+                            <reference value="#medication.1.form"/>
+                          </originalText>
+                        </pharm:formCode>
+                      </pharm:containerPackagedProduct>
+                    </pharm:asContent>
+                    <pharm:ingredient classCode="ACTI">
+                      <pharm:quantity>
+                        <numerator value="100" unit="[IU]" xsi:type="PQ"/>
+                        <denominator value="1" unit="ML" xsi:type="PQ"/>
+                      </pharm:quantity>
+                      <pharm:ingredientSubstance classCode="MMAT" determinerCode="KIND">
+                        <pharm:code code="A10AE04" codeSystem="2.16.840.1.113883.6.73" codeSystemName="Anatomical Therapeutic Chemical">
+                          <originalText>
+                            <reference value="#medication.1.ingredient"/>
+                          </originalText>
+                        </pharm:code>
+                        <pharm:name>INSULIN GLARGINE</pharm:name>
+                      </pharm:ingredientSubstance>
+                    </pharm:ingredient>
+                  </manufacturedMaterial>
+                </manufacturedProduct>
+              </consumable>
+              <entryRelationship typeCode="RSON">
+                <observation classCode="OBS" moodCode="EVN">
+                  <templateId root="2.16.840.1.113883.10.20.1.57"/>
+                  <templateId root="2.16.840.1.113883.10.20.1.50"/>
+                  <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.1.1"/>
+                  <id root="2.999.1.1.1"/>
+                  <code code="73211009" codeSystem="2.16.840.1.113883.6.96"/>
+                  <text>
+                    <reference value="#medication.1.reason"/>
+                  </text>
+                  <statusCode code="completed"/>
+                  <effectiveTime>
+                    <low value="20240101"/>
+                    <high value="20250101"/>
+                  </effectiveTime>
+                  <value code="73211009" codeSystem="2.16.840.1.113883.6.96" xsi:type="CD"/>
+                </observation>
+              </entryRelationship>
+            </substanceAdministration>
+          </entry>
+        </section>
+      </component>
+      <!-- Allergies and other adverse reactions -->
+      <component>
+        <section>
+          <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.2.12"/>
+          <templateId root="1.3.6.1.4.1.19376.1.5.3.1.3.13"/>
+          <id extension="allergy" root="2.16.17.710.813.1000.990.1.9"/>
+          <code code="48765-2" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Allergies and other adverse reactions"/>
+          <title>Allergies and other adverse reactions</title>
+          <text>
+            <paragraph ID="allergy.1">
                             Propensity to adverse reactions to Sitagliptin, manifested as Nausea,
                             onset 03-Oct-1994, moderate to severe, low risk, confirmed.
                         </paragraph>
-                        <paragraph ID="allergy.2">
+            <paragraph ID="allergy.2">
                             Propensity to adverse reactions to Latex, manifested as Urticaria, onset
                             01-Jan-1990, moderate to severe, low risk, confirmed.
                         </paragraph>
-                        <table border="1">
-                            <thead>
-                                <tr>
-                                    <th>Reaction Type</th>
-                                    <th>Clinical Manifestation</th>
-                                    <th>Agent</th>
-                                    <th>Onset Date</th>
-                                    <th>Severity</th>
-                                    <th>Criticality</th>
-                                    <th>Status</th>
-                                    <th>Certainty</th>
-                                    <th>Description</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <content ID="allergy.1.type" language="en-GB">Propensity to
+            <table border="1">
+              <thead>
+                <tr>
+                  <th>Reaction Type</th>
+                  <th>Clinical Manifestation</th>
+                  <th>Agent</th>
+                  <th>Onset Date</th>
+                  <th>Severity</th>
+                  <th>Criticality</th>
+                  <th>Status</th>
+                  <th>Certainty</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>
+                    <content ID="allergy.1.type" language="en-GB">Propensity to
                                             adverse reactions , Sitagliptin</content>
-                                    </td>
-                                    <td>
-                                        <content ID="allergy.1.manifestation" language="en-GB">
+                  </td>
+                  <td>
+                    <content ID="allergy.1.manifestation" language="en-GB">
                                             Nausea</content>
-                                    </td>
-                                    <td>
-                                        <content ID="allergy.1.agent" language="en-GB">Sitagliptin</content>
-                                        <br />
-                                    </td>
-                                    <td ID="allergy.1.onset">03-Oct-1994</td>
-                                    <td>
-                                        <content ID="allergy.1.severity" language="en-GB">Moderate
+                  </td>
+                  <td>
+                    <content ID="allergy.1.agent" language="en-GB">Sitagliptin</content>
+                    <br/>
+                  </td>
+                  <td ID="allergy.1.onset">03-Oct-1994</td>
+                  <td>
+                    <content ID="allergy.1.severity" language="en-GB">Moderate
                                             to severe</content>
-                                        <br />
-                                    </td>
-                                    <td>
-                                        <content ID="allergy.1.criticality" language="en-GB">low
+                    <br/>
+                  </td>
+                  <td>
+                    <content ID="allergy.1.criticality" language="en-GB">low
                                             risk</content>
-                                        <br />
-                                    </td>
-                                    <td>
-                                        <content ID="allergy.1.status">Status</content>
-                                        <br />
-                                    </td>
-                                    <td>
-                                        <content ID="allergy.1.certainty">Confirmed</content>
-                                        <br />
-                                    </td>
-                                    <td>
-                                        <content ID="allergy.1.description" language="en-GB">Finding
+                    <br/>
+                  </td>
+                  <td>
+                    <content ID="allergy.1.status">Status</content>
+                    <br/>
+                  </td>
+                  <td>
+                    <content ID="allergy.1.certainty">Confirmed</content>
+                    <br/>
+                  </td>
+                  <td>
+                    <content ID="allergy.1.description" language="en-GB">Finding
                                             reported by
                                             subject or history provider</content>
-                                        <br />
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <content ID="allergy.2.type" language="en-GB">Propensity to
+                    <br/>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <content ID="allergy.2.type" language="en-GB">Propensity to
                                             adverse
                                             reactions , Latex</content>
-                                    </td>
-                                    <td>
-                                        <content ID="allergy.2.manifestation" language="en-GB">
+                  </td>
+                  <td>
+                    <content ID="allergy.2.manifestation" language="en-GB">
                                             Urticaria</content>
-                                    </td>
-                                    <td>
-                                        <content ID="allergy.2.agent" language="en-GB">Latex</content>
-                                    </td>
-                                    <td>
-                                        <content ID="allergy.2.onset" language="en-GB">01-Jan-1990</content>
-                                    </td>
-                                    <td>
-                                        <content ID="allergy.2.severity" language="en-GB">Moderate
+                  </td>
+                  <td>
+                    <content ID="allergy.2.agent" language="en-GB">Latex</content>
+                  </td>
+                  <td>
+                    <content ID="allergy.2.onset" language="en-GB">01-Jan-1990</content>
+                  </td>
+                  <td>
+                    <content ID="allergy.2.severity" language="en-GB">Moderate
                                             to severe</content>
-                                    </td>
-                                    <td>
-                                        <content ID="allergy.2.criticality" language="en-GB">Low
+                  </td>
+                  <td>
+                    <content ID="allergy.2.criticality" language="en-GB">Low
                                             risk</content>
-                                    </td>
-                                    <td>
-                                        <content ID="allergy.2.status" language="en-GB">Active</content>
-                                    </td>
-                                    <td>
-                                        <content ID="allergy.2.certainty" language="en-GB">Confirmed</content>
-                                    </td>
-                                    <td>
-                                        <content ID="allergy.2.description" language="en-GB">Finding
+                  </td>
+                  <td>
+                    <content ID="allergy.2.status" language="en-GB">Active</content>
+                  </td>
+                  <td>
+                    <content ID="allergy.2.certainty" language="en-GB">Confirmed</content>
+                  </td>
+                  <td>
+                    <content ID="allergy.2.description" language="en-GB">Finding
                                             reported by subject or history provider</content>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </text>
-                    <entry typeCode="DRIV">
-                        <act classCode="ACT" moodCode="EVN">
-                            <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.5.1" />
-                            <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.16" />
-                            <templateId root="2.16.840.1.113883.10.20.1.27" />
-                            <id extension="allergy.1" root="2.16.17.710.813.1000.990.1.9" />
-                            <code code="CONC" codeSystem="2.16.840.1.113883.5.6" />
-                            <statusCode code="active" />
-                            <effectiveTime>
-                                <low value="19941003" />
-                            </effectiveTime>
-                            <entryRelationship inversionInd="false" typeCode="SUBJ">
-                                <observation classCode="OBS" moodCode="EVN">
-                                    <templateId root="2.16.840.1.113883.10.20.1.18" />
-                                    <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.6" />
-                                    <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.5" />
-                                    <templateId root="2.16.840.1.113883.10.20.1.28" />
-                                    <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.17" />
-                                    <id extension="allergy.1.obs.1"
-                                        root="2.16.17.710.813.1000.990.1.9" />
-                                    <code code="420134006" codeSystem="2.16.840.1.113883.6.96"
-                                        codeSystemName="SNOMED CT"
-                                        displayName="Propensity to adverse reactions" />
-                                    <text>
-                                        <reference value="#allergy.1" />
-                                    </text>
-                                    <statusCode code="completed" />
-                                    <effectiveTime>
-                                        <low value="19941003" />
-                                    </effectiveTime>
-                                    <value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                                        nullFlavor="NI" xsi:type="CD" />
-                                    <participant typeCode="CSM">
-                                        <participantRole classCode="MANU">
-                                            <playingEntity classCode="MMAT">
-                                                <code code="A10BH01"
-                                                    codeSystem="2.16.840.1.113883.6.73"
-                                                    codeSystemName="Anatomical Therapeutic Chemical"
-                                                    displayName="Sitagliptin">
-                                                    <originalText mediaType="text/xml">
-                                                        <reference value="#allergy.1.agent" />
-                                                    </originalText>
-                                                </code>
-                                            </playingEntity>
-                                        </participantRole>
-                                    </participant>
-                                    <entryRelationship typeCode="MFST">
-                                        <observation classCode="OBS" moodCode="EVN">
-                                            <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.44" />
-                                            <id root="1.3.6.1.4.1.19376.1.5.3.1.4.5" />
-                                            <code code="418799008"
-                                                codeSystem="2.16.840.1.113883.6.96"
-                                                codeSystemName="SNOMED CT"
-                                                displayName="Finding reported by subject or history provider" />
-                                            <text>
-                                                <reference value="#allergy.1.description" />
-                                            </text>
-                                            <statusCode code="completed" />
-                                            <effectiveTime>
-                                                <low nullFlavor="UNK" />
-                                                <high nullFlavor="UNK" />
-                                            </effectiveTime>
-                                            <value xmlns:urn="urn:hl7-org:v3"
-                                                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                                                code="422587007" codeSystem="2.16.840.1.113883.6.96"
-                                                codeSystemName="SNOMED CT" displayName="Nausea"
-                                                xsi:type="urn:CD" />
-                                        </observation>
-                                    </entryRelationship>
-                                    <entryRelationship typeCode="SUBJ">
-                                        <observation classCode="OBS" moodCode="EVN">
-                                            <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.33" />
-                                            <code code="82606-5" codeSystem="2.16.840.1.113883.6.1"
-                                                codeSystemName="LOINC"
-                                                displayName="Allergy or intolerance criticality">
-                                                <originalText>
-                                                    <reference value="#allergy.1.manifestation" />
-                                                </originalText>
-                                            </code>
-                                            <text>
-                                                <reference value="#allergy.1.criticality" />
-                                            </text>
-                                            <statusCode code="completed" />
-                                            <value xmlns:urn="urn:hl7-org:v3"
-                                                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                                                code="high"
-                                                codeSystem="2.16.840.1.113883.4.642.4.130"
-                                                displayName="High Risk" xsi:type="urn:CE" />
-                                        </observation>
-                                    </entryRelationship>
-                                </observation>
-                            </entryRelationship>
-                        </act>
-                    </entry>
-                    <entry typeCode="DRIV">
-                        <act classCode="ACT" moodCode="EVN">
-                            <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.5.1" />
-                            <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.16" />
-                            <templateId root="2.16.840.1.113883.10.20.1.27" />
-                            <id extension="allergy.2" root="2.16.17.710.813.1000.990.1.9" />
-                            <code code="CONC" codeSystem="2.16.840.1.113883.5.6" />
-                            <statusCode code="active" />
-                            <effectiveTime>
-                                <low value="19900101" />
-                            </effectiveTime>
-                            <entryRelationship inversionInd="false" typeCode="SUBJ">
-                                <observation classCode="OBS" moodCode="EVN">
-                                    <templateId root="2.16.840.1.113883.10.20.1.18" />
-                                    <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.6" />
-                                    <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.5" />
-                                    <templateId root="2.16.840.1.113883.10.20.1.28" />
-                                    <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.17" />
-                                    <id extension="allergy.2.obs.1"
-                                        root="2.16.17.710.813.1000.990.1.9" />
-                                    <code code="420134006" codeSystem="2.16.840.1.113883.6.96"
-                                        codeSystemName="SNOMED CT"
-                                        displayName="Propensity to adverse reactions" />
-                                    <text>
-                                        <reference value="#allergy.2" />
-                                    </text>
-                                    <statusCode code="completed" />
-                                    <effectiveTime>
-                                        <low value="19900101" />
-                                    </effectiveTime>
-                                    <value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                                        nullFlavor="NI" xsi:type="CD" />
-                                    <participant typeCode="CSM">
-                                        <participantRole classCode="MANU">
-                                            <playingEntity classCode="MMAT">
-                                                <code code="111088007"
-                                                    codeSystem="2.16.840.1.113883.6.96"
-                                                    codeSystemName="SNOMED CT" displayName="Latex">
-                                                    <originalText mediaType="text/xml">
-                                                        <reference value="#allergy.2.agent" />
-                                                    </originalText>
-                                                </code>
-                                            </playingEntity>
-                                        </participantRole>
-                                    </participant>
-                                    <entryRelationship typeCode="MFST">
-                                        <observation classCode="OBS" moodCode="EVN">
-                                            <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.44" />
-                                            <id root="1.3.6.1.4.1.19376.1.5.3.1.4.5" />
-                                            <code code="418799008"
-                                                codeSystem="2.16.840.1.113883.6.96"
-                                                codeSystemName="SNOMED CT"
-                                                displayName="Finding reported by subject or history provider" />
-                                            <text>
-                                                <reference value="#allergy.2.description" />
-                                            </text>
-                                            <statusCode code="completed" />
-                                            <effectiveTime>
-                                                <low nullFlavor="UNK" />
-                                                <high nullFlavor="UNK" />
-                                            </effectiveTime>
-                                            <value xmlns:urn="urn:hl7-org:v3"
-                                                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                                                code="126485001" codeSystem="2.16.840.1.113883.6.96"
-                                                codeSystemName="SNOMED CT" displayName="Urticaria"
-                                                xsi:type="urn:CD" />
-                                        </observation>
-                                    </entryRelationship>
-                                    <entryRelationship typeCode="SUBJ">
-                                        <observation classCode="OBS" moodCode="EVN">
-                                            <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.33" />
-                                            <code code="82606-5" codeSystem="2.16.840.1.113883.6.1"
-                                                codeSystemName="LOINC"
-                                                displayName="Allergy or intolerance criticality" />
-                                            <text>
-                                                <reference value="#allergy.2.criticality" />
-                                            </text>
-                                            <statusCode code="completed" />
-                                            <effectiveTime>
-                                                <low value="19900101" />
-                                            </effectiveTime>
-                                            <value xmlns:urn="urn:hl7-org:v3"
-                                                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                                                code="low"
-                                                codeSystem="2.16.840.1.113883.4.642.4.130"
-                                                displayName="Low Risk" xsi:type="urn:CE" />
-                                            <participant typeCode="CSM">
-                                                <participantRole classCode="MANU">
-                                                    <playingEntity classCode="MMAT">
-                                                        <code code="111088007"
-                                                            codeSystem="2.16.840.1.113883.6.96"
-                                                            codeSystemName="SNOMED CT"
-                                                            displayName="Latex">
-                                                            <originalText mediaType="text/xml">
-                                                                <reference value="#allergy.2.agent" />
-                                                            </originalText>
-                                                        </code>
-                                                    </playingEntity>
-                                                </participantRole>
-                                            </participant>
-                                        </observation>
-                                    </entryRelationship>
-                                </observation>
-                            </entryRelationship>
-                        </act>
-                    </entry>
-                </section>
-            </component>
-            <!-- History of Procedures -->
-            <component>
-                <section>
-                    <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.2.11" />
-                    <templateId root="1.3.6.1.4.1.19376.1.5.3.1.3.12" />
-                    <templateId root="2.16.840.1.113883.10.20.1.12" />
-                    <id extension="procedure" root="2.16.17.710.813.1000.990.1.6" />
-                    <code code="47519-4" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC"
-                        displayName="History of Procedures" />
-                    <title>History of Procedures</title>
-                    <text>
-                        <paragraph ID="procedure.1">Fracture 4th metacarpal, 09-Apr-2002</paragraph>
-                        <paragraph ID="procedure.2">Resection of a benign salivary gland tumor, 11-Oct-2013</paragraph>
-                        <table border="1">
-                            <thead>
-                                <tr>
-                                    <th>Description</th>
-                                    <th>Procedure Date</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr ID="procedureRow1">
-                                    <td>
-                                        <content ID="procedureDesc1" language="en-GB">Fracture 4th
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </text>
+          <entry typeCode="DRIV">
+            <act classCode="ACT" moodCode="EVN">
+              <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.5.1"/>
+              <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.16"/>
+              <templateId root="2.16.840.1.113883.10.20.1.27"/>
+              <id extension="allergy.1" root="2.16.17.710.813.1000.990.1.9"/>
+              <code code="CONC" codeSystem="2.16.840.1.113883.5.6"/>
+              <statusCode code="active"/>
+              <effectiveTime>
+                <low value="19941003"/>
+              </effectiveTime>
+              <entryRelationship inversionInd="false" typeCode="SUBJ">
+                <observation classCode="OBS" moodCode="EVN">
+                  <templateId root="2.16.840.1.113883.10.20.1.18"/>
+                  <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.6"/>
+                  <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.5"/>
+                  <templateId root="2.16.840.1.113883.10.20.1.28"/>
+                  <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.17"/>
+                  <id extension="allergy.1.obs.1" root="2.16.17.710.813.1000.990.1.9"/>
+                  <code code="420134006" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" displayName="Propensity to adverse reactions"/>
+                  <text>
+                    <reference value="#allergy.1"/>
+                  </text>
+                  <statusCode code="completed"/>
+                  <effectiveTime>
+                    <low value="19941003"/>
+                  </effectiveTime>
+                  <value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" nullFlavor="NI" xsi:type="CD"/>
+                  <participant typeCode="CSM">
+                    <participantRole classCode="MANU">
+                      <playingEntity classCode="MMAT">
+                        <code code="A10BH01" codeSystem="2.16.840.1.113883.6.73" codeSystemName="Anatomical Therapeutic Chemical" displayName="Sitagliptin">
+                          <originalText mediaType="text/xml">
+                            <reference value="#allergy.1.agent"/>
+                          </originalText>
+                        </code>
+                      </playingEntity>
+                    </participantRole>
+                  </participant>
+                  <entryRelationship typeCode="MFST">
+                    <observation classCode="OBS" moodCode="EVN">
+                      <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.44"/>
+                      <id root="1.3.6.1.4.1.19376.1.5.3.1.4.5"/>
+                      <code code="418799008" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" displayName="Finding reported by subject or history provider"/>
+                      <text>
+                        <reference value="#allergy.1.description"/>
+                      </text>
+                      <statusCode code="completed"/>
+                      <effectiveTime>
+                        <low nullFlavor="UNK"/>
+                        <high nullFlavor="UNK"/>
+                      </effectiveTime>
+                      <value xmlns:urn="urn:hl7-org:v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" code="422587007" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" displayName="Nausea" xsi:type="urn:CD"/>
+                    </observation>
+                  </entryRelationship>
+                  <entryRelationship typeCode="SUBJ">
+                    <observation classCode="OBS" moodCode="EVN">
+                      <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.33"/>
+                      <code code="82606-5" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Allergy or intolerance criticality">
+                        <originalText>
+                          <reference value="#allergy.1.manifestation"/>
+                        </originalText>
+                      </code>
+                      <text>
+                        <reference value="#allergy.1.criticality"/>
+                      </text>
+                      <statusCode code="completed"/>
+                      <value xmlns:urn="urn:hl7-org:v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" code="high" codeSystem="2.16.840.1.113883.4.642.4.130" displayName="High Risk" xsi:type="urn:CE"/>
+                    </observation>
+                  </entryRelationship>
+                </observation>
+              </entryRelationship>
+            </act>
+          </entry>
+          <entry typeCode="DRIV">
+            <act classCode="ACT" moodCode="EVN">
+              <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.5.1"/>
+              <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.16"/>
+              <templateId root="2.16.840.1.113883.10.20.1.27"/>
+              <id extension="allergy.2" root="2.16.17.710.813.1000.990.1.9"/>
+              <code code="CONC" codeSystem="2.16.840.1.113883.5.6"/>
+              <statusCode code="active"/>
+              <effectiveTime>
+                <low value="19900101"/>
+              </effectiveTime>
+              <entryRelationship inversionInd="false" typeCode="SUBJ">
+                <observation classCode="OBS" moodCode="EVN">
+                  <templateId root="2.16.840.1.113883.10.20.1.18"/>
+                  <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.6"/>
+                  <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.5"/>
+                  <templateId root="2.16.840.1.113883.10.20.1.28"/>
+                  <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.17"/>
+                  <id extension="allergy.2.obs.1" root="2.16.17.710.813.1000.990.1.9"/>
+                  <code code="420134006" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" displayName="Propensity to adverse reactions"/>
+                  <text>
+                    <reference value="#allergy.2"/>
+                  </text>
+                  <statusCode code="completed"/>
+                  <effectiveTime>
+                    <low value="19900101"/>
+                  </effectiveTime>
+                  <value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" nullFlavor="NI" xsi:type="CD"/>
+                  <participant typeCode="CSM">
+                    <participantRole classCode="MANU">
+                      <playingEntity classCode="MMAT">
+                        <code code="111088007" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" displayName="Latex">
+                          <originalText mediaType="text/xml">
+                            <reference value="#allergy.2.agent"/>
+                          </originalText>
+                        </code>
+                      </playingEntity>
+                    </participantRole>
+                  </participant>
+                  <entryRelationship typeCode="MFST">
+                    <observation classCode="OBS" moodCode="EVN">
+                      <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.44"/>
+                      <id root="1.3.6.1.4.1.19376.1.5.3.1.4.5"/>
+                      <code code="418799008" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" displayName="Finding reported by subject or history provider"/>
+                      <text>
+                        <reference value="#allergy.2.description"/>
+                      </text>
+                      <statusCode code="completed"/>
+                      <effectiveTime>
+                        <low nullFlavor="UNK"/>
+                        <high nullFlavor="UNK"/>
+                      </effectiveTime>
+                      <value xmlns:urn="urn:hl7-org:v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" code="126485001" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" displayName="Urticaria" xsi:type="urn:CD"/>
+                    </observation>
+                  </entryRelationship>
+                  <entryRelationship typeCode="SUBJ">
+                    <observation classCode="OBS" moodCode="EVN">
+                      <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.33"/>
+                      <code code="82606-5" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Allergy or intolerance criticality"/>
+                      <text>
+                        <reference value="#allergy.2.criticality"/>
+                      </text>
+                      <statusCode code="completed"/>
+                      <effectiveTime>
+                        <low value="19900101"/>
+                      </effectiveTime>
+                      <value xmlns:urn="urn:hl7-org:v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" code="low" codeSystem="2.16.840.1.113883.4.642.4.130" displayName="Low Risk" xsi:type="urn:CE"/>
+                      <participant typeCode="CSM">
+                        <participantRole classCode="MANU">
+                          <playingEntity classCode="MMAT">
+                            <code code="111088007" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" displayName="Latex">
+                              <originalText mediaType="text/xml">
+                                <reference value="#allergy.2.agent"/>
+                              </originalText>
+                            </code>
+                          </playingEntity>
+                        </participantRole>
+                      </participant>
+                    </observation>
+                  </entryRelationship>
+                </observation>
+              </entryRelationship>
+            </act>
+          </entry>
+        </section>
+      </component>
+      <!-- History of Procedures -->
+      <component>
+        <section>
+          <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.2.11"/>
+          <templateId root="1.3.6.1.4.1.19376.1.5.3.1.3.12"/>
+          <templateId root="2.16.840.1.113883.10.20.1.12"/>
+          <id extension="procedure" root="2.16.17.710.813.1000.990.1.6"/>
+          <code code="47519-4" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="History of Procedures"/>
+          <title>History of Procedures</title>
+          <text>
+            <paragraph ID="procedure.1">Fracture 4th metacarpal, 09-Apr-2002</paragraph>
+            <paragraph ID="procedure.2">Resection of a benign salivary gland tumor, 11-Oct-2013</paragraph>
+            <table border="1">
+              <thead>
+                <tr>
+                  <th>Description</th>
+                  <th>Procedure Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr ID="procedureRow1">
+                  <td>
+                    <content ID="procedureDesc1" language="en-GB">Fracture 4th
                                             metacarpal</content>
-                                    </td>
-                                    <td ID="procedureDate1">09-Apr-2002</td>
-                                </tr>
-                                <tr ID="procedureRow2">
-                                    <td>
-                                        <content ID="procedureDesc2" language="en-GB">Resection of
+                  </td>
+                  <td ID="procedureDate1">09-Apr-2002</td>
+                </tr>
+                <tr ID="procedureRow2">
+                  <td>
+                    <content ID="procedureDesc2" language="en-GB">Resection of
                                             a benign salivary gland tumor</content>
-                                    </td>
-                                    <td ID="procedureDate2">11-Oct-2013</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </text>
-                    <entry>
-                        <procedure classCode="PROC" moodCode="EVN">
-                            <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.19" />
-                            <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.26" />
-                            <id extension="procedure.1" root="2.16.17.710.813.1000.990.1.6" />
-                            <code code="112746006" codeSystem="2.16.840.1.113883.6.96"
-                                codeSystemName="SNOMED CT" displayName="Operative procedure on hand">
-                                <originalText mediaType="text/xml">
-                                    <reference value="#procedure.1.desc" />
-                                </originalText>
-                            </code>
-                            <text>
-                                <reference value="#procedure.1" />
-                            </text>
-                            <statusCode code="completed" />
-                            <effectiveTime>
-                                <low value="20020409" />
-                            </effectiveTime>
-                        </procedure>
-                    </entry>
-                    <entry>
-                        <procedure classCode="PROC" moodCode="EVN">
-                            <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.19" />
-                            <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.26" />
-                            <id extension="#procedure.2" root="2.16.17.710.813.1000.990.1.6" />
-                            <code code="86273004" codeSystem="2.16.840.1.113883.6.96"
-                                codeSystemName="SNOMED CT" displayName="Biopsy">
-                                <originalText mediaType="text/xml">
-                                    <reference value="#procedure.2.desc" />
-                                </originalText>
-                            </code>
-                            <text>
-                                <reference value="#procedure.2" />
-                            </text>
-                            <statusCode code="completed" />
-                            <effectiveTime>
-                                <low value="20131011" />
-                            </effectiveTime>
-                        </procedure>
-                    </entry>
-                </section>
-            </component>
-            <!-- Problem list -->
-            <component>
-                <section>
-                    <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.2.9" />
-                    <templateId root="1.3.6.1.4.1.19376.1.5.3.1.3.6" />
-                    <templateId root="2.16.840.1.113883.10.20.1.11" />
-                    <id extension="problem" root="2.16.17.710.813.1000.990.1.7" />
-                    <code code="11450-4" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC"
-                        displayName="Problem list" />
-                    <title>Problem list</title>
-                    <text>
-                        <paragraph ID="problem.1">
+                  </td>
+                  <td ID="procedureDate2">11-Oct-2013</td>
+                </tr>
+              </tbody>
+            </table>
+          </text>
+          <entry>
+            <procedure classCode="PROC" moodCode="EVN">
+              <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.19"/>
+              <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.26"/>
+              <id extension="procedure.1" root="2.16.17.710.813.1000.990.1.6"/>
+              <code code="112746006" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" displayName="Operative procedure on hand">
+                <originalText mediaType="text/xml">
+                  <reference value="#procedure.1.desc"/>
+                </originalText>
+              </code>
+              <text>
+                <reference value="#procedure.1"/>
+              </text>
+              <statusCode code="completed"/>
+              <effectiveTime>
+                <low value="20020409"/>
+              </effectiveTime>
+            </procedure>
+          </entry>
+          <entry>
+            <procedure classCode="PROC" moodCode="EVN">
+              <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.19"/>
+              <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.26"/>
+              <id extension="#procedure.2" root="2.16.17.710.813.1000.990.1.6"/>
+              <code code="86273004" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" displayName="Biopsy">
+                <originalText mediaType="text/xml">
+                  <reference value="#procedure.2.desc"/>
+                </originalText>
+              </code>
+              <text>
+                <reference value="#procedure.2"/>
+              </text>
+              <statusCode code="completed"/>
+              <effectiveTime>
+                <low value="20131011"/>
+              </effectiveTime>
+            </procedure>
+          </entry>
+        </section>
+      </component>
+      <!-- Problem list -->
+      <component>
+        <section>
+          <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.2.9"/>
+          <templateId root="1.3.6.1.4.1.19376.1.5.3.1.3.6"/>
+          <templateId root="2.16.840.1.113883.10.20.1.11"/>
+          <id extension="problem" root="2.16.17.710.813.1000.990.1.7"/>
+          <code code="11450-4" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Problem list"/>
+          <title>Problem list</title>
+          <text>
+            <paragraph ID="problem.1">
                             Type 2 diabetes mellitus, Disease, onset 18-Jun-2009
                         </paragraph>
-                        <table border="1">
-                            <thead>
-                                <tr>
-                                    <th>Active Problem</th>
-                                    <th>Problem Type</th>
-                                    <th>Onset Date</th>
-                                    <th>Problem Status</th>
-                                    <th>Severity</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr ID="problemRow1">
-                                    <td>
-                                        <content ID="problemActive1" language="en-GB">Type 2
+            <table border="1">
+              <thead>
+                <tr>
+                  <th>Active Problem</th>
+                  <th>Problem Type</th>
+                  <th>Onset Date</th>
+                  <th>Problem Status</th>
+                  <th>Severity</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr ID="problemRow1">
+                  <td>
+                    <content ID="problemActive1" language="en-GB">Type 2
                                             diabetes mellitus, Disease</content>
-                                    </td>
-                                    <td>
-                                        <content ID="problem.1.description" language="en-GB">Clinical finding</content>
-                                    </td>
-                                    <td>
-                                        <content ID="problemOnset1" language="en-GB">Since
+                  </td>
+                  <td>
+                    <content ID="problem.1.description" language="en-GB">Clinical finding</content>
+                  </td>
+                  <td>
+                    <content ID="problemOnset1" language="en-GB">Since
                                             18-Jun-2009</content>
-                                    </td>
-                                    <td ID="problem.1.status" language="en-GB">active</td>
-                                    <td>
-                                        <content ID="problem.1.severity" language="en-GB">Moderate</content>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </text>
-                    <entry typeCode="DRIV">
-                        <act classCode="ACT" moodCode="EVN">
-                            <templateId root="2.16.840.1.113883.10.20.1.27" />
-                            <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.15" />
-                            <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.5.1" />
-                            <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.5.2" />
-                            <id extension="problem.1" root="2.16.17.710.813.1000.990.1.7" />
-                            <code code="CONC" codeSystem="2.16.840.1.113883.5.6" />
-                            <statusCode code="active" />
-                            <effectiveTime>
-                                <low value="20090618" />
-                            </effectiveTime>
-                            <entryRelationship typeCode="REFR">
-                                <observation classCode="OBS" moodCode="EVN">
-                                    <templateId root="2.16.840.1.113883.10.20.1.57" />
-                                    <templateId root="2.16.840.1.113883.10.20.1.50" />
-                                    <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.1.1" />
-                                    <code code="33999-4" codeSystem="2.16.840.1.113883.6.1"
-                                        displayName="Status" codeSystemName="LOINC" />
-                                    <text>
-                                        <reference value="#problem.1.status" />
-                                    </text>
-                                    <statusCode code="completed" />
-                                    <value xsi:type="CE" displayName="Active"
-                                        code="55561003" codeSystem="2.16.840.1.113883.6.96" />
-                                </observation>
-                            </entryRelationship>
-                            <entryRelationship inversionInd="false" typeCode="SUBJ">
-                                <observation classCode="OBS" moodCode="EVN">
-                                    <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.7" />
-                                    <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.5" />
-                                    <id extension="problem.1.obs.1"
-                                        root="2.16.17.710.813.1000.990.1.7" />
-                                    <code code="64572001" codeSystem="2.16.840.1.113883.6.96"
-                                        codeSystemName="SNOMED CT" displayName="Disease" />
-                                    <text>
-                                        <reference value="#problem.1.active" />
-                                    </text>
-                                    <statusCode code="completed" />
-                                    <effectiveTime>
-                                        <low value="20090618" />
-                                    </effectiveTime>
-                                    <value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                                        code="E11" codeSystem="1.3.6.1.4.1.12559.11.10.1.3.1.44.2"
-                                        displayName="Type 2 diabetes mellitus" xsi:type="CD">
-                                        <originalText>
-                                            <reference value="#problem.1.description" />
-                                        </originalText>
-                                    </value>
-                                </observation>
-                            </entryRelationship>
-                            <!-- Added Problem Severity -->
-                            <entryRelationship typeCode="SUBJ">
-                                <observation classCode="OBS" moodCode="EVN">
-                                    <templateId root="2.16.840.1.113883.10.20.1.48" />
-                                    <code code="SEV" codeSystem="2.16.840.1.113883.5.4"
-                                        displayName="Severity" codeSystemName="ActCode" />
-                                    <text>
-                                        <reference value="#problem.1.severity" />
-                                    </text>
-                                    <statusCode code="completed" />
-                                    <value xsi:type="CD" code="6736007" codeSystem="2.16.840.1.113883.6.96"
-                                        displayName="Moderate" />
-                                </observation>
-                            </entryRelationship>
-                        </act>
-                    </entry>
-                </section>
-            </component>
-            <!-- History of medical device use -->
-            <component>
-                <section>
-                    <templateId root="2.16.840.1.113883.10.20.1.7" />
-                    <templateId root="1.3.6.1.4.1.19376.1.5.3.1.1.5.3.5" />
-                    <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.2.4" />
-                    <id extension="device" root="2.16.17.710.813.1000.990.1.10" />
-                    <code code="46264-8" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC"
-                        displayName="History of medical device use" />
-                    <title>History of medical device use</title>
-                    <text>
-                        <paragraph ID="dev.1">No known devices in use</paragraph>
-                    </text>
-                    <entry typeCode="DRIV">
-                        <supply classCode="SPLY" moodCode="EVN">
-                            <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.5" />
-                            <text>
-                                <reference value="#dev.1" />
-                            </text>
-                            <effectiveTime xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                                xsi:type="IVL_TS">
-                                <low nullFlavor="UNK" />
-                            </effectiveTime>
-                            <participant typeCode="DEV">
-                                <participantRole classCode="MANU">
-                                    <playingDevice classCode="DEV" determinerCode="INSTANCE">
-                                        <code code="no-known-devices"
-                                            codeSystem="2.16.840.1.113883.5.1150.1"
-                                            codeSystemName="IPS Absent And Unknown Data"
-                                            displayName="No known devices in use" />
-                                    </playingDevice>
-                                </participantRole>
-                            </participant>
-                        </supply>
-                    </entry>
-                </section>
-            </component>
-
-        </structuredBody>
-    </component>
-
+                  </td>
+                  <td ID="problem.1.status" language="en-GB">active</td>
+                  <td>
+                    <content ID="problem.1.severity" language="en-GB">Moderate</content>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </text>
+          <entry typeCode="DRIV">
+            <act classCode="ACT" moodCode="EVN">
+              <templateId root="2.16.840.1.113883.10.20.1.27"/>
+              <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.15"/>
+              <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.5.1"/>
+              <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.5.2"/>
+              <id extension="problem.1" root="2.16.17.710.813.1000.990.1.7"/>
+              <code code="CONC" codeSystem="2.16.840.1.113883.5.6"/>
+              <statusCode code="active"/>
+              <effectiveTime>
+                <low value="20090618"/>
+              </effectiveTime>
+              <entryRelationship typeCode="REFR">
+                <observation classCode="OBS" moodCode="EVN">
+                  <templateId root="2.16.840.1.113883.10.20.1.57"/>
+                  <templateId root="2.16.840.1.113883.10.20.1.50"/>
+                  <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.1.1"/>
+                  <code code="33999-4" codeSystem="2.16.840.1.113883.6.1" displayName="Status" codeSystemName="LOINC"/>
+                  <text>
+                    <reference value="#problem.1.status"/>
+                  </text>
+                  <statusCode code="completed"/>
+                  <value xsi:type="CE" displayName="Active" code="55561003" codeSystem="2.16.840.1.113883.6.96"/>
+                </observation>
+              </entryRelationship>
+              <entryRelationship inversionInd="false" typeCode="SUBJ">
+                <observation classCode="OBS" moodCode="EVN">
+                  <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.7"/>
+                  <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.5"/>
+                  <id extension="problem.1.obs.1" root="2.16.17.710.813.1000.990.1.7"/>
+                  <code code="64572001" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" displayName="Disease"/>
+                  <text>
+                    <reference value="#problem.1.active"/>
+                  </text>
+                  <statusCode code="completed"/>
+                  <effectiveTime>
+                    <low value="20090618"/>
+                  </effectiveTime>
+                  <value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" code="E11" codeSystem="1.3.6.1.4.1.12559.11.10.1.3.1.44.2" displayName="Type 2 diabetes mellitus" xsi:type="CD">
+                    <originalText>
+                      <reference value="#problem.1.description"/>
+                    </originalText>
+                  </value>
+                </observation>
+              </entryRelationship>
+              <!-- Added Problem Severity -->
+              <entryRelationship typeCode="SUBJ">
+                <observation classCode="OBS" moodCode="EVN">
+                  <templateId root="2.16.840.1.113883.10.20.1.48"/>
+                  <code code="SEV" codeSystem="2.16.840.1.113883.5.4" displayName="Severity" codeSystemName="ActCode"/>
+                  <text>
+                    <reference value="#problem.1.severity"/>
+                  </text>
+                  <statusCode code="completed"/>
+                  <value xsi:type="CD" code="6736007" codeSystem="2.16.840.1.113883.6.96" displayName="Moderate"/>
+                </observation>
+              </entryRelationship>
+            </act>
+          </entry>
+        </section>
+      </component>
+      <!-- History of medical device use -->
+      <component>
+        <section>
+          <templateId root="2.16.840.1.113883.10.20.1.7"/>
+          <templateId root="1.3.6.1.4.1.19376.1.5.3.1.1.5.3.5"/>
+          <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.2.4"/>
+          <id extension="device" root="2.16.17.710.813.1000.990.1.10"/>
+          <code code="46264-8" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="History of medical device use"/>
+          <title>History of medical device use</title>
+          <text>
+            <paragraph ID="dev.1">No known devices in use</paragraph>
+          </text>
+          <entry typeCode="DRIV">
+            <supply classCode="SPLY" moodCode="EVN">
+              <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.5"/>
+              <text>
+                <reference value="#dev.1"/>
+              </text>
+              <effectiveTime xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="IVL_TS">
+                <low nullFlavor="UNK"/>
+              </effectiveTime>
+              <participant typeCode="DEV">
+                <participantRole classCode="MANU">
+                  <playingDevice classCode="DEV" determinerCode="INSTANCE">
+                    <code code="no-known-devices" codeSystem="2.16.840.1.113883.5.1150.1" codeSystemName="IPS Absent And Unknown Data" displayName="No known devices in use"/>
+                  </playingDevice>
+                </participantRole>
+              </participant>
+            </supply>
+          </entry>
+        </section>
+      </component>
+      <component>
+        <section>
+          <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.2.1"/>
+          <templateId root="2.16.840.1.113883.10.20.1.6"/>
+          <id extension="immunization" root="2.16.17.710.813.1000.990.1.11"/>
+          <code code="11369-6" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="History of Immunizations"/>
+          <title>History of Immunizations</title>
+          <text>
+            <paragraph ID="immun.1">Influenza virus vaccine (2023-10-15)</paragraph>
+            <paragraph ID="immun.2">COVID-19 vaccine (2023-03-10)</paragraph>
+          </text>
+          <entry typeCode="DRIV">
+            <substanceAdministration classCode="SBADM" moodCode="EVN">
+              <id extension="immun.1" root="2.16.17.710.813.1000.990.1.11"/>
+              <statusCode code="completed"/>
+              <effectiveTime value="20231015"/>
+            </substanceAdministration>
+          </entry>
+        </section>
+      </component>
+      <component>
+        <section>
+          <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.2.7"/>
+          <id extension="socialhistory" root="2.16.17.710.813.1000.990.1.12"/>
+          <code code="29762-2" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Social History"/>
+          <title>Social History</title>
+          <text>
+            <table border="1">
+              <thead>
+                <tr>
+                  <th>Type</th>
+                  <th>Value</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr ID="social.1">
+                  <td>
+                    <content ID="social.1.type" language="en-GB">Tobacco smoking status</content>
+                  </td>
+                  <td ID="social.1.value">Former smoker</td>
+                </tr>
+                <tr ID="social.2">
+                  <td>
+                    <content ID="social.2.type" language="en-GB">Alcohol consumption</content>
+                  </td>
+                  <td ID="social.2.value">Moderate (1-2 drinks/day)</td>
+                </tr>
+              </tbody>
+            </table>
+          </text>
+          <entry typeCode="DRIV">
+            <observation classCode="OBS" moodCode="EVN">
+              <id extension="social.1" root="2.16.17.710.813.1000.990.1.12"/>
+              <code code="72166-2" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Tobacco smoking status"/>
+              <text>
+                <reference value="#social.1"/>
+              </text>
+              <statusCode code="completed"/>
+              <value code="8517006" codeSystem="2.16.840.1.113883.6.96" displayName="Former smoker" xsi:type="CD"/>
+            </observation>
+          </entry>
+          <entry typeCode="DRIV">
+            <observation classCode="OBS" moodCode="EVN">
+              <id extension="social.2" root="2.16.17.710.813.1000.990.1.12"/>
+              <code code="74013-4" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Alcoholic drinks per day"/>
+              <text>
+                <reference value="#social.2"/>
+              </text>
+              <statusCode code="completed"/>
+              <value value="1.5" unit="/d" xsi:type="PQ"/>
+            </observation>
+          </entry>
+        </section>
+      </component>
+      <component>
+        <section>
+          <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.2.6"/>
+          <id extension="diagnosticresults" root="2.16.17.710.813.1000.990.1.13"/>
+          <code code="30954-2" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Relevant diagnostic tests/laboratory data"/>
+          <title>Laboratory Results</title>
+          <text>
+            <paragraph ID="lab.1">HbA1c: 7.2% (2025-04-15)</paragraph>
+            <paragraph ID="lab.2">MRI Brain (2024-11-20): Normal findings</paragraph>
+          </text>
+          <entry typeCode="DRIV">
+            <observation classCode="OBS" moodCode="EVN">
+              <id extension="lab.1" root="2.16.17.710.813.1000.990.1.13"/>
+              <code code="4548-4" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Hemoglobin A1c/Hemoglobin.total in Blood"/>
+              <statusCode code="completed"/>
+              <effectiveTime value="20250415"/>
+              <value value="7.2" unit="%" xsi:type="PQ"/>
+            </observation>
+          </entry>
+          <entry typeCode="DRIV">
+            <observation classCode="OBS" moodCode="EVN">
+              <id extension="lab.2" root="2.16.17.710.813.1000.990.1.13"/>
+              <code code="LP6406-5" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Magnetic resonance imaging (MRI)"/>
+              <statusCode code="completed"/>
+              <effectiveTime value="20241120"/>
+              <value code="17621005" codeSystem="2.16.840.1.113883.6.96" displayName="Normal" xsi:type="CD"/>
+            </observation>
+          </entry>
+        </section>
+      </component>
+      <component>
+        <section>
+          <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.2.5"/>
+          <id extension="vitalsigns" root="2.16.17.710.813.1000.990.1.14"/>
+          <code code="8716-3" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Vital Signs"/>
+          <title>Vital Signs</title>
+          <text>
+            <paragraph ID="vital.1">Blood Pressure: 135/85 mmHg (2025-05-20)</paragraph>
+            <paragraph ID="vital.2">Weight: 87 kg (2025-05-20)</paragraph>
+            <paragraph ID="vital.3">Height: 178 cm (2025-05-20)</paragraph>
+          </text>
+          <entry typeCode="DRIV">
+            <organizer classCode="CLUSTER" moodCode="EVN">
+              <id extension="vital.1" root="2.16.17.710.813.1000.990.1.14"/>
+              <statusCode code="completed"/>
+              <effectiveTime value="20250520"/>
+              <component>
+                <observation classCode="OBS" moodCode="EVN">
+                  <code code="8480-6" codeSystem="2.16.840.1.113883.6.1" displayName="Systolic blood pressure"/>
+                  <value value="135" unit="mm[Hg]" xsi:type="PQ"/>
+                </observation>
+              </component>
+              <component>
+                <observation classCode="OBS" moodCode="EVN">
+                  <code code="8462-4" codeSystem="2.16.840.1.113883.6.1" displayName="Diastolic blood pressure"/>
+                  <value value="85" unit="mm[Hg]" xsi:type="PQ"/>
+                </observation>
+              </component>
+            </organizer>
+          </entry>
+        </section>
+      </component>
+      <component>
+        <section>
+          <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.2.8"/>
+          <id extension="functionalstatus" root="2.16.17.710.813.1000.990.1.15"/>
+          <code code="47420-5" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Functional Status"/>
+          <title>Functional Status</title>
+          <text>
+            <paragraph ID="func.1">Independent in activities of daily living</paragraph>
+          </text>
+          <entry typeCode="DRIV">
+            <observation classCode="OBS" moodCode="EVN">
+              <id extension="func.1" root="2.16.17.710.813.1000.990.1.15"/>
+              <code code="54522-8" codeSystem="2.16.840.1.113883.6.1" displayName="Functional status"/>
+              <statusCode code="completed"/>
+              <value code="371153006" codeSystem="2.16.840.1.113883.6.96" displayName="Independent" xsi:type="CD"/>
+            </observation>
+          </entry>
+        </section>
+      </component>
+      <component>
+        <section>
+          <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.2.10"/>
+          <id extension="advancedirectives" root="2.16.17.710.813.1000.990.1.16"/>
+          <code code="42348-3" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Advance Directives"/>
+          <title>Advance Directives</title>
+          <text>
+            <paragraph ID="adv.1">No advance directives on file</paragraph>
+          </text>
+          <entry typeCode="DRIV">
+            <observation classCode="OBS" moodCode="EVN">
+              <id extension="adv.1" root="2.16.17.710.813.1000.990.1.16"/>
+              <code code="304253006" codeSystem="2.16.840.1.113883.6.96" displayName="Not known"/>
+              <statusCode code="completed"/>
+            </observation>
+          </entry>
+        </section>
+      </component>
+    </structuredBody>
+  </component>
 </ClinicalDocument>
