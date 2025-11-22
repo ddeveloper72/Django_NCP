@@ -97,7 +97,7 @@ class AllergiesSectionService(ClinicalServiceBase):
                 'reaction_type': self._extract_field_value(allergy_data, 'reaction_type', 'Propensity to adverse reaction'),
                 'clinical_manifestation': self._extract_field_value(allergy_data, 'clinical_manifestation', 'Not specified'),
                 'agent': self._extract_field_value(allergy_data, 'agent', 'Unknown allergen'),
-                'time': self._format_cda_date(self._extract_field_value(allergy_data, 'time', 'Not specified')),
+                'time': self._extract_field_value(allergy_data, 'time', 'Not specified'),  # Already formatted in extract_from_cda
                 'severity': self._extract_field_value(allergy_data, 'severity', 'Not specified'),
                 'criticality': self._extract_field_value(allergy_data, 'criticality', 'Not specified'),
                 'status': self._extract_field_value(allergy_data, 'status', 'Active'),
@@ -107,7 +107,7 @@ class AllergiesSectionService(ClinicalServiceBase):
                 # Backward compatibility fields
                 'substance': self._extract_field_value(allergy_data, 'substance', 'Unknown allergen'),
                 'reaction': self._extract_field_value(allergy_data, 'clinical_manifestation', 'Not specified'),
-                'onset_date': self._format_cda_date(self._extract_field_value(allergy_data, 'time', 'Not specified')),
+                'onset_date': self._extract_field_value(allergy_data, 'time', 'Not specified'),  # Already formatted
                 'verification_status': self._extract_field_value(allergy_data, 'certainty', 'Confirmed'),
                 
                 'source': 'cda_extraction_enhanced'
