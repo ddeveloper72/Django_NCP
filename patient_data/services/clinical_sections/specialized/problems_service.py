@@ -140,11 +140,30 @@ class ProblemsSectionService(CTSIntegrationMixin, ClinicalServiceBase):
         # Strategy 1: Extract from structured entries
         entries = section.findall('.//hl7:entry', self.namespaces)
         for entry in entries:
-            observation = entry.find('.//hl7:observation', self.namespaces)
-            if observation is not None:
-                problem = self._parse_problem_observation(observation)
-                if problem:
-                    problems.append(problem)
+            # Look for act element (Concern Act wrapper)
+            act = entry.find('.//hl7:act', self.namespaces)
+            if act is not None:
+                # Find the problem observation within entryRelationship
+                # The problem observation has typeCode="SUBJ" and inversionInd="false"
+                entry_rels = act.findall('.//hl7:entryRelationship', self.namespaces)
+                for rel in entry_rels:
+                    # Look for the actual problem observation (not status/severity)
+                    if rel.get('typeCode') == 'SUBJ' and rel.get('inversionInd') == 'false':
+                        observation = rel.find('.//hl7:observation', self.namespaces)
+                        if observation is not None:
+                            problem = self._parse_problem_observation(observation)
+                            if problem:
+                                # Also extract status and severity from sibling entryRelationships
+                                problem = self._enhance_problem_with_status_severity(act, problem)
+                                problems.append(problem)
+                                break  # Only process one problem per act
+            else:
+                # Fallback: Look for direct observation (some CDAs don't use act wrapper)
+                observation = entry.find('.//hl7:observation', self.namespaces)
+                if observation is not None:
+                    problem = self._parse_problem_observation(observation)
+                    if problem:
+                        problems.append(problem)
         
         # Strategy 2: Extract from narrative text
         if not problems:
@@ -562,6 +581,54 @@ class ProblemsSectionService(CTSIntegrationMixin, ClinicalServiceBase):
             return f"Until {resolution_formatted}"
         else:
             return "Not specified"
+    
+    def _enhance_problem_with_status_severity(self, act, problem: Dict[str, Any]) -> Dict[str, Any]:
+        """Extract status and severity from act's entryRelationships and add to problem."""
+        # Look for status observation (typeCode="REFR")
+        status_rels = act.findall('.//hl7:entryRelationship[@typeCode="REFR"]', self.namespaces)
+        for rel in status_rels:
+            obs = rel.find('.//hl7:observation', self.namespaces)
+            if obs is not None:
+                code_elem = obs.find('hl7:code', self.namespaces)
+                if code_elem is not None and code_elem.get('code') in ['33999-4', 'status']:
+                    value_elem = obs.find('hl7:value', self.namespaces)
+                    if value_elem is not None:
+                        status_display = value_elem.get('displayName', '')
+                        status_code = value_elem.get('code', '')
+                        if status_display:
+                            problem['clinical_status'] = status_display
+                        elif status_code:
+                            # Map SNOMED CT status codes
+                            status_map = {
+                                '55561003': 'Active',
+                                '73425007': 'Inactive',
+                                '413322009': 'Resolved'
+                            }
+                            problem['clinical_status'] = status_map.get(status_code, status_code)
+        
+        # Look for severity observation (typeCode="SUBJ")
+        severity_rels = act.findall('.//hl7:entryRelationship[@typeCode="SUBJ"]', self.namespaces)
+        for rel in severity_rels:
+            obs = rel.find('.//hl7:observation', self.namespaces)
+            if obs is not None:
+                code_elem = obs.find('hl7:code', self.namespaces)
+                if code_elem is not None and code_elem.get('code') == 'SEV':
+                    value_elem = obs.find('hl7:value', self.namespaces)
+                    if value_elem is not None:
+                        severity_display = value_elem.get('displayName', '')
+                        severity_code = value_elem.get('code', '')
+                        if severity_display:
+                            problem['severity'] = severity_display
+                        elif severity_code:
+                            # Map SNOMED CT severity codes
+                            severity_map = {
+                                '24484000': 'Severe',
+                                '6736007': 'Moderate',
+                                '255604002': 'Mild'
+                            }
+                            problem['severity'] = severity_map.get(severity_code, severity_code)
+        
+        return problem
     
     def _parse_problem_narrative(self, text: str) -> Dict[str, Any]:
         """Parse problem information from narrative text."""
