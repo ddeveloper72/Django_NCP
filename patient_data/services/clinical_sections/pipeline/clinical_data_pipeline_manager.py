@@ -96,6 +96,16 @@ class ClinicalDataPipelineManager:
                 # Extract data using the service
                 section_data = service.extract_from_cda(cda_content)
                 
+                # Enhance and store data if we have a request object (full API mode)
+                if request is not None and section_data:
+                    try:
+                        enhanced_data = service.enhance_and_store(request, session_id, section_data)
+                        section_data = enhanced_data  # Use enhanced data for results
+                        logger.info(f"[PIPELINE MANAGER] Enhanced and stored {len(enhanced_data)} items for section {section_code}")
+                    except Exception as enhance_error:
+                        logger.warning(f"[PIPELINE MANAGER] Could not enhance section {section_code}: {enhance_error}")
+                        # Continue with raw data if enhancement fails
+                
                 results[section_code] = {
                     'section_name': service.get_section_name(),
                     'section_code': section_code,
