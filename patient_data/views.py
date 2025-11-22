@@ -2319,9 +2319,19 @@ def direct_patient_view(request, patient_id):
 
         from .models import PatientSession
 
-        # Generate a unique session ID (same pattern as normal search)
-        session_id = str(uuid.uuid4().int)[:10]  # 10-digit session ID
+        # Generate a consistent session ID based on patient identifier and country
+        # This ensures the same patient always gets the same session ID
+        import hashlib
+        patient_hash_input = f"{target_patient['country_code']}_{target_patient['patient_id']}_{target_patient.get('birth_date', '')}"
+        session_id = str(int(hashlib.md5(patient_hash_input.encode()).hexdigest(), 16))[:10]
 
+        # Build available document types list
+        available_types = []
+        if match.has_l1_cda():
+            available_types.append("L1")
+        if match.has_l3_cda():
+            available_types.append("L3")
+        
         # Prepare patient data for secure storage (same format as normal search)
         patient_session_data = {
             "file_path": match.file_path,
@@ -2329,21 +2339,16 @@ def direct_patient_view(request, patient_id):
             "confidence_score": 1.0,  # 100% confidence for direct access
             "patient_data": patient_data,
             "cda_content": match.cda_content,
-            # Enhanced L1/L3 CDA support
-            "l1_cda_content": getattr(match, "l1_cda_content", None),
-            "l3_cda_content": getattr(match, "l3_cda_content", None),
-            "l1_cda_path": getattr(match, "l1_cda_path", None),
-            "l3_cda_path": getattr(match, "l3_cda_path", None),
-            "preferred_cda_type": getattr(match, "preferred_cda_type", "L3"),  # Use actual detected type
-            "has_l1": getattr(match, "has_l1", False),
-            "has_l3": getattr(match, "has_l3", True),
+            # Enhanced L1/L3 CDA support - use method calls
+            "preferred_cda_type": match.preferred_cda_type,
+            "has_l1": match.has_l1_cda(),
+            "has_l3": match.has_l3_cda(),
             # Enhanced multiple document support
-            "l1_documents": getattr(match, "l1_documents", []),
-            "l3_documents": getattr(match, "l3_documents", []),
+            "l1_documents": match.l1_documents or [],
+            "l3_documents": match.l3_documents or [],
             "selected_l1_index": 0,
             "selected_l3_index": 0,
-            "document_summary": {},
-            "available_document_types": ["L3"],
+            "available_document_types": available_types,
             # Automation context
             "automated_search": database_record is not None,
             "original_database_id": patient_id if database_record else None,
@@ -2487,9 +2492,11 @@ def patient_details_view(request, patient_id):
 
                 # Perform the search
                 search_service = EUPatientSearchService()
-                search_result = search_service.search_patient(credentials)
+                search_results = search_service.search_patient(credentials)
 
-                if search_result:
+                if search_results and len(search_results) > 0:
+                    # Take the first match (best match)
+                    search_result = search_results[0]
                     logger.info(f"Direct search successful for patient {patient_id}")
 
                     # Store in session for future access
@@ -2506,8 +2513,10 @@ def patient_details_view(request, patient_id):
                         "confidence_score": search_result.confidence_score,
                         "country_code": target_patient["country_code"],
                         "preferred_cda_type": search_result.preferred_cda_type,  # Use actual detected type instead of hardcoded L3
-                        "has_l1": search_result.has_l1,
-                        "has_l3": search_result.has_l3,
+                        "has_l1": search_result.has_l1_cda(),
+                        "has_l3": search_result.has_l3_cda(),
+                        "l1_documents": search_result.l1_documents or [],
+                        "l3_documents": search_result.l3_documents or [],
                     }
 
                     # Store in session
@@ -2581,19 +2590,6 @@ def patient_details_view(request, patient_id):
     # Log session data status
     if match_data:
         logger.info("Found session data for patient %s", patient_id)
-        
-        # CHECK: If patient has multiple L1 documents, redirect to document selection page
-        l1_documents = match_data.get("l1_documents", [])
-        l3_documents = match_data.get("l3_documents", [])
-        
-        if len(l1_documents) > 1:
-            # Multiple L1 documents available - redirect to selection page
-            logger.info(f"Patient {patient_id} has {len(l1_documents)} L1 documents - redirecting to selection page")
-            return redirect("patient_data:select_document", patient_id=patient_id)
-        elif len(l1_documents) == 1 and len(l3_documents) > 0:
-            # Has both L1 and L3 - redirect to selection page to let user choose
-            logger.info(f"Patient {patient_id} has L1 and L3 documents - redirecting to selection page")
-            return redirect("patient_data:select_document", patient_id=patient_id)
     else:
         logger.warning("No session data found for patient %s", patient_id)
 
@@ -2720,6 +2716,9 @@ def patient_details_view(request, patient_id):
             ),
             match_data["country_code"],
         )
+        
+        # DEBUG: Log document counts from match_data
+        logger.info(f"[DOCUMENT_COUNT_DEBUG] Patient {patient_id}: l1_documents={len(match_data.get('l1_documents', []))}, l3_documents={len(match_data.get('l3_documents', []))}")
 
         # Extract clinical arrays for Clinical Information tab
         clinical_arrays = {
@@ -2855,6 +2854,9 @@ def patient_details_view(request, patient_id):
                 "selected_l3_index": match_data.get("selected_l3_index", 0),
             }
         )
+        
+        # DEBUG: Verify document lists in context
+        logger.info(f"[CONTEXT_DEBUG] Patient {patient_id}: context l1_documents={len(context.get('l1_documents', []))}, l3_documents={len(context.get('l3_documents', []))}")
 
         # Add clinical arrays to context if available (unpack for template compatibility)
         if clinical_arrays:
@@ -3023,6 +3025,9 @@ def patient_details_view(request, patient_id):
             })
             logger.info(f"[PATIENT_DETAILS] Added empty clinical arrays to context for patient {patient_id}")
 
+        # FINAL DEBUG: Verify document lists just before rendering template
+        logger.info(f"[FINAL_RENDER_DEBUG] Patient {patient_id}: Rendering template with l1_documents={len(context.get('l1_documents', []))}, l3_documents={len(context.get('l3_documents', []))}, l1_available={context.get('l1_available', False)}, l3_available={context.get('l3_available', False)}")
+        
         return render(request, "patient_data/patient_details.html", context)
     else:
         # Session data is missing - provide fallback with clear message
@@ -6745,6 +6750,9 @@ def select_document_view(request, patient_id):
                     match_data["selected_l1_index"] = document_index
                     # Update preferred CDA type to L1 since user selected an L1 document
                     match_data["preferred_cda_type"] = "L1"
+                    # Set CDA availability flags for ContextBuilder detection
+                    match_data["has_l1"] = True
+                    match_data["has_l3"] = False
                     # Load the actual CDA content from the selected document
                     try:
                         with open(selected_doc["path"], "r", encoding="utf-8") as f:
@@ -6769,6 +6777,9 @@ def select_document_view(request, patient_id):
                     match_data["selected_l3_index"] = document_index
                     # Update preferred CDA type to L3 since user selected an L3 document
                     match_data["preferred_cda_type"] = "L3"
+                    # Set CDA availability flags for ContextBuilder detection
+                    match_data["has_l1"] = False
+                    match_data["has_l3"] = True
                     # Load the actual CDA content from the selected document
                     try:
                         with open(selected_doc["path"], "r", encoding="utf-8") as f:
@@ -6788,7 +6799,7 @@ def select_document_view(request, patient_id):
                     )
 
             # Redirect to the CDA viewer to show the selected document
-            return redirect("patient_data:patient_cda", session_id=patient_id)
+            return redirect("patient_data:patient_cda_view", session_id=patient_id)
 
         # GET request - show document selection form
         context = {

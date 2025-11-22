@@ -192,7 +192,7 @@
                                                                 <strong>Patient ID:</strong> {{ patient.patient_id }}<br>
                                                                 <strong>Country:</strong> {{ patient.country_code }}<br>
                                                                 <strong>Documents:</strong>
-                                                                {{ patient.l1_count }} L1, {{ patient.l3_count }} L3
+                                                                {% if patient.l1_count > 0 %}L1{% endif %}{% if patient.l2_count > 0 %}{% if patient.l1_count > 0 %}, {% endif %}L2{% endif %}{% if patient.l3_count > 0 %}{% if patient.l1_count > 0 or patient.l2_count > 0 %}, {% endif %}L3{% endif %}
                                                             </small>
                                                         </p>
                                                         <div class="btn-group w-100 mt-auto" role="group">

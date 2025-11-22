@@ -91,6 +91,9 @@ class CDADocumentInfo:
     assigning_authority: str
     last_modified: float
     file_size: int
+    document_title: str = None  # Document title from <title> element
+    document_extension: str = None  # Document ID extension from <id>
+    document_root: str = None  # Document ID root from <id>
 
     def to_dict(self) -> Dict:
         return asdict(self)
@@ -181,6 +184,22 @@ class CDADocumentIndexer:
                     gender_map = {"M": "Male", "F": "Female", "U": "Unknown"}
                     gender = gender_map.get(gender_code, gender_code)
 
+            # Extract document metadata from ClinicalDocument root
+            document_title = "Untitled Document"
+            document_extension = ""
+            document_root = ""
+
+            # Extract document title
+            title_elem = root.find(".//hl7:title", namespaces)
+            if title_elem is not None and title_elem.text:
+                document_title = title_elem.text.strip()
+
+            # Extract document ID (not patient ID - at ClinicalDocument level)
+            doc_id = root.find("hl7:id", namespaces)
+            if doc_id is not None:
+                document_extension = doc_id.get("extension", "")
+                document_root = doc_id.get("root", "")
+
             return {
                 "patient_id": patient_id,
                 "given_name": given_name,
@@ -188,6 +207,9 @@ class CDADocumentIndexer:
                 "birth_date": birth_date,
                 "gender": gender,
                 "assigning_authority": assigning_authority,
+                "document_title": document_title,
+                "document_extension": document_extension,
+                "document_root": document_root,
             }
 
         except Exception as e:
@@ -290,6 +312,9 @@ class CDADocumentIndexer:
                             assigning_authority=patient_info["assigning_authority"],
                             last_modified=stat.st_mtime,
                             file_size=stat.st_size,
+                            document_title=patient_info.get("document_title", "Untitled Document"),
+                            document_extension=patient_info.get("document_extension", ""),
+                            document_root=patient_info.get("document_root", ""),
                         )
 
                         documents.append(doc_info)
@@ -389,6 +414,12 @@ class CDADocumentIndexer:
             # Use the first document to get patient info
             if documents:
                 doc = documents[0]
+                
+                # Count L1, L2, L3 documents
+                l1_count = sum(1 for d in documents if d.cda_type == "L1")
+                l2_count = sum(1 for d in documents if d.cda_type == "L2")
+                l3_count = sum(1 for d in documents if d.cda_type == "L3")
+                
                 patients.append(
                     {
                         "patient_id": patient_id,
@@ -399,6 +430,9 @@ class CDADocumentIndexer:
                         "country_code": doc.country_code,
                         "assigning_authority": doc.assigning_authority,
                         "document_count": len(documents),
+                        "l1_count": l1_count,
+                        "l2_count": l2_count,
+                        "l3_count": l3_count,
                         "cda_types": list(set(d.cda_type for d in documents)),
                     }
                 )

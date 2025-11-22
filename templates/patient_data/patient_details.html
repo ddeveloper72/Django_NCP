@@ -192,8 +192,9 @@
                         {% endwith %}
 
                         <!-- Document Selection - Multiple Documents Available -->
-                        {% if l1_available and l3_available %}
-                        {% with total_docs=2 %}
+                        {% if l1_documents|length > 1 or l3_documents|length > 1 or l1_available and l3_available %}
+                        {% with l1_count=l1_documents|length l3_count=l3_documents|length %}
+                        {% with total_docs=l1_count|add:l3_count %}
                         <a href="{% url 'patient_data:select_document' patient_id %}" class="btn btn-outline-primary d-flex align-items-center justify-content-between">
                             <div class="d-flex align-items-center">
                                 <i class="fa-solid fa-list me-2"></i>
@@ -203,6 +204,7 @@
                                 </div>
                             </div>
                         </a>
+                        {% endwith %}
                         {% endwith %}
                         {% endif %}
 

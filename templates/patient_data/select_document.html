@@ -15,7 +15,7 @@
                         Select CDA Document for {{ patient_data.given_name }} {{ patient_data.family_name }}
                     </h5>
                     {% if patient_id %}
-                    <a href="{% url 'patient_data:patient_details' patient_id %}"
+                    <a href="{% url 'patient_data:patient_details' patient_id %}?skip_redirect=1"
                         class="btn btn-secondary btn-sm">
                         <i class="fa-solid fa-arrow-left"></i> Back to Details
                     </a>
@@ -73,16 +73,21 @@
                                                 value="{{ forloop.counter0 }}" id="l1_doc_{{ forloop.counter0 }}" {% if forloop.counter0 == selected_l1_index %}checked{% endif %}>
                                             <label class="form-check-label w-100" for="l1_doc_{{ forloop.counter0 }}">
                                                 <div class="d-flex justify-content-between align-items-start">
-                                                    <div>
-                                                        <strong>L1 Document {{ forloop.counter }}</strong>
-                                                        <br>
-                                                        <small class="text-muted">{{ doc.path | basename }}</small>
+                                                    <div class="flex-grow-1">
+                                                        <strong class="d-block mb-1">{{ doc.title }}</strong>
+                                                        <small class="text-muted d-block">File: {{ doc.path | basename }}</small>
+                                                        {% if doc.extension %}
+                                                        <small class="text-muted d-block">Extension: {{ doc.extension }}</small>
+                                                        {% endif %}
+                                                        {% if doc.root %}
+                                                        <small class="text-muted d-block">Root: {{ doc.root }}</small>
+                                                        {% endif %}
                                                         {% if forloop.counter0 == selected_l1_index %}
-                                                        <br><small class="text-primary"><i class="fa-solid fa-check"></i>
+                                                        <small class="text-primary d-block mt-1"><i class="fa-solid fa-check"></i>
                                                             Currently Selected</small>
                                                         {% endif %}
                                                     </div>
-                                                    <div class="text-end">
+                                                    <div class="text-end ms-3">
                                                         <span class="badge bg-primary">L1</span>
                                                         <br>
                                                         <small class="text-muted">{{ doc.size }} bytes</small>
@@ -122,16 +127,21 @@
                                                 value="{{ forloop.counter0 }}" id="l3_doc_{{ forloop.counter0 }}" {% if forloop.counter0 == selected_l3_index %}checked{% endif %}>
                                             <label class="form-check-label w-100" for="l3_doc_{{ forloop.counter0 }}">
                                                 <div class="d-flex justify-content-between align-items-start">
-                                                    <div>
-                                                        <strong>L3 Document {{ forloop.counter }}</strong>
-                                                        <br>
-                                                        <small class="text-muted">{{ doc.path | basename }}</small>
+                                                    <div class="flex-grow-1">
+                                                        <strong class="d-block mb-1">{{ doc.title }}</strong>
+                                                        <small class="text-muted d-block">File: {{ doc.path | basename }}</small>
+                                                        {% if doc.extension %}
+                                                        <small class="text-muted d-block">Extension: {{ doc.extension }}</small>
+                                                        {% endif %}
+                                                        {% if doc.root %}
+                                                        <small class="text-muted d-block">Root: {{ doc.root }}</small>
+                                                        {% endif %}
                                                         {% if forloop.counter0 == selected_l3_index %}
-                                                        <br><small class="text-success"><i class="fa-solid fa-check"></i>
+                                                        <small class="text-success d-block mt-1"><i class="fa-solid fa-check"></i>
                                                             Currently Selected</small>
                                                         {% endif %}
                                                     </div>
-                                                    <div class="text-end">
+                                                    <div class="text-end ms-3">
                                                         <span class="badge bg-success">L3</span>
                                                         <br>
                                                         <small class="text-muted">{{ doc.size }} bytes</small>
@@ -162,7 +172,7 @@
                         <div class="col-12">
                             <div class="d-flex justify-content-between">
                                 {% if patient_id %}
-                                <a href="{% url 'patient_data:patient_details' patient_id %}"
+                                <a href="{% url 'patient_data:patient_details' patient_id %}?skip_redirect=1"
                                     class="btn btn-outline-secondary">
                                     <i class="fa-solid fa-arrow-left"></i> Back to Patient Details
                                 </a>

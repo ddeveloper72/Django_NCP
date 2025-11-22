@@ -346,6 +346,9 @@ class EUPatientSearchService:
                         "description": f"L1 Document {i+1} ({os.path.basename(l1_doc.file_path)})",
                         "size": str(l1_doc.file_size),
                         "last_modified": str(l1_doc.last_modified),
+                        "title": l1_doc.document_title or "Untitled Document",
+                        "extension": l1_doc.document_extension or "",
+                        "root": l1_doc.document_root or "",
                     }
                     l1_document_list.append(doc_info)
 
@@ -356,6 +359,9 @@ class EUPatientSearchService:
                         "description": f"L3 Document {i+1} ({os.path.basename(l3_doc.file_path)})",
                         "size": str(l3_doc.file_size),
                         "last_modified": str(l3_doc.last_modified),
+                        "title": l3_doc.document_title or "Untitled Document",
+                        "extension": l3_doc.document_extension or "",
+                        "root": l3_doc.document_root or "",
                     }
                     l3_document_list.append(doc_info)
 
