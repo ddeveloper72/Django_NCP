@@ -96,9 +96,9 @@ class VitalSignsSectionService(ClinicalServiceBase):
             enhanced_vital = {
                 'name': self._extract_field_value(vital_data, 'name', 'Unknown measurement'),
                 'display_name': self._extract_field_value(vital_data, 'name', 'Unknown measurement'),
-                'value': self._extract_field_value(vital_data, 'value'),
+                'value': self._extract_field_value(vital_data, 'value', ''),
                 'unit': self._extract_field_value(vital_data, 'unit', ''),
-                'date': self._format_cda_date(self._extract_field_value(vital_data, 'date')),
+                'date': self._format_cda_date(self._extract_field_value(vital_data, 'date', '')),
                 'status': self._extract_field_value(vital_data, 'status', 'Final'),
                 'reference_range': self._extract_field_value(vital_data, 'reference_range', ''),
                 'source': 'cda_extraction_enhanced',
@@ -151,14 +151,24 @@ class VitalSignsSectionService(ClinicalServiceBase):
         self.logger.info(f"[VITAL SIGNS SERVICE] Found {len(organizers)} organizers")
         
         for organizer in organizers:
+            # Extract date from organizer level (applies to all observations in this organizer)
+            organizer_time_elem = organizer.find('hl7:effectiveTime', self.namespaces)
+            organizer_date = ""
+            if organizer_time_elem is not None:
+                organizer_date = organizer_time_elem.get('value', '')
+                if not organizer_date:
+                    low_elem = organizer_time_elem.find('hl7:low', self.namespaces)
+                    if low_elem is not None:
+                        organizer_date = low_elem.get('value', '')
+            
             # Find all component observations within the organizer
             components = organizer.findall('.//hl7:component/hl7:observation', self.namespaces)
-            self.logger.info(f"[VITAL SIGNS SERVICE] Found {len(components)} observations in organizer")
+            self.logger.info(f"[VITAL SIGNS SERVICE] Found {len(components)} observations in organizer with date: {organizer_date}")
             
             for observation in components:
-                vital = self._parse_vital_observation(observation)
+                vital = self._parse_vital_observation(observation, organizer_date)
                 if vital:
-                    self.logger.info(f"[VITAL SIGNS SERVICE] Parsed vital: {vital.get('name')} = {vital.get('value')} {vital.get('unit')}")
+                    self.logger.info(f"[VITAL SIGNS SERVICE] Parsed vital: {vital.get('name')} = {vital.get('value')} {vital.get('unit')} on {vital.get('date')}")
                     vitals.append(vital)
                 else:
                     self.logger.warning("[VITAL SIGNS SERVICE] Failed to parse observation")
@@ -180,8 +190,13 @@ class VitalSignsSectionService(ClinicalServiceBase):
         self.logger.info(f"[VITAL SIGNS SERVICE] Total vitals parsed: {len(vitals)}")
         return vitals
     
-    def _parse_vital_observation(self, observation) -> Dict[str, Any]:
-        """Parse vital sign observation into structured data."""
+    def _parse_vital_observation(self, observation, organizer_date: str = "") -> Dict[str, Any]:
+        """Parse vital sign observation into structured data.
+        
+        Args:
+            observation: The observation element
+            organizer_date: Date from parent organizer (applies to all observations)
+        """
         # Extract LOINC code and display name
         code_elem = observation.find('hl7:code', self.namespaces)
         vital_code = ""
@@ -213,11 +228,18 @@ class VitalSignsSectionService(ClinicalServiceBase):
             value = value_elem.get('value', '')
             unit = value_elem.get('unit', '')
         
-        # Extract date
+        # Extract date from observation, or use organizer date as fallback
         time_elem = observation.find('hl7:effectiveTime', self.namespaces)
         date = ""
         if time_elem is not None:
             date = time_elem.get('value', '')
+            if not date:
+                low_elem = time_elem.find('hl7:low', self.namespaces)
+                if low_elem is not None:
+                    date = low_elem.get('value', '')
+        # Use organizer date if observation has no date
+        if not date and organizer_date:
+            date = organizer_date
         
         # Extract status
         status_elem = observation.find('hl7:statusCode', self.namespaces)

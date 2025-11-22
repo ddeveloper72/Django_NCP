@@ -284,7 +284,18 @@ class ProceduresSectionService(ClinicalServiceBase):
         time_elem = procedure_elem.find('hl7:effectiveTime', self.namespaces)
         date = "Not specified"
         if time_elem is not None:
-            date = time_elem.get('value', 'Not specified')
+            # Try value attribute first (simple effectiveTime)
+            date = time_elem.get('value')
+            # If no value attribute, check for low element (interval effectiveTime)
+            if not date:
+                low_elem = time_elem.find('hl7:low', self.namespaces)
+                if low_elem is not None:
+                    date = low_elem.get('value', 'Not specified')
+                else:
+                    date = 'Not specified'
+            # If still no date, set default
+            if not date:
+                date = 'Not specified'
         
         # Extract status
         status_elem = procedure_elem.find('hl7:statusCode', self.namespaces)
@@ -388,13 +399,13 @@ class ProceduresSectionService(ClinicalServiceBase):
     
     def _format_procedure_date(self, cda_date: str) -> str:
         """
-        Format CDA date string to ISO format (YYYY-MM-DD)
+        Format CDA date string to dd/mm/yyyy format
         
         Args:
             cda_date: CDA date string (e.g., "20141020" or "2014-10-20")
             
         Returns:
-            str: Formatted date string in YYYY-MM-DD format
+            str: Formatted date string in dd/mm/yyyy format
         """
         from datetime import datetime
         import re
@@ -411,20 +422,19 @@ class ProceduresSectionService(ClinicalServiceBase):
                 # Format: YYYYMMDD
                 date_obj = datetime.strptime(date_clean, '%Y%m%d')
             elif '-' in date_clean:
-                # Format: YYYY-MM-DD (already correct)
-                return date_clean
+                # Format: YYYY-MM-DD - parse and reformat
+                date_obj = datetime.strptime(date_clean, '%Y-%m-%d')
             elif '/' in date_clean:
-                # Format: MM/DD/YYYY or DD/MM/YYYY
+                # Format: Already dd/mm/yyyy
                 parts = date_clean.split('/')
-                if len(parts[2]) == 4:  # YYYY is 4 digits
-                    date_obj = datetime.strptime(date_clean, '%m/%d/%Y')
-                else:
-                    date_obj = datetime.strptime(date_clean, '%d/%m/%Y')
+                if len(parts) == 3 and len(parts[2]) == 4:
+                    return date_clean  # Already correct format
+                date_obj = datetime.strptime(date_clean, '%d/%m/%Y')
             else:
                 return cda_date  # Return original if format unknown
             
-            # Format as "YYYY-MM-DD"
-            return date_obj.strftime("%Y-%m-%d")
+            # Format as "dd/mm/yyyy"
+            return date_obj.strftime("%d/%m/%Y")
             
         except (ValueError, IndexError) as e:
             self.logger.warning(f"Could not parse procedure date '{cda_date}': {e}")

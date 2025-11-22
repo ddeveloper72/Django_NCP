@@ -2980,6 +2980,32 @@ def patient_details_view(request, patient_id):
                 else:
                     logger.info("[ENHANCED_PROBLEMS] No enhanced problems found in context or session")
             
+            # ENHANCED VITAL SIGNS: Check if enhanced vital signs already in context (from CDA processor), 
+            # otherwise check session for enhanced vital signs and override if available
+            if 'vital_signs' in context and len(context['vital_signs']) > 0:
+                # Check if first vital sign has enhanced data structure (from CDA processor)
+                first_vital = context['vital_signs'][0]
+                if 'data' in first_vital and isinstance(first_vital['data'], dict):
+                    logger.info(f"[ENHANCED_VITAL_SIGNS] Using {len(context['vital_signs'])} enhanced vital signs already in context from CDA processor")
+                    logger.info(f"[ENHANCED_VITAL_SIGNS] First vital: {first_vital.get('data', {}).get('vital_name', {}).get('value', 'Unknown')}")
+                else:
+                    # Fallback to session-based enhanced vital signs
+                    enhanced_vital_signs = request.session.get('enhanced_vital_signs')
+                    if enhanced_vital_signs:
+                        logger.info(f"[ENHANCED_VITAL_SIGNS] Found {len(enhanced_vital_signs)} enhanced vital signs in session, overriding clinical arrays")
+                        context["vital_signs"] = enhanced_vital_signs
+                        logger.info(f"[ENHANCED_VITAL_SIGNS] First vital: {enhanced_vital_signs[0].get('name', 'Unknown')} - Value: {enhanced_vital_signs[0].get('value', 'N/A')} - Date: {enhanced_vital_signs[0].get('date', 'N/A')}")
+                    else:
+                        logger.info("[ENHANCED_VITAL_SIGNS] No enhanced vital signs found in session, using clinical arrays")
+            else:
+                # No vital signs in context, check session
+                enhanced_vital_signs = request.session.get('enhanced_vital_signs')
+                if enhanced_vital_signs:
+                    logger.info(f"[ENHANCED_VITAL_SIGNS] Found {len(enhanced_vital_signs)} enhanced vital signs in session")
+                    context["vital_signs"] = enhanced_vital_signs
+                else:
+                    logger.info("[ENHANCED_VITAL_SIGNS] No enhanced vital signs found in context or session")
+            
             # PHASE 3B: Add administrative and healthcare data to context for Healthcare Team & Contacts tab
             context.update({
                 "administrative_data": administrative_data,
