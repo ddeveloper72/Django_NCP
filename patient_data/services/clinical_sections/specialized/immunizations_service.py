@@ -93,6 +93,10 @@ class ImmunizationsSectionService(ClinicalServiceBase):
             if 'display_name' not in enhanced_immunization:
                 enhanced_immunization['display_name'] = enhanced_immunization.get('name', 'Unknown vaccine')
             
+            # Format date_administered if present
+            if 'date_administered' in enhanced_immunization and enhanced_immunization['date_administered']:
+                enhanced_immunization['date_administered'] = self._format_cda_date(enhanced_immunization['date_administered'])
+            
             # Mark as enhanced
             enhanced_immunization['source'] = 'cda_extraction_enhanced'
             enhanced_immunization['enhanced_data'] = True

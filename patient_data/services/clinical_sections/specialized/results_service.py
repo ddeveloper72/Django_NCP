@@ -99,6 +99,10 @@ class ResultsSectionService(ClinicalServiceBase):
             if 'display_name' not in enhanced_result:
                 enhanced_result['display_name'] = enhanced_result.get('name', 'Unknown test')
             
+            # Format date field if present
+            if 'date' in enhanced_result and enhanced_result['date'] != 'Not specified':
+                enhanced_result['date'] = self._format_cda_date(enhanced_result['date'])
+            
             # Mark as enhanced
             enhanced_result['source'] = 'cda_extraction_enhanced'
             

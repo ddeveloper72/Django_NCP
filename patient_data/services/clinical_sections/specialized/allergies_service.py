@@ -97,7 +97,7 @@ class AllergiesSectionService(ClinicalServiceBase):
                 'reaction_type': self._extract_field_value(allergy_data, 'reaction_type', 'Propensity to adverse reaction'),
                 'clinical_manifestation': self._extract_field_value(allergy_data, 'clinical_manifestation', 'Not specified'),
                 'agent': self._extract_field_value(allergy_data, 'agent', 'Unknown allergen'),
-                'time': self._extract_field_value(allergy_data, 'time', 'Not specified'),
+                'time': self._format_cda_date(self._extract_field_value(allergy_data, 'time', 'Not specified')),
                 'severity': self._extract_field_value(allergy_data, 'severity', 'Not specified'),
                 'criticality': self._extract_field_value(allergy_data, 'criticality', 'Not specified'),
                 'status': self._extract_field_value(allergy_data, 'status', 'Active'),
@@ -107,7 +107,7 @@ class AllergiesSectionService(ClinicalServiceBase):
                 # Backward compatibility fields
                 'substance': self._extract_field_value(allergy_data, 'substance', 'Unknown allergen'),
                 'reaction': self._extract_field_value(allergy_data, 'clinical_manifestation', 'Not specified'),
-                'onset_date': self._extract_field_value(allergy_data, 'time', 'Not specified'),
+                'onset_date': self._format_cda_date(self._extract_field_value(allergy_data, 'time', 'Not specified')),
                 'verification_status': self._extract_field_value(allergy_data, 'certainty', 'Confirmed'),
                 
                 'source': 'cda_extraction_enhanced'
@@ -725,7 +725,7 @@ class AllergiesSectionService(ClinicalServiceBase):
         return "Unknown allergen"
     
     def _format_cda_date(self, date_str: str) -> str:
-        """Format CDA date string to readable format."""
+        """Format CDA date string to dd/mm/yyyy ISO format."""
         if not date_str or date_str == "Not specified":
             return date_str
         
@@ -737,13 +737,13 @@ class AllergiesSectionService(ClinicalServiceBase):
                 year = clean_date[:4]
                 month = clean_date[4:6]
                 day = clean_date[6:8]
-                return f"{year}-{month}-{day}"
+                return f"{day}/{month}/{year}"
             elif len(clean_date) == 4:  # YYYY
                 return clean_date
             elif len(clean_date) == 6:  # YYYYMM
                 year = clean_date[:4]
                 month = clean_date[4:6]
-                return f"{year}-{month}"
+                return f"{month}/{year}"
             else:
                 return date_str
         except Exception as e:
