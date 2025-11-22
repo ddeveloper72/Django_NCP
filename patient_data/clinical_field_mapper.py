@@ -459,7 +459,9 @@ class ClinicalFieldMapper:
             vital_name = self._extract_vital_sign_name(vital_sign)
             vital_value = vital_sign.get("value", vital_sign.get("observation_value", ""))
             vital_unit = vital_sign.get("unit", "")
-            vital_date = vital_sign.get("date", "")  # Already formatted by comprehensive service
+            vital_date_raw = vital_sign.get("date", "")
+            # Format date to dd/mm/yyyy
+            vital_date = self._format_cda_date(vital_date_raw)
             
             # Create data structure for template compatibility
             mapped_vital_sign["data"] = {
@@ -476,7 +478,7 @@ class ClinicalFieldMapper:
                     "value": vital_unit
                 },
                 "date": {
-                    "display_value": vital_date,  # Already formatted by comprehensive service
+                    "display_value": vital_date,  # Formatted dd/mm/yyyy
                     "value": vital_date
                 }
             }
@@ -486,7 +488,7 @@ class ClinicalFieldMapper:
             mapped_vital_sign["display_name"] = vital_name
             mapped_vital_sign["value"] = vital_value
             mapped_vital_sign["unit"] = vital_unit
-            mapped_vital_sign["date"] = vital_date  # Already formatted by comprehensive service
+            mapped_vital_sign["date"] = vital_date  # Formatted dd/mm/yyyy
             
             mapped_vital_signs.append(mapped_vital_sign)
             
@@ -511,7 +513,9 @@ class ClinicalFieldMapper:
             result_name = self._extract_result_name(result)
             result_value = result.get("value", result.get("observation_value", ""))
             result_unit = result.get("unit", "")
-            result_date = result.get("date", "")  # Already formatted by comprehensive service
+            result_date_raw = result.get("date", "")
+            # Format date to dd/mm/yyyy
+            result_date = self._format_cda_date(result_date_raw)
             result_interpretation = result.get("interpretation", "")
             reference_range = result.get("reference_range", "")
             status = result.get("status", "Final")
@@ -531,7 +535,7 @@ class ClinicalFieldMapper:
                     "value": result_unit
                 },
                 "date": {
-                    "display_value": result_date,  # Already formatted by comprehensive service
+                    "display_value": result_date,  # Formatted dd/mm/yyyy
                     "value": result_date
                 },
                 "interpretation": {
@@ -553,7 +557,7 @@ class ClinicalFieldMapper:
             mapped_result["display_name"] = result_name
             mapped_result["value"] = result_value
             mapped_result["unit"] = result_unit
-            mapped_result["date"] = result_date  # Already formatted by comprehensive service
+            mapped_result["date"] = result_date  # Formatted dd/mm/yyyy
             mapped_result["interpretation"] = result_interpretation
             mapped_result["reference_range"] = reference_range
             mapped_result["status"] = status

@@ -2909,7 +2909,7 @@ def patient_details_view(request, patient_id):
                 first_proc = context['procedures'][0]
                 if 'data' in first_proc and isinstance(first_proc['data'], dict):
                     logger.info(f"[ENHANCED_PROCEDURES] Using {len(context['procedures'])} enhanced procedures already in context from CDA processor")
-                    logger.info(f"[ENHANCED_PROCEDURES] First procedure: {first_proc.get('data', {}).get('procedure_name', {}).get('value', 'Unknown')}")
+                    logger.info(f"[ENHANCED_PROCEDURES] First procedure: {first_proc.get('name', first_proc.get('display_name', 'Unknown'))}")
                 else:
                     # Fallback to session-based enhanced procedures
                     enhanced_procedures = request.session.get('enhanced_procedures')
@@ -2961,7 +2961,7 @@ def patient_details_view(request, patient_id):
                 first_problem = context['problems'][0]
                 if 'data' in first_problem and isinstance(first_problem['data'], dict):
                     logger.info(f"[ENHANCED_PROBLEMS] Using {len(context['problems'])} enhanced problems already in context from CDA processor")
-                    logger.info(f"[ENHANCED_PROBLEMS] First problem: {first_problem.get('data', {}).get('problem_name', {}).get('value', 'Unknown')}")
+                    logger.info(f"[ENHANCED_PROBLEMS] First problem: {first_problem.get('name', first_problem.get('display_name', 'Unknown'))}")
                 else:
                     # Fallback to session-based enhanced problems
                     enhanced_problems = request.session.get('enhanced_problems')
@@ -2987,7 +2987,7 @@ def patient_details_view(request, patient_id):
                 first_vital = context['vital_signs'][0]
                 if 'data' in first_vital and isinstance(first_vital['data'], dict):
                     logger.info(f"[ENHANCED_VITAL_SIGNS] Using {len(context['vital_signs'])} enhanced vital signs already in context from CDA processor")
-                    logger.info(f"[ENHANCED_VITAL_SIGNS] First vital: {first_vital.get('data', {}).get('vital_name', {}).get('value', 'Unknown')}")
+                    logger.info(f"[ENHANCED_VITAL_SIGNS] First vital: {first_vital.get('name', 'Unknown')} - Date: {first_vital.get('date', 'N/A')}")
                 else:
                     # Fallback to session-based enhanced vital signs
                     enhanced_vital_signs = request.session.get('enhanced_vital_signs')
