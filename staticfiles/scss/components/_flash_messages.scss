@@ -142,15 +142,23 @@
 
 // Enhanced info alert
 .alert-info {
-  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-  border-left: 4px solid $hco-primary-teal;
-  color: #0c4a6e;
+  background: linear-gradient(135deg, $hco-primary-teal 0%, darken($hco-primary-teal, 10%) 100%);
+  border-left: 4px solid darken($hco-primary-teal, 15%);
+  color: $white;
   
   .alert-heading {
-    color: #0369a1;
+    color: $white;
     
     i {
-      color: $hco-primary-teal;
+      color: $white;
+    }
+  }
+  
+  .btn-close {
+    filter: brightness(0) invert(1);
+    
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.2);
     }
   }
 }

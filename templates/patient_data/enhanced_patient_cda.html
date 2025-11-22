@@ -101,7 +101,7 @@
                         </button>
                     </li>
 
-                    {% if cda_type != 'L1' %}
+                    {% if cda_type != 'L1' and not has_l1 %}
                     <!-- Clinical Information Tab - Only show for L3/FHIR documents with parsed data -->
                     <li class="nav-item" role="presentation">
                         <button class="nav-link" id="clinical-tab" data-bs-toggle="tab"
@@ -333,7 +333,7 @@
                         </div>
                     </div>
 
-                    {% if cda_type != 'L1' %}
+                    {% if cda_type != 'L1' and not has_l1 %}
                     <!-- Clinical Information Tab Content - Only for L3/FHIR documents -->
                     <div class="tab-pane fade" id="clinical-content" role="tabpanel" aria-labelledby="clinical-tab">
                         <div class="p-4">

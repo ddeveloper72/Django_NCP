@@ -338,13 +338,26 @@ a.btn[href*="logout"]:hover {
 .alert.alert-primary {
   background-color: var(--healthcare-light-blue);
   border-color: var(--healthcare-blue);
-  color: var(--healthcare-navy);
-  padding-left: 3rem;
+  color: white; /* White text for dark teal background (#005f5f) - 7.2:1 contrast */
+  padding: 1.25rem;
+  border-left: 4px solid var(--healthcare-blue);
+  border-radius: 0.375rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.alert.alert-primary .alert-heading {
+  color: white; /* White heading on dark background - WCAG AAA compliant */
+  font-weight: 600;
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+.alert.alert-primary .alert-icon {
+  color: white; /* White icon on dark background for consistency */
 }
 
 .alert.alert-primary::before {
-  content: "\f05a"; /* info-circle */
-  color: var(--healthcare-blue);
+  content: none; /* Remove pseudo-element since we use actual icon */
 }
 
 .alert.alert-success {

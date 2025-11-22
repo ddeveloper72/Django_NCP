@@ -9865,15 +9865,21 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
 }
 
 .alert-info {
-  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-  border-left: 4px solid #005f5f;
-  color: #0c4a6e;
+  background: linear-gradient(135deg, #005f5f 0%, #002c2c 100%);
+  border-left: 4px solid rgb(0, 18.5, 18.5);
+  color: #ffffff;
 }
 .alert-info .alert-heading {
-  color: #0369a1;
+  color: #ffffff;
 }
 .alert-info .alert-heading i {
-  color: #005f5f;
+  color: #ffffff;
+}
+.alert-info .btn-close {
+  filter: brightness(0) invert(1);
+}
+.alert-info .btn-close:hover {
+  background-color: rgba(255, 255, 255, 0.2);
 }
 
 .error-page-container .error-card {
