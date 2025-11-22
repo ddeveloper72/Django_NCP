@@ -106,13 +106,13 @@ class ClinicalServiceBase(ClinicalSectionServiceInterface):
     
     def _format_cda_date(self, cda_date: str) -> Optional[str]:
         """
-        Format CDA date string to human-readable format
+        Format CDA date string to dd/mm/yyyy ISO format
         
         Args:
             cda_date: CDA date string (e.g., "19971006" or "1997-10-06")
             
         Returns:
-            Optional[str]: Formatted date string or None if parsing fails
+            Optional[str]: Formatted date string (dd/mm/yyyy) or None if parsing fails
         """
         from datetime import datetime
         import re
@@ -121,14 +121,14 @@ class ClinicalServiceBase(ClinicalSectionServiceInterface):
             return None
         
         try:
-            # Remove any timezone info and clean up
-            date_clean = re.sub(r'[T\+\-].*$', '', cda_date)
+            # Remove any timezone info (e.g., "20091006T10:00:00+01:00" → "20091006")
+            date_clean = re.sub(r'T[\d:]+.*$', '', cda_date)
             
             # Handle different date formats
             if len(date_clean) == 8 and date_clean.isdigit():
                 # Format: YYYYMMDD
                 date_obj = datetime.strptime(date_clean, '%Y%m%d')
-            elif '-' in date_clean:
+            elif '-' in date_clean and len(date_clean) == 10:
                 # Format: YYYY-MM-DD
                 date_obj = datetime.strptime(date_clean, '%Y-%m-%d')
             elif '/' in date_clean:
@@ -140,8 +140,8 @@ class ClinicalServiceBase(ClinicalSectionServiceInterface):
             else:
                 return cda_date  # Return original if format unknown
             
-            # Format as "Oct 06, 1997"
-            return date_obj.strftime("%b %d, %Y")
+            # Format as dd/mm/yyyy ISO format (e.g., "18/06/2009")
+            return date_obj.strftime("%d/%m/%Y")
             
         except (ValueError, IndexError) as e:
             self.logger.warning(f"Could not parse date '{cda_date}': {e}")
