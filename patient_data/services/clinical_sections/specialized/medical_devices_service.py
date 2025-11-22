@@ -187,14 +187,25 @@ class MedicalDevicesSectionService(ClinicalServiceBase):
         if time_elem is not None:
             low_elem = time_elem.find('hl7:low', self.namespaces)
             if low_elem is not None:
-                implant_date = low_elem.get('value', '')
-                logger.info(f"[MEDICAL DEVICES] Found implant date: {implant_date}")
+                # Check for nullFlavor first (unknown/not available dates)
+                null_flavor = low_elem.get('nullFlavor', '')
+                if null_flavor:
+                    logger.info(f"[MEDICAL DEVICES] Implant date has nullFlavor: {null_flavor}")
+                    implant_date = ''  # No date available
+                else:
+                    implant_date = low_elem.get('value', '')
+                    logger.info(f"[MEDICAL DEVICES] Found implant date: {implant_date}")
             
             # Extract removal date from effectiveTime/high (if present)
             high_elem = time_elem.find('hl7:high', self.namespaces)
             if high_elem is not None:
-                removal_date = high_elem.get('value', '')
-                logger.info(f"[MEDICAL DEVICES] Found removal date: {removal_date}")
+                null_flavor = high_elem.get('nullFlavor', '')
+                if null_flavor:
+                    logger.info(f"[MEDICAL DEVICES] Removal date has nullFlavor: {null_flavor}")
+                    removal_date = ''
+                else:
+                    removal_date = high_elem.get('value', '')
+                    logger.info(f"[MEDICAL DEVICES] Found removal date: {removal_date}")
         
         return {
             'name': device_type,
