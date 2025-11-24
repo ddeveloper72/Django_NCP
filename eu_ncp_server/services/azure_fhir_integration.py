@@ -817,28 +817,21 @@ class AzureFHIRIntegrationService:
                         org_id = custodian_ref.split('/')[-1]
                         organization_references.add(org_id)
             
-            # Search for Practitioners and Organizations with deduplication
-            # Get only the most recent version of each unique resource
-            try:
-                # Search for Practitioners - get all versions then filter
-                practitioner_search = self._make_request('GET', 'Practitioner', params={'_count': '100', '_sort': '-_lastUpdated'})
-                if practitioner_search and practitioner_search.get('entry'):
-                    # Filter to get only latest version of each practitioner
-                    practitioner_entries = self._filter_latest_versions(
-                        practitioner_search['entry'], 
-                        'Practitioner'
-                    )
-                    
-                    # Add to bundle (avoiding duplicates by ID)
-                    existing_ids = {e.get('resource', {}).get('id') for e in bundle_entries}
-                    for entry in practitioner_entries:
-                        resource = entry['resource']
-                        if resource.get('id') not in existing_ids:
-                            bundle_entries.append({'resource': resource})
-                            existing_ids.add(resource.get('id'))
-                            logger.info(f"Added Practitioner (latest): {resource.get('id')} v{resource.get('meta', {}).get('versionId', 'N/A')}")
-            except Exception as e:
-                logger.debug(f"Could not search Practitioners: {e}")
+            # CRITICAL: Fetch ONLY practitioners referenced in Composition (not all practitioners)
+            # This prevents cross-patient data contamination
+            if practitioner_references:
+                logger.info(f"Fetching {len(practitioner_references)} Composition-referenced Practitioner resources")
+                for prac_id in practitioner_references:
+                    try:
+                        practitioner = self._make_request('GET', f"Practitioner/{prac_id}")
+                        if practitioner:
+                            bundle_entries.append({'resource': practitioner})
+                            logger.info(f"Added Composition-referenced Practitioner: {prac_id}")
+                    except Exception as e:
+                        logger.warning(f"Could not fetch Practitioner {prac_id}: {e}")
+                        continue
+            else:
+                logger.warning("No Practitioner references found in Composition - Healthcare Team will be empty")
             
             # Fetch referenced Organizations
             if organization_references:
@@ -853,26 +846,10 @@ class AzureFHIRIntegrationService:
                         logger.warning(f"Could not fetch Organization {org_id}: {e}")
                         continue
             
-            # Search for Organizations with deduplication
-            try:
-                org_search = self._make_request('GET', 'Organization', params={'_count': '100', '_sort': '-_lastUpdated'})
-                if org_search and org_search.get('entry'):
-                    # Filter to get only latest version of each organization
-                    org_entries = self._filter_latest_versions(
-                        org_search['entry'],
-                        'Organization'
-                    )
-                    
-                    # Add to bundle (avoiding duplicates by ID)
-                    existing_ids = {e.get('resource', {}).get('id') for e in bundle_entries}
-                    for entry in org_entries:
-                        resource = entry['resource']
-                        if resource.get('id') not in existing_ids:
-                            bundle_entries.append({'resource': resource})
-                            existing_ids.add(resource.get('id'))
-                            logger.info(f"Added Organization (latest): {resource.get('id')} v{resource.get('meta', {}).get('versionId', 'N/A')}")
-            except Exception as e:
-                logger.debug(f"Could not search Organizations: {e}")
+            # CRITICAL: Organizations should ONLY come from Composition references (not all organizations)
+            # If no organization references found in Composition, this is expected
+            if not organization_references:
+                logger.info("No Organization references found in Composition - using custodian organizations from patient data if available")
             
             # 7. Create Patient Summary Bundle
             summary_bundle = {
