@@ -112,18 +112,67 @@
 
 <script>
     let autoRefreshInterval;
+    let pollingActive = true;
     
     {% if task_status.status == 'pending' or task_status.status == 'running' %}
-    // Auto-refresh functionality
-    autoRefreshInterval = setInterval(function() {
-        window.location.reload();
-    }, 5000);
+    // AJAX-based progress polling (no full page reload)
+    function updateProgress() {
+        if (!pollingActive) return;
+        
+        fetch('{% url "admin:mvc_import_status" task_id %}')
+            .then(response => response.json())
+            .then(data => {
+                // Update status
+                document.getElementById('import-status').textContent = data.status.charAt(0).toUpperCase() + data.status.slice(1);
+                document.getElementById('import-status').className = 'status-' + data.status;
+                
+                // Update progress bar
+                const progressBar = document.getElementById('progress-bar');
+                const progressPercentage = document.getElementById('progress-percentage');
+                const progressMessage = document.getElementById('progress-message');
+                
+                progressBar.style.width = data.progress_percentage + '%';
+                progressPercentage.textContent = data.progress_percentage + '%';
+                progressMessage.textContent = data.progress_message;
+                
+                // Update processed count if element exists
+                const processedCount = document.getElementById('processed-count');
+                if (processedCount && data.processed_items !== undefined) {
+                    processedCount.textContent = data.processed_items;
+                }
+                
+                // If completed or failed, stop polling and refresh once to show final results
+                if (data.status === 'completed' || data.status === 'failed') {
+                    stopAutoRefresh();
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching import status:', error);
+                // Fallback to full page refresh if AJAX fails
+                if (pollingActive) {
+                    window.location.reload();
+                }
+            });
+    }
+    
+    // Poll every 2 seconds for more responsive updates
+    autoRefreshInterval = setInterval(updateProgress, 2000);
+    
+    // Initial update
+    updateProgress();
     {% endif %}
     
     function stopAutoRefresh() {
+        pollingActive = false;
         if (autoRefreshInterval) {
             clearInterval(autoRefreshInterval);
-            document.querySelector('.auto-refresh-info').innerHTML = '<p><em>Auto-refresh stopped.</em></p>';
+            const infoElement = document.querySelector('.auto-refresh-info');
+            if (infoElement) {
+                infoElement.innerHTML = '<p><em>Auto-refresh stopped.</em></p>';
+            }
         }
     }
 </script>

@@ -44,44 +44,65 @@
 }
 
 .progress-bar {
-  background: $success-green;
+  background: linear-gradient(90deg, $success-green 0%, darken($success-green, 10%) 100%);
   height: 100%;
   border-radius: $border-radius-md;
-  transition: width 0.5s ease;
+  transition: width 0.3s ease-in-out;
+  width: 0%; // Default starting width, JavaScript will update this dynamically
+  position: relative;
+  
+  // Animated stripes for visual feedback during processing
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background-image: linear-gradient(
+      45deg,
+      rgba(255, 255, 255, 0.2) 25%,
+      transparent 25%,
+      transparent 50%,
+      rgba(255, 255, 255, 0.2) 50%,
+      rgba(255, 255, 255, 0.2) 75%,
+      transparent 75%,
+      transparent
+    );
+    background-size: 50px 50px;
+    animation: progress-stripes 2s linear infinite;
+  }
+  
+  // Status-specific colors
+  &.status-pending {
+    background: linear-gradient(90deg, $warning-amber 0%, darken($warning-amber, 10%) 100%);
+  }
+  
+  &.status-running {
+    background: linear-gradient(90deg, $primary-blue 0%, darken($primary-blue, 10%) 100%);
+  }
+  
+  &.status-completed {
+    background: linear-gradient(90deg, $success-green 0%, darken($success-green, 10%) 100%);
+    &::before {
+      animation: none; // Stop stripes when completed
+    }
+  }
+  
+  &.status-failed {
+    background: linear-gradient(90deg, $error-red 0%, darken($error-red, 10%) 100%);
+    &::before {
+      animation: none; // Stop stripes when failed
+    }
+  }
+}
 
-  // Use data attribute for width
-  &[data-width='0'] {
-    width: 0%;
+@keyframes progress-stripes {
+  0% {
+    background-position: 0 0;
   }
-  &[data-width='10'] {
-    width: 10%;
-  }
-  &[data-width='20'] {
-    width: 20%;
-  }
-  &[data-width='30'] {
-    width: 30%;
-  }
-  &[data-width='40'] {
-    width: 40%;
-  }
-  &[data-width='50'] {
-    width: 50%;
-  }
-  &[data-width='60'] {
-    width: 60%;
-  }
-  &[data-width='70'] {
-    width: 70%;
-  }
-  &[data-width='80'] {
-    width: 80%;
-  }
-  &[data-width='90'] {
-    width: 90%;
-  }
-  &[data-width='100'] {
-    width: 100%;
+  100% {
+    background-position: 50px 50px;
   }
 }
 
@@ -93,12 +114,20 @@
   font-weight: $font-weight-bold;
   color: $text-dark;
   text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
+  z-index: 2; // Ensure text stays above progress bar and stripes
+  pointer-events: none; // Allow clicks to pass through
 }
 
 .progress-message {
   margin: $space-md 0;
   font-style: italic;
   color: $text-muted;
+  min-height: 1.5em; // Prevent layout shift during updates
+  transition: opacity 0.2s ease;
+  
+  &.updating {
+    opacity: 0.6;
+  }
 }
 
 .progress-details {
