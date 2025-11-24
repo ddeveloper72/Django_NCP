@@ -206,13 +206,22 @@ class FHIRBundleParser:
                 resources_by_type.get('RelatedPerson', [])
             )
             
-            practitioner_resources = resources_by_type.get('Practitioner', [])
+            # Extract all resources from bundle
+            all_practitioner_resources = resources_by_type.get('Practitioner', [])
             organization_resources = resources_by_type.get('Organization', [])
             composition_resources = resources_by_type.get('Composition', [])
-            logger.info(f"[PARSER DEBUG] Extracting healthcare data: {len(practitioner_resources)} Practitioners, {len(organization_resources)} Organizations, {len(composition_resources)} Compositions")
+            
+            # CRITICAL FIX: Filter practitioners by composition author references
+            # Only include practitioners that are referenced in THIS patient's compositions
+            filtered_practitioner_resources = self._filter_practitioners_by_composition(
+                all_practitioner_resources,
+                composition_resources
+            )
+            
+            logger.info(f"[PARSER DEBUG] Filtered {len(filtered_practitioner_resources)}/{len(all_practitioner_resources)} Practitioners by Composition references, {len(organization_resources)} Organizations, {len(composition_resources)} Compositions")
             
             healthcare_data = self._extract_healthcare_data(
-                practitioner_resources,
+                filtered_practitioner_resources,
                 organization_resources,
                 composition_resources
             )
@@ -3624,6 +3633,66 @@ class FHIRBundleParser:
             contact_data['telecoms'].append(formatted_telecom)
         
         return contact_data
+    
+    def _filter_practitioners_by_composition(self, 
+                                            practitioner_resources: List[Dict],
+                                            composition_resources: List[Dict]) -> List[Dict]:
+        """
+        Filter practitioners to only include those referenced in patient's Composition author fields
+        
+        CRITICAL: Prevents cross-patient data contamination by ensuring each patient only sees 
+        their own healthcare team practitioners, not all practitioners in the system.
+        
+        Args:
+            practitioner_resources: All Practitioner resources from bundle
+            composition_resources: Composition resources for THIS patient
+            
+        Returns:
+            Filtered list of practitioners referenced in compositions
+        """
+        if not composition_resources:
+            logger.warning("No Composition resources found - cannot filter practitioners, returning empty list to prevent cross-patient contamination")
+            return []
+        
+        # Extract all practitioner references from composition authors
+        referenced_practitioner_ids = set()
+        
+        for composition in composition_resources:
+            authors = composition.get('author', [])
+            for author in authors:
+                ref = author.get('reference', '')
+                
+                # Handle Practitioner/id references
+                if ref.startswith('Practitioner/'):
+                    pract_id = ref.split('/')[-1]
+                    referenced_practitioner_ids.add(pract_id)
+                    logger.debug(f"Found Practitioner reference in Composition: {pract_id}")
+                
+                # Handle urn:uuid: references
+                elif ref.startswith('urn:uuid:'):
+                    uuid = ref.replace('urn:uuid:', '')
+                    referenced_practitioner_ids.add(uuid)
+                    logger.debug(f"Found Practitioner UUID reference in Composition: {uuid}")
+        
+        if not referenced_practitioner_ids:
+            logger.warning("No Practitioner references found in Compositions - returning empty list to prevent contamination")
+            return []
+        
+        # Filter practitioners to only those referenced in compositions
+        filtered_practitioners = []
+        for practitioner in practitioner_resources:
+            pract_id = practitioner.get('id', '')
+            
+            # Check if practitioner ID matches any composition reference
+            if pract_id in referenced_practitioner_ids:
+                filtered_practitioners.append(practitioner)
+                logger.debug(f"Including Practitioner {pract_id} - referenced in Composition")
+            else:
+                logger.debug(f"Excluding Practitioner {pract_id} - NOT referenced in patient's Compositions")
+        
+        logger.info(f"Practitioner filtering: {len(filtered_practitioners)}/{len(practitioner_resources)} practitioners match Composition author references")
+        
+        return filtered_practitioners
     
     def _extract_healthcare_data(self, practitioner_resources: List[Dict],
                                organization_resources: List[Dict],
