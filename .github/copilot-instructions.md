@@ -44,6 +44,18 @@ You are my **Django_NCP Spec Enforcer and Development Partner** for this sophist
 - **Administration Framework**: Comprehensive admin interfaces for Patient Summary (PS), ePrescription (eP), eDispensation (eD), Laboratory Results, Hospital Discharge Reports, and Medical Imaging
 - **Standards Compliance**: FHIR R4 data models for healthcare interoperability, CDA document integration, and European healthcare standards
 
+### Azure FHIR Integration (`eu_ncp_server/services/azure_fhir_integration.py`)
+- **CRITICAL PATTERN**: ALL FHIR resource queries MUST be patient-specific using composition references
+- **Patient-Specific Queries**: 
+  1. Query Patient by identifier: `GET /Patient?identifier={patient_id}`
+  2. Query Composition by subject: `GET /Composition?subject=Patient/{azure_patient_id}`
+  3. Query clinical resources by patient: `GET /{ResourceType}?patient={azure_patient_id}`
+  4. Extract Practitioner/Organization IDs from Composition.author and Composition.custodian
+  5. Fetch ONLY referenced resources: `GET /Practitioner/{id}` (NEVER `GET /Practitioner` without patient filter)
+- **Cross-Patient Contamination Prevention**: NEVER fetch all resources of a type without patient filtering
+- **NO GLOBAL QUERIES**: Avoid `GET /Practitioner`, `GET /Organization` - these return ALL resources in the system
+- **Parser-Level Safety**: `fhir_bundle_parser.py` provides additional filtering as defense-in-depth
+
 ### Authentication Security (`authentication/`)
 - **Enhanced Authentication**: HSE-themed registration and authentication with auto-login, enhanced user forms, and comprehensive error handling
 - **Security Features**: Custom login/logout views, password reset workflows, redirect handling, and user session management
@@ -100,6 +112,61 @@ git commit -m "test: add patient data model unit tests"
 - Class-Based Views: Use mixins for reusable functionality
 - Service Layer: Extract business logic from views to dedicated service classes
 - Documentation: Comprehensive docstrings for healthcare domain logic
+
+## FHIR Query Architecture - CRITICAL PATTERNS
+
+### Patient-Specific Resource Queries (MANDATORY)
+
+**ALL FHIR queries MUST be patient-specific to prevent cross-patient data contamination:**
+
+```python
+# ✅ CORRECT: Patient-specific queries
+GET /Patient?identifier={patient_id}
+GET /Composition?subject=Patient/{azure_patient_id}
+GET /AllergyIntolerance?patient={azure_patient_id}
+GET /MedicationStatement?patient={azure_patient_id}
+GET /Condition?patient={azure_patient_id}
+GET /Observation?patient={azure_patient_id}
+GET /Procedure?patient={azure_patient_id}
+GET /Immunization?patient={azure_patient_id}
+
+# ✅ CORRECT: Composition-referenced practitioners/organizations
+1. GET /Composition?subject=Patient/{id}
+2. Extract Practitioner IDs from Composition.author[]
+3. GET /Practitioner/{id} for EACH referenced ID
+4. Extract Organization IDs from Composition.custodian
+5. GET /Organization/{id} for EACH referenced ID
+
+# ❌ WRONG: Global queries (return ALL resources in system)
+GET /Practitioner  # Returns practitioners for ALL patients
+GET /Organization  # Returns organizations for ALL patients
+GET /AllergyIntolerance  # Returns allergies for ALL patients
+```
+
+### Implementation Checklist
+
+When querying Azure FHIR:
+- [ ] Patient query uses identifier parameter: `?identifier={patient_id}`
+- [ ] Composition query uses subject parameter: `?subject=Patient/{id}`
+- [ ] Clinical resources use patient parameter: `?patient={azure_patient_id}`
+- [ ] Practitioners fetched ONLY by IDs from Composition.author
+- [ ] Organizations fetched ONLY by IDs from Composition.custodian
+- [ ] NO queries without patient/subject filtering
+- [ ] Parser-level filtering as safety net (defense-in-depth)
+
+### Cross-Patient Contamination Prevention
+
+**NEVER**:
+- Fetch all practitioners: `GET /Practitioner?_count=100`
+- Fetch all organizations: `GET /Organization?_count=100`
+- Query resources without patient filter
+- Rely only on parser-level filtering (query at source)
+
+**ALWAYS**:
+- Use composition as source of truth for practitioner/organization references
+- Fetch resources by specific ID when composition-referenced
+- Include patient parameter in all clinical resource queries
+- Verify bundle contains only patient-specific data before parsing
 
 ### Healthcare Domain Knowledge
 
