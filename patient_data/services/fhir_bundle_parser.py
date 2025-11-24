@@ -230,6 +230,13 @@ class FHIRBundleParser:
             if healthcare_data.get('custodian_organization'):
                 administrative_data['custodian_organization'] = healthcare_data['custodian_organization']
                 logger.info(f"Mapped custodian organization to administrative_data: {administrative_data['custodian_organization']['name']}")
+                logger.info(f"[CUSTODIAN DEBUG] custodian_organization keys: {list(administrative_data['custodian_organization'].keys())}")
+                logger.info(f"[CUSTODIAN DEBUG] addresses count: {len(administrative_data['custodian_organization'].get('addresses', []))}")
+                logger.info(f"[CUSTODIAN DEBUG] telecoms count: {len(administrative_data['custodian_organization'].get('telecoms', []))}")
+                if administrative_data['custodian_organization'].get('addresses'):
+                    logger.info(f"[CUSTODIAN DEBUG] First address: {administrative_data['custodian_organization']['addresses'][0]}")
+                if administrative_data['custodian_organization'].get('telecoms'):
+                    logger.info(f"[CUSTODIAN DEBUG] First telecom: {administrative_data['custodian_organization']['telecoms'][0]}")
             
             # Create clinical arrays for view compatibility
             clinical_arrays = self._create_clinical_arrays(clinical_sections)
@@ -616,7 +623,11 @@ class FHIRBundleParser:
             parsed_entries = [self._parse_medication_resource(resource) for resource in resources]
         elif resource_type in ['Condition:Active', 'Condition:Resolved']:
             # Parse condition resources (now split by clinical status)
-            parsed_entries = [self._parse_condition_resource(resource) for resource in resources]
+            # Filter out None values (metadata codes that should be skipped)
+            parsed_entries = [
+                parsed for parsed in [self._parse_condition_resource(resource) for resource in resources]
+                if parsed is not None
+            ]
         elif resource_type == 'Procedure':
             parsed_entries = [self._parse_procedure_resource(resource) for resource in resources]
         elif resource_type == 'Observation':
@@ -739,11 +750,18 @@ class FHIRBundleParser:
                 is_negative_assertion = True
                 allergen = display or 'No allergy information available'
             else:
-                # PRIORITY 1: Use display name if provided in FHIR
-                if display:
+                # PRIORITY 1: Use display name if provided in FHIR AND it's not just the code itself
+                # Check if display is meaningful (not the same as code and not just a number/code pattern)
+                is_meaningful_display = display and display != code_value and not display.replace('-', '').replace('.', '').isdigit()
+                
+                if is_meaningful_display:
                     allergen = display
                     logger.info(f"Using FHIR display for allergy: {allergen}")
                 else:
+                    if display and display == code_value:
+                        logger.warning(f"FHIR display field contains code value instead of name: {display}")
+                    elif display:
+                        logger.warning(f"FHIR display field appears to be a code: {display}")
                     # PRIORITY 2: Resolve via CTS agent (ATC, SNOMED, etc.)
                     try:
                         from translation_services.terminology_translator import TerminologyTranslator
@@ -969,13 +987,32 @@ class FHIRBundleParser:
         
         # Resolve medication name via CTS if we have ATC code
         if atc_code and not is_negative_assertion:
-            medication_name = self._get_atc_drug_name(atc_code) or f"ATC Code: {atc_code}"
+            medication_name = self._get_atc_drug_name(atc_code)
+            
+            # If ATC lookup fails, fallback to display text or text field BEFORE showing code
+            if not medication_name:
+                if medication.get('medicationCodeableConcept', {}).get('coding'):
+                    coding = medication['medicationCodeableConcept']['coding'][0]
+                    medication_name = coding.get('display')
+                
+                if not medication_name and medication.get('medicationCodeableConcept', {}).get('text'):
+                    medication_name = medication['medicationCodeableConcept']['text']
+                elif not medication_name and medication.get('medicationReference', {}).get('display'):
+                    medication_name = medication['medicationReference']['display']
+                
+                # Last resort: show ATC code with note
+                if not medication_name:
+                    medication_name = f"ATC Code: {atc_code}"
         
         # Priority 2: Fallback to text fields only if no ATC code available
         # (This maintains compatibility but ATC codes should be preferred)
-        if not atc_code and not is_negative_assertion:
+        elif not is_negative_assertion:
             if medication.get('medicationCodeableConcept', {}).get('text'):
                 medication_name = medication['medicationCodeableConcept']['text']
+            elif medication.get('medicationCodeableConcept', {}).get('coding'):
+                # Try display from coding if no text
+                coding = medication['medicationCodeableConcept']['coding'][0]
+                medication_name = coding.get('display', medication_name)
             elif medication.get('medicationReference', {}).get('display'):
                 medication_name = medication['medicationReference']['display']
         
@@ -1360,9 +1397,31 @@ class FHIRBundleParser:
         if code:
             # Use unified CTS-enabled extraction
             code_data = processor._extract_codeable_concept(code)
-            condition_code = code_data.get('code', '')
-            code_system = code_data.get('system', '')
             condition_name = code_data.get('display_text', 'Unknown condition')
+            
+            # Get PRIMARY coding from extracted data
+            primary_coding = code_data.get('primary_coding', {})
+            condition_code = primary_coding.get('code', '')
+            code_system = primary_coding.get('system', '')
+            
+            # FILTER OUT MALFORMED CONDITIONS (empty code system, missing code)
+            if not condition_code or code_system == 'urn:oid:' or not condition_name or condition_name == 'Unknown code':
+                logger.info(f"[CONDITION FILTER] Skipping malformed condition: ID={condition.get('id')}, code='{condition_code}', system='{code_system}', name='{condition_name}'")
+                return None
+            
+            # FILTER OUT METADATA CODE SYSTEMS (assertion status, workflow status, etc.)
+            # These are administrative codes, not clinical conditions
+            metadata_code_systems = [
+                'urn:oid:1.3.6.1.4.1.12559.11.10.1.3.1.44.5',  # Diagnosis Assertion Status
+                'http://terminology.hl7.org/CodeSystem/v3-ActCode',  # HL7 Act codes (workflow)
+                'http://terminology.hl7.org/CodeSystem/condition-clinical',  # Clinical status codes
+                'http://terminology.hl7.org/CodeSystem/condition-ver-status',  # Verification status codes
+            ]
+            
+            logger.info(f"[CONDITION FILTER DEBUG] Checking condition: code='{condition_code}', system='{code_system}', name='{condition_name}'")
+            if code_system in metadata_code_systems:
+                logger.info(f"[CONDITION FILTER] Skipping metadata code: {condition_code} ({condition_name}) from system {code_system}")
+                return None  # Signal to skip this condition
             
             # Check for negative assertion codes
             if condition_code in ['no-problem-info', 'no-condition-info', 'no-known-problems']:
@@ -1481,6 +1540,9 @@ class FHIRBundleParser:
             # Also extract simple text for backward compatibility
             annotation_text = processor._extract_annotation_text(condition['note'])
 
+        # Debug logging to verify CTS resolution
+        logger.info(f"[CONDITION DEBUG] ID: {condition.get('id')}, Code: {condition_code}, Name: {condition_name}")
+        
         return {
             'id': condition.get('id'),
             'condition_name': condition_name,
@@ -1544,9 +1606,13 @@ class FHIRBundleParser:
             category_data = processor._extract_codeable_concept(procedure['category'])
             category_text = category_data.get('display_text', 'Unknown')
         
+        # Debug logging to verify CTS resolution
+        logger.info(f"[PROCEDURE DEBUG] ID: {procedure.get('id')}, Procedure Name: {procedure_name}")
+        
         return {
             'id': procedure.get('id'),
             'procedure_name': procedure_name,
+            'name': procedure_name,  # Template compatibility
             'procedure_code_data': code_data,  # Full CodeableConcept with CTS translation
             'status': status.capitalize(),
             'performed_date': performed_date,

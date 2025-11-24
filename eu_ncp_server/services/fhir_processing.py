@@ -778,20 +778,39 @@ class FHIRResourceProcessor:
         code = coding.get('code', 'Unknown code')
         code_system = coding.get('system', '')
         
-        # If no display text, use CTS translator to resolve the code
-        if not display_text and code != 'Unknown code':
+        # Check if display is meaningful (not just the code itself or purely numeric)
+        is_meaningful_display = (
+            display_text and 
+            display_text != code and 
+            not display_text.replace('-', '').replace('.', '').isdigit()
+        )
+        
+        # If no meaningful display text, use CTS translator to resolve the code
+        if not is_meaningful_display and code != 'Unknown code':
             try:
-                # Try CTS translation WITHOUT OID first (works best for ICD-10 and other codes)
-                resolved_display = self.cts_translator.resolve_code(code)
+                # Convert FHIR code system URL to OID for CTS lookup
+                oid = self._convert_code_system_to_oid(code_system) if code_system else None
+                
+                logger.info(f"[CTS LOOKUP] Attempting to resolve code: {code} from system: {code_system} (OID: {oid})")
+                
+                # Try with OID first if available, then without
+                if oid and oid != code_system:
+                    resolved_display = self.cts_translator.resolve_code(code, oid)
+                else:
+                    resolved_display = self.cts_translator.resolve_code(code)
+                
                 if resolved_display and resolved_display != code:
                     display_text = resolved_display
-                    logger.debug(f"[CTS] Resolved {code} -> {display_text}")
+                    logger.info(f"[CTS SUCCESS] Resolved {code} -> {display_text}")
+                else:
+                    logger.warning(f"[CTS NOT FOUND] No translation found for code {code} from system {code_system} (OID: {oid})")
             except Exception as e:
-                logger.warning(f"[CTS] Failed to resolve code {code}: {e}")
+                logger.error(f"[CTS ERROR] Failed to resolve code {code} from system {code_system}: {e}")
         
-        # Final fallback to code value
+        # Final fallback to code value (only if absolutely necessary)
         if not display_text:
             display_text = code
+            logger.debug(f"[FHIR] Using code as display text: {code}")
         
         return {
             'system': code_system,
@@ -828,8 +847,19 @@ class FHIRResourceProcessor:
         if text and text.lower() in ['unknown condition', 'unknown', 'not specified', 'n/a']:
             text = None
         
-        # Priority: specific text -> resolved coding display -> fallback
-        display_text = text or (codings[0]['display_text'] if codings else 'Unknown concept')
+        # Priority: specific text -> resolved coding display_text (CTS-resolved) -> fallback
+        # IMPORTANT: Use display_text which contains CTS-resolved names, NOT display which may contain codes
+        if text:
+            display_text = text
+        elif codings and codings[0].get('display_text'):
+            # Use display_text from coding (contains CTS-resolved name if available)
+            display_text = codings[0]['display_text']
+        elif codings:
+            # Last resort: use code value with warning
+            display_text = codings[0].get('code', 'Unknown concept')
+            logger.warning(f"[FHIR] No human-readable display found for code {codings[0].get('code')}, using code as display")
+        else:
+            display_text = 'Unknown concept'
         
         return {
             'coding': codings,

@@ -1,0 +1,134 @@
+{
+  "resourceType": "Composition",
+  "id": "78f27b51-7da0-4249-aaf8-ba7d43fdf18f",
+  "meta": {
+    "versionId": "6",
+    "lastUpdated": "2025-11-24T14:04:32.574+00:00"
+  },
+  "identifier": {
+    "system": "urn:oid:2.999",
+    "value": "111"
+  },
+  "status": "final",
+  "type": {
+    "coding": [
+      {
+        "system": "http://loinc.org",
+        "code": "60591-5",
+        "display": "Patient summary Document"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/dbca9120-c667-41c1-82bc-7f06d3cc709d"
+  },
+  "date": "2022-06-08T10:49:00+02:00",
+  "author": [
+    {
+      "reference": "Practitioner/9271d58e-799e-4756-98db-9bfb1b2d6aeb"
+    }
+  ],
+  "title": "Patient Summary",
+  "custodian": {
+    "reference": "Organization/48ac7399-22c4-4e2a-8cd3-c5fe15b65aa7",
+    "display": "Hospital Garcia de Orta"
+  },
+  "section": [
+    {
+      "title": "Allergies and adverse reactions",
+      "code": {
+        "coding": [
+          {
+            "system": "http://loinc.org",
+            "code": "48765-2",
+            "display": "Allergies and adverse reactions"
+          }
+        ]
+      },
+      "text": {
+        "status": "generated",
+        "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Allergies and adverse reactions</div>"
+      },
+      "entry": [
+        {
+          "reference": "AllergyIntolerance/3660ea32-e73c-46dc-bddf-82cec4c87591"
+        },
+        {
+          "reference": "AllergyIntolerance/93fc3e95-7fca-449a-ad22-0579eae25c8a"
+        },
+        {
+          "reference": "AllergyIntolerance/2db2440a-8675-4e5c-81ba-ccba144ee837"
+        },
+        {
+          "reference": "AllergyIntolerance/80e22b45-26f7-4d3a-86d1-f671c1c6ecc8"
+        }
+      ]
+    },
+    {
+      "title": "Problem list",
+      "code": {
+        "coding": [
+          {
+            "system": "http://loinc.org",
+            "code": "11450-4",
+            "display": "Problem list"
+          }
+        ]
+      },
+      "text": {
+        "status": "generated",
+        "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Problem list</div>"
+      },
+      "entry": [
+        {
+          "reference": "Condition/95c622ef-3d54-40ca-a1e8-7db10da470cc"
+        },
+        {
+          "reference": "Condition/fe4dc709-68e1-42b8-9adb-8fed31414f6a"
+        },
+        {
+          "reference": "Condition/06024ade-c27a-45ce-89d5-189f32635507"
+        },
+        {
+          "reference": "Condition/f931f42b-5bd3-4945-91c7-606d29de639d"
+        },
+        {
+          "reference": "Condition/69c9ba0d-d6f4-449d-8455-ec7e5e260425"
+        },
+        {
+          "reference": "Condition/4abb6023-7737-4921-b3de-2772b59dfba6"
+        },
+        {
+          "reference": "Condition/39f63e41-9d46-47fc-ae1c-df3a627f02b7"
+        }
+      ]
+    },
+    {
+      "title": "History of Procedures",
+      "code": {
+        "coding": [
+          {
+            "system": "http://loinc.org",
+            "code": "47519-4",
+            "display": "History of Procedures"
+          }
+        ]
+      },
+      "text": {
+        "status": "generated",
+        "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">History of Procedures</div>"
+      },
+      "entry": [
+        {
+          "reference": "Procedure/f5da4aeb-52ab-4c80-a805-9ae712c5c63d"
+        },
+        {
+          "reference": "Procedure/9cc5f921-9793-4c4f-be46-c429b2d33b07"
+        },
+        {
+          "reference": "Procedure/9cfc14a2-f80a-4c3f-ad4b-4970aee24e35"
+        }
+      ]
+    }
+  ]
+}

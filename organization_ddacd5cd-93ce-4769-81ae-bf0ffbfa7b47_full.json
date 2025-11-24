@@ -1,0 +1,65 @@
+{
+  "resourceType": "Organization",
+  "id": "ddacd5cd-93ce-4769-81ae-bf0ffbfa7b47",
+  "meta": {
+    "versionId": "2",
+    "lastUpdated": "2025-11-24T14:19:03.708+00:00"
+  },
+  "identifier": [
+    {
+      "system": "urn:oid:2.999",
+      "value": "12345678"
+    },
+    {
+      "system": "urn:oid:2.16.620.1.101.10.2.1.1",
+      "value": "PT-HOSP-106001"
+    },
+    {
+      "system": "urn:oid:2.16.620.1.101.10.2.2.1",
+      "value": "500066471"
+    }
+  ],
+  "active": true,
+  "type": [
+    {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/organization-type",
+          "code": "prov",
+          "display": "Healthcare Provider"
+        }
+      ]
+    }
+  ],
+  "name": "Centro Hospitalar de Lisboa Central",
+  "telecom": [
+    {
+      "system": "phone",
+      "value": "351217805000",
+      "use": "work"
+    },
+    {
+      "system": "email",
+      "value": "hospital@gmail.com",
+      "use": "work"
+    },
+    {
+      "system": "url",
+      "value": "http://www.chlc.min-saude.pt",
+      "use": "work"
+    }
+  ],
+  "address": [
+    {
+      "use": "work",
+      "type": "physical",
+      "line": [
+        "3, Alameda Santo Ant\u00f3nio dos Capuchos"
+      ],
+      "city": "Lisbon",
+      "state": "Lisboa",
+      "postalCode": "1169-050",
+      "country": "PT"
+    }
+  ]
+}
