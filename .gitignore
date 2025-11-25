@@ -57,6 +57,12 @@ venv.bak/
 *.swo
 *~
 
+# Compiled Static Files (CSS compiled from SCSS)
+static/css/main.css
+static/css/main.css.map
+static/css/main-debug.css
+static/css/main-debug.css.map
+
 # Specifications and Documentation
 # .specs/
 
