@@ -28,20 +28,30 @@ class Command(BaseCommand):
             self.stdout.write(f"Compiling {main_scss} → {main_css}...")
             
             try:
-                # Compile SCSS to CSS
+                # Compile SCSS to CSS with COMPRESSED output
+                self.stdout.write('Compiling with output_style=compressed...')
                 compiled_css = sass.compile(
                     filename=str(main_scss),
                     output_style='compressed',
                     include_paths=[str(scss_path)]
                 )
                 
+                # Verify compression (compressed CSS should have no newlines)
+                line_count = compiled_css.count('\n')
+                is_minified = line_count < 10  # Compressed CSS should be ~1-5 lines max
+                
                 # Write compiled CSS
                 with open(main_css, 'w', encoding='utf-8') as f:
                     f.write(compiled_css)
                 
-                self.stdout.write(self.style.SUCCESS(
-                    f'✓ Successfully compiled SCSS to CSS ({len(compiled_css)} bytes)'
-                ))
+                status_msg = f'✓ Successfully compiled SCSS to CSS ({len(compiled_css)} bytes, {line_count} lines)'
+                if is_minified:
+                    status_msg += ' [COMPRESSED ✓]'
+                else:
+                    status_msg += ' [WARNING: NOT COMPRESSED!]'
+                    self.stdout.write(self.style.WARNING('CSS is not minified - check libsass version'))
+                
+                self.stdout.write(self.style.SUCCESS(status_msg))
                 
             except sass.CompileError as e:
                 self.stdout.write(self.style.ERROR(f'✗ SCSS compilation error: {e}'))
