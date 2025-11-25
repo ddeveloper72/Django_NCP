@@ -24,6 +24,11 @@ class Command(BaseCommand):
         main_scss = scss_path / "main.scss"
         main_css = css_path / "main.css"
         
+        # Delete old compiled CSS to force fresh compilation
+        if main_css.exists():
+            main_css.unlink()
+            self.stdout.write(f"Removed old CSS: {main_css}")
+        
         if main_scss.exists():
             self.stdout.write(f"Compiling {main_scss} → {main_css}...")
             
@@ -40,9 +45,12 @@ class Command(BaseCommand):
                 line_count = compiled_css.count('\n')
                 is_minified = line_count < 10  # Compressed CSS should be ~1-5 lines max
                 
-                # Write compiled CSS
-                with open(main_css, 'w', encoding='utf-8') as f:
+                # Write compiled CSS with explicit newline at end (forces collectstatic to see it as changed)
+                with open(main_css, 'w', encoding='utf-8', newline='\n') as f:
                     f.write(compiled_css)
+                
+                # Force file modification timestamp update to ensure collectstatic copies it
+                os.utime(main_css, None)
                 
                 status_msg = f'✓ Successfully compiled SCSS to CSS ({len(compiled_css)} bytes, {line_count} lines)'
                 if is_minified:
@@ -52,6 +60,7 @@ class Command(BaseCommand):
                     self.stdout.write(self.style.WARNING('CSS is not minified - check libsass version'))
                 
                 self.stdout.write(self.style.SUCCESS(status_msg))
+                self.stdout.write(f'File timestamp updated: {main_css}')
                 
             except sass.CompileError as e:
                 self.stdout.write(self.style.ERROR(f'✗ SCSS compilation error: {e}'))
