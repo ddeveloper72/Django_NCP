@@ -197,7 +197,6 @@ class ImmunizationsSectionService(CTSIntegrationMixin, ClinicalServiceBase):
                     )
                     
                     logger.info(f"[IMMUNIZATIONS] Resolved vaccine: {vaccine_name} (code: {vaccine_code})")
-                                logger.debug(f"[IMMUNIZATIONS] Found originalText reference: {ref_value}, will use brand name instead")
         
         # CRITICAL: Use brand name as vaccine name if code displayName is not available
         # Brand name (<name> element) is more readable than code (e.g., "Engerix B (2294189)" vs "836374004")
