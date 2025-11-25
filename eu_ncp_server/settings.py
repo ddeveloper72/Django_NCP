@@ -220,7 +220,11 @@ if DEVELOPMENT:
 if DEVELOPMENT:
     STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
 else:
-    STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
+    STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+# WhiteNoise settings for cache control
+WHITENOISE_MAX_AGE = 31536000  # 1 year cache for static files with hashed names
+WHITENOISE_IMMUTABLE_FILE_TEST = lambda path, url: True  # All files get cache-busting hash
 
 # Media files
 MEDIA_URL = "media/"
