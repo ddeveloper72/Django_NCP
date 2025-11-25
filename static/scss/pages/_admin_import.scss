@@ -44,7 +44,7 @@
 }
 
 .progress-bar {
-  background: linear-gradient(90deg, $success-green 0%, darken($success-green, 10%) 100%);
+  background: linear-gradient(90deg, $success-green 0%, #1a7f47 100%);
   height: 100%;
   border-radius: $border-radius-md;
   transition: width 0.3s ease-in-out;
@@ -75,22 +75,22 @@
   
   // Status-specific colors
   &.status-pending {
-    background: linear-gradient(90deg, $warning-amber 0%, darken($warning-amber, 10%) 100%);
+    background: linear-gradient(90deg, $warning 0%, $warning-dark 100%);
   }
   
   &.status-running {
-    background: linear-gradient(90deg, $primary-blue 0%, darken($primary-blue, 10%) 100%);
+    background: linear-gradient(90deg, $primary-blue 0%, #0052a3 100%);
   }
   
   &.status-completed {
-    background: linear-gradient(90deg, $success-green 0%, darken($success-green, 10%) 100%);
+    background: linear-gradient(90deg, $success-green 0%, #1a7f47 100%);
     &::before {
       animation: none; // Stop stripes when completed
     }
   }
   
   &.status-failed {
-    background: linear-gradient(90deg, $error-red 0%, darken($error-red, 10%) 100%);
+    background: linear-gradient(90deg, $error-red 0%, #a31a1a 100%);
     &::before {
       animation: none; // Stop stripes when failed
     }

@@ -132,6 +132,16 @@ img {
   max-width: 100%;
   height: auto;
   display: block;
+  
+  // EXCEPTION: Country flags should NOT expand to container width
+  &.country-flag,
+  &.flag-sm,
+  &.flag-md,
+  &.flag-lg {
+    max-width: none !important;
+    height: auto;
+    display: inline-block;
+  }
 }
 
 // Remove default button styles
