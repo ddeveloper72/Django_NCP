@@ -2567,9 +2567,11 @@ class FHIRBundleParser:
         return any(keyword in observation_text for keyword in physical_exam_keywords)
     
     def _parse_immunization_resource(self, immunization: Dict[str, Any]) -> Dict[str, Any]:
-        """Parse FHIR Immunization resource"""
-        # Extract vaccine name
+        """Parse FHIR Immunization resource - preserves CodeableConcepts for CTS resolution"""
+        # Preserve original vaccineCode CodeableConcept for CTS resolution in agent service
         vaccine_code = immunization.get('vaccineCode', {})
+        
+        # Extract fallback vaccine name for backwards compatibility
         vaccine_name = 'Unknown vaccine'
         if vaccine_code.get('coding'):
             coding = vaccine_code['coding'][0]
@@ -2587,24 +2589,28 @@ class FHIRBundleParser:
         else:
             occurrence_date = None
         
-        # Extract route - handle missing or complex structures
-        route_value = immunization.get('route')
-        if route_value:
-            route_display = route_value.get('coding', [{}])[0].get('display') if isinstance(route_value, dict) else route_value
-        else:
-            route_display = None
+        # Preserve route and site CodeableConcepts for CTS resolution
+        route = immunization.get('route', {})
+        site = immunization.get('site', {})
         
         # Extract lot number - can be None
         lot_number = immunization.get('lotNumber')
         
         return {
             'id': immunization.get('id'),
-            'vaccine_name': vaccine_name,
+            'vaccine_code': vaccine_code,  # Preserve CodeableConcept for CTS
+            'vaccine_name': vaccine_name,  # Fallback display name
             'status': immunization.get('status', 'Unknown'),
             'date': occurrence_date,  # Use 'date' field name for template compatibility
             'occurrence_date': occurrence_date,  # Keep for backwards compatibility
+            'occurrence_datetime': occurrence_date,  # For agent service compatibility
             'lot_number': lot_number,  # None if not present
-            'route': route_display,  # None if not present
+            'route': route,  # Preserve CodeableConcept for CTS
+            'site': site,  # Preserve CodeableConcept for CTS
+            'dose_quantity': immunization.get('doseQuantity'),
+            'reason_code': immunization.get('reasonCode', []),
+            'recorded': immunization.get('recorded'),
+            'expiration_date': immunization.get('expirationDate'),
             'resource_type': 'Immunization',
             'display_text': f"Vaccination: {vaccine_name}"
         }

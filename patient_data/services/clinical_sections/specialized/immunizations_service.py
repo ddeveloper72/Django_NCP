@@ -18,11 +18,12 @@ import logging
 from typing import Dict, List, Any
 from django.http import HttpRequest
 from ..base.clinical_service_base import ClinicalServiceBase
+from ..cts_integration_mixin import CTSIntegrationMixin
 
 logger = logging.getLogger(__name__)
 
 
-class ImmunizationsSectionService(ClinicalServiceBase):
+class ImmunizationsSectionService(CTSIntegrationMixin, ClinicalServiceBase):
     """
     Specialized service for immunizations section data processing.
     
@@ -130,18 +131,24 @@ class ImmunizationsSectionService(ClinicalServiceBase):
         """Parse immunizations section XML into structured data."""
         immunizations = []
         
+        # Extract narrative mapping for text reference resolution
+        narrative_mapping = self._extract_narrative_mapping(section)
+        
         entries = section.findall('.//hl7:entry', self.namespaces)
         for entry in entries:
             substance_admin = entry.find('.//hl7:substanceAdministration', self.namespaces)
             if substance_admin is not None:
-                immunization = self._parse_immunization_element(substance_admin)
+                immunization = self._parse_immunization_element(substance_admin, narrative_mapping)
                 if immunization:
                     immunizations.append(immunization)
         
         return immunizations
     
-    def _parse_immunization_element(self, substance_admin) -> Dict[str, Any]:
+    def _parse_immunization_element(self, substance_admin, narrative_mapping: Dict[str, str] = None) -> Dict[str, Any]:
         """Parse immunization element into structured data with comprehensive field extraction."""
+        
+        if narrative_mapping is None:
+            narrative_mapping = {}
         
         # Extract vaccine name and brand name
         consumable = substance_admin.find('.//hl7:consumable', self.namespaces)
@@ -164,20 +171,32 @@ class ImmunizationsSectionService(ClinicalServiceBase):
                 # Get vaccine information from <code> element
                 code_elem = material.find('hl7:code', self.namespaces)
                 if code_elem is not None:
+                    vaccine_code = code_elem.get('code', '')
+                    vaccine_code_system = code_elem.get('codeSystem', '')
                     code_display_name = code_elem.get('displayName', '')
                     
-                    # PRIORITY: Use displayName if available
-                    if code_display_name:
-                        vaccine_name = code_display_name
-                    else:
-                        # Try to get text from originalText reference (e.g., #code-51)
-                        original_text = code_elem.find('hl7:originalText', self.namespaces)
-                        if original_text is not None:
-                            reference = original_text.find('hl7:reference', self.namespaces)
-                            if reference is not None:
-                                ref_value = reference.get('value', '')
-                                # Reference value points to content in the narrative text
-                                # We can't easily resolve it here, so we'll rely on brand name instead
+                    # Build text reference for fallback
+                    text_reference = ""
+                    original_text = code_elem.find('hl7:originalText', self.namespaces)
+                    if original_text is not None:
+                        reference = original_text.find('hl7:reference', self.namespaces)
+                        if reference is not None:
+                            ref_value = reference.get('value', '')
+                            if ref_value.startswith('#'):
+                                ref_id = ref_value[1:]
+                                if ref_id in narrative_mapping:
+                                    text_reference = narrative_mapping[ref_id]
+                    
+                    # Resolve vaccine name using CTS with fallbacks
+                    vaccine_name = self._resolve_clinical_code_with_cts(
+                        code=vaccine_code,
+                        code_system=vaccine_code_system,
+                        display_name=code_display_name,
+                        text_reference=text_reference,
+                        fallback_mappings=None
+                    )
+                    
+                    logger.info(f"[IMMUNIZATIONS] Resolved vaccine: {vaccine_name} (code: {vaccine_code})")
                                 logger.debug(f"[IMMUNIZATIONS] Found originalText reference: {ref_value}, will use brand name instead")
         
         # CRITICAL: Use brand name as vaccine name if code displayName is not available
@@ -214,17 +233,39 @@ class ImmunizationsSectionService(ClinicalServiceBase):
             if dose_value:
                 dose_number = f"Dose {dose_value}"
         
-        # Extract route of administration
+        # Extract route of administration with CTS resolution
         route_elem = substance_admin.find('hl7:routeCode', self.namespaces)
         route = ""
         if route_elem is not None:
-            route = route_elem.get('displayName', route_elem.get('code', ''))
+            route_code = route_elem.get('code', '')
+            route_code_system = route_elem.get('codeSystem', '')
+            route_display = route_elem.get('displayName', '')
+            
+            if route_code:
+                route = self._resolve_clinical_code_with_cts(
+                    code=route_code,
+                    code_system=route_code_system,
+                    display_name=route_display,
+                    text_reference="",
+                    fallback_mappings=None
+                )
         
-        # Extract administration site
+        # Extract administration site with CTS resolution
         site_elem = substance_admin.find('hl7:approachSiteCode', self.namespaces)
         site = ""
         if site_elem is not None:
-            site = site_elem.get('displayName', site_elem.get('code', ''))
+            site_code = site_elem.get('code', '')
+            site_code_system = site_elem.get('codeSystem', '')
+            site_display = site_elem.get('displayName', '')
+            
+            if site_code:
+                site = self._resolve_clinical_code_with_cts(
+                    code=site_code,
+                    code_system=site_code_system,
+                    display_name=site_display,
+                    text_reference="",
+                    fallback_mappings=None
+                )
         
         # Extract lot number from lotNumberText
         lot_number = ""
@@ -319,14 +360,21 @@ class ImmunizationsSectionService(ClinicalServiceBase):
             if participant_role is not None:
                 agent_code_elem = participant_role.find('hl7:code', self.namespaces)
                 if agent_code_elem is not None:
-                    agent_display_name = agent_code_elem.get('displayName', '')
                     agent_code = agent_code_elem.get('code', '')
                     agent_code_system = agent_code_elem.get('codeSystem', '')
                     agent_code_system_name = agent_code_elem.get('codeSystemName', '')
+                    agent_display_from_xml = agent_code_elem.get('displayName', '')
                     
-                    # Override the earlier agent extraction from consumable
-                    if agent_display_name:
-                        logger.info(f"[IMMUNIZATIONS] Found agent from participant: {agent_display_name} ({agent_code})")
+                    # Resolve agent using CTS (SNOMED CT, ICD-10, etc.)
+                    if agent_code and agent_code.upper() != 'UNK':
+                        agent_display_name = self._resolve_clinical_code_with_cts(
+                            code=agent_code,
+                            code_system=agent_code_system,
+                            display_name=agent_display_from_xml,
+                            text_reference="",
+                            fallback_mappings=None
+                        )
+                        logger.info(f"[IMMUNIZATIONS] Resolved agent: {agent_display_name} (code: {agent_code})")
         
         # Extract dose number from entryRelationship observation (LOINC 30973-2)
         dose_number_value = ""
@@ -369,3 +417,22 @@ class ImmunizationsSectionService(ClinicalServiceBase):
             'country_of_vaccination': country,
             'annotations': annotations
         }
+    
+    def _extract_narrative_mapping(self, section) -> Dict[str, str]:
+        """Extract narrative text mapping from section for reference resolution."""
+        narrative_mapping = {}
+        
+        text_section = section.find('hl7:text', self.namespaces)
+        if text_section is not None:
+            # Extract all elements with ID attribute
+            for elem in text_section.iter():
+                elem_id = elem.get('ID')
+                if elem_id:
+                    # Get all text content, handling nested elements
+                    elem_text = ''.join(elem.itertext()).strip()
+                    if elem_text:
+                        narrative_mapping[elem_id] = elem_text
+                        logger.debug(f"[IMMUNIZATIONS] Mapped narrative ID '{elem_id}' -> '{elem_text[:50]}...'")
+        
+        logger.info(f"[IMMUNIZATIONS] Extracted {len(narrative_mapping)} narrative text references")
+        return narrative_mapping

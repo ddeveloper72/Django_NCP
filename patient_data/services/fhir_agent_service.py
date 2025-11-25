@@ -353,22 +353,43 @@ class FHIRAgentService:
     # Helper methods for data formatting
     
     def _extract_display_text(self, codeable_concept: Dict[str, Any]) -> str:
-        """Extract human-readable text from FHIR CodeableConcept."""
+        """Extract human-readable text from FHIR CodeableConcept with CTS resolution."""
         if not codeable_concept:
             return "Unknown"
-            
-        # Try text field first
-        if codeable_concept.get("text"):
-            return codeable_concept["text"]
-            
-        # Fallback to first coding display
+        
+        # Extract code and system from first coding
         coding = codeable_concept.get("coding", [])
-        if coding and coding[0].get("display"):
-            return coding[0]["display"]
-            
-        # Last resort: use code
-        if coding and coding[0].get("code"):
-            return coding[0]["code"]
+        code = None
+        code_system = None
+        display_from_fhir = None
+        text_value = codeable_concept.get("text", "")
+        
+        if coding:
+            code = coding[0].get("code")
+            code_system = coding[0].get("system", "")
+            display_from_fhir = coding[0].get("display", "")
+        
+        # If we have a code, try CTS resolution
+        if code:
+            try:
+                from patient_data.services.cts_integration.cts_service import CTSService
+                cts_service = CTSService()
+                
+                # Try CTS resolution
+                cts_result = cts_service.get_term_display(code, code_system)
+                if cts_result and cts_result != code:
+                    logger.info(f"[FHIR CTS] Resolved {code} → {cts_result}")
+                    return cts_result
+            except Exception as e:
+                logger.debug(f"[FHIR CTS] Resolution failed for {code}: {e}")
+        
+        # Fallback hierarchy: text > display > code
+        if text_value:
+            return text_value
+        if display_from_fhir:
+            return display_from_fhir
+        if code:
+            return code
             
         return "Unknown"
     
