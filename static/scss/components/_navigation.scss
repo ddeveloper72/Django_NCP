@@ -2072,6 +2072,17 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
       color: $text-dark;
       font-weight: $font-weight-medium;
     }
+
+    // Flag sizing fix for breadcrumb flags
+    .flag-sm,
+    .country-flag {
+      width: 20px !important;
+      height: 13px !important;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 0.25rem;
+      object-fit: cover;
+    }
   }
 
   .quick-actions {
@@ -3177,4 +3188,22 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
 .page-context .page-actions .btn i.page-action-icon.far,
 .page-context .page-actions .btn i.page-action-icon.fab {
   color: #2d3748 !important; // Dark gray for excellent contrast on light backgrounds
+}
+
+// Global breadcrumb flag sizing (all breadcrumb contexts)
+.breadcrumb .flag-sm,
+.breadcrumb .country-flag,
+.breadcrumb img.flag-sm,
+.breadcrumb img.country-flag,
+.breadcrumb-item .flag-sm,
+.breadcrumb-item .country-flag,
+.breadcrumb-item img.flag-sm,
+.breadcrumb-item img.country-flag {
+  width: 20px !important;
+  height: 13px !important;
+  max-width: 20px !important;
+  display: inline-block !important;
+  vertical-align: middle;
+  margin-right: 0.25rem;
+  object-fit: cover;
 }

@@ -103,3 +103,21 @@
   position: relative;
   z-index: 1010;
 }
+
+// Global breadcrumb flag sizing (applies to all breadcrumbs)
+.breadcrumb .flag-sm,
+.breadcrumb .country-flag,
+.breadcrumb img.flag-sm,
+.breadcrumb img.country-flag,
+.breadcrumb-item .flag-sm,
+.breadcrumb-item .country-flag,
+.breadcrumb-item img.flag-sm,
+.breadcrumb-item img.country-flag {
+  width: 20px !important;
+  height: 13px !important;
+  max-width: 20px !important;
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 0.25rem;
+  object-fit: cover;
+}

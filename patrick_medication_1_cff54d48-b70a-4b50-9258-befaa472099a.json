@@ -1,0 +1,18 @@
+{
+  "resourceType": "MedicationStatement",
+  "id": "cff54d48-b70a-4b50-9258-befaa472099a",
+  "meta": {
+    "versionId": "2",
+    "lastUpdated": "2025-11-24T12:02:40.498+00:00"
+  },
+  "status": "unknown",
+  "medicationReference": {
+    "reference": "Medication/0d445f58-e41f-4c68-9851-1b0d3e1f642b"
+  },
+  "subject": {
+    "reference": "Patient/9955eb80-a5f9-4c02-aa6c-d1853c76377c"
+  },
+  "informationSource": {
+    "reference": "Practitioner/755944f9-064f-417c-975f-cf055c60b75a"
+  }
+}

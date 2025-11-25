@@ -21469,27 +21469,28 @@ input[type=checkbox] {
     text-align: center;
   }
 }
-.patient-search-page .country-header .country-flag {
-  width: 60px;
-  height: 40px;
+.patient-search-page .country-header .country-flag,
+.patient-search-page .country-header .flag-sm {
+  width: 48px !important;
+  height: 32px !important;
   border-radius: 8px;
   margin-right: 1.5rem;
   vertical-align: middle;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
   border: 2px solid rgba(255, 255, 255, 0.3);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  display: inline-block;
   font-weight: bold;
   font-size: 12px;
   object-fit: cover;
 }
-.patient-search-page .country-header .country-flag.country-flag-de {
+.patient-search-page .country-header .country-flag.country-flag-de,
+.patient-search-page .country-header .flag-sm.country-flag-de {
   background: #000;
   color: #ff0000;
 }
 @media (max-width: 640px) {
-  .patient-search-page .country-header .country-flag {
+  .patient-search-page .country-header .country-flag,
+  .patient-search-page .country-header .flag-sm {
     margin-right: 0;
     margin-bottom: 15px;
   }

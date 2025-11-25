@@ -8400,6 +8400,16 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
   color: #2d3748;
   font-weight: 500;
 }
+.cda-navigation .breadcrumb-nav .breadcrumb .flag-sm, .cda-navigation .breadcrumb-nav .breadcrumb-enhanced .flag-sm,
+.cda-navigation .breadcrumb-nav .breadcrumb .country-flag,
+.cda-navigation .breadcrumb-nav .breadcrumb-enhanced .country-flag {
+  width: 20px !important;
+  height: 13px !important;
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 0.25rem;
+  object-fit: cover;
+}
 .cda-navigation .quick-actions {
   display: flex;
   justify-content: center;
@@ -9422,6 +9432,24 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
 .page-context .page-actions .btn i.page-action-icon.far,
 .page-context .page-actions .btn i.page-action-icon.fab {
   color: #2d3748 !important;
+}
+
+.breadcrumb .flag-sm, .breadcrumb-enhanced .flag-sm,
+.breadcrumb .country-flag,
+.breadcrumb-enhanced .country-flag,
+.breadcrumb img.flag-sm,
+.breadcrumb img.country-flag,
+.breadcrumb-item .flag-sm,
+.breadcrumb-item .country-flag,
+.breadcrumb-item img.flag-sm,
+.breadcrumb-item img.country-flag {
+  width: 20px !important;
+  height: 13px !important;
+  max-width: 20px !important;
+  display: inline-block !important;
+  vertical-align: middle;
+  margin-right: 0.25rem;
+  object-fit: cover;
 }
 
 .modal {
@@ -21427,6 +21455,42 @@ input[type=checkbox] {
   background: linear-gradient(135deg, #f7fafc 0%, #c3cfe2 100%);
   min-height: 100vh;
 }
+.patient-search-page .page-header {
+  background: linear-gradient(135deg, #005f5f 0%, #1e3a5f 100%) !important;
+  color: white !important;
+  padding: 2rem;
+  border-radius: 20px;
+  margin-bottom: 2rem;
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+}
+.patient-search-page .page-header h1, .patient-search-page .page-header h2, .patient-search-page .page-header h3, .patient-search-page .page-header h4, .patient-search-page .page-header h5, .patient-search-page .page-header h6, .patient-search-page .page-header p, .patient-search-page .page-header .page-subtitle {
+  color: white !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+.patient-search-page .page-header h1 {
+  display: flex;
+  align-items: center;
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0;
+}
+.patient-search-page .page-header h1 i {
+  color: white !important;
+}
+.patient-search-page .page-header .page-subtitle {
+  margin-top: 0.5rem;
+  opacity: 0.95;
+}
+.patient-search-page .page-header .country-flag,
+.patient-search-page .page-header img.country-flag {
+  width: 48px !important;
+  height: 32px !important;
+  display: inline-block;
+  vertical-align: middle;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  object-fit: cover;
+}
 .patient-search-page .country-header {
   background: linear-gradient(135deg, #005f5f 0%, #1e3a5f 100%);
   color: white !important;
@@ -21469,27 +21533,28 @@ input[type=checkbox] {
     text-align: center;
   }
 }
-.patient-search-page .country-header .country-flag {
-  width: 60px;
-  height: 40px;
+.patient-search-page .country-header .country-flag,
+.patient-search-page .country-header .flag-sm {
+  width: 48px !important;
+  height: 32px !important;
   border-radius: 8px;
   margin-right: 1.5rem;
   vertical-align: middle;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
   border: 2px solid rgba(255, 255, 255, 0.3);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  display: inline-block;
   font-weight: bold;
   font-size: 12px;
   object-fit: cover;
 }
-.patient-search-page .country-header .country-flag.country-flag-de {
+.patient-search-page .country-header .country-flag.country-flag-de,
+.patient-search-page .country-header .flag-sm.country-flag-de {
   background: #000;
   color: #ff0000;
 }
 @media (max-width: 640px) {
-  .patient-search-page .country-header .country-flag {
+  .patient-search-page .country-header .country-flag,
+  .patient-search-page .country-header .flag-sm {
     margin-right: 0;
     margin-bottom: 15px;
   }

@@ -52,17 +52,16 @@
       }
     }
 
-    .country-flag {
-      width: 60px;
-      height: 40px;
+    .country-flag,
+    .flag-sm {
+      width: 48px !important;
+      height: 32px !important;
       border-radius: 8px;
       margin-right: $space-lg;
       vertical-align: middle;
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
       border: 2px solid rgba($white, 0.3);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
+      display: inline-block;
       font-weight: bold;
       font-size: 12px;
       object-fit: cover;

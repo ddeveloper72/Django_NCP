@@ -6,6 +6,50 @@
   background: linear-gradient(135deg, $neutral-lightest 0%, #c3cfe2 100%);
   min-height: 100vh;
 
+  // Page Header - Dark teal with white text
+  .page-header {
+    background: linear-gradient(135deg, #005f5f 0%, $accent-blue 100%) !important;
+    color: white !important;
+    padding: $space-xl;
+    border-radius: 20px;
+    margin-bottom: $space-xl;
+    box-shadow: $shadow-lg;
+
+    h1, h2, h3, h4, h5, h6, p, .page-subtitle {
+      color: white !important;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    }
+
+    h1 {
+      display: flex;
+      align-items: center;
+      font-size: $font-size-xxxl;
+      font-weight: $font-weight-bold;
+      margin: 0;
+
+      i {
+        color: white !important;
+      }
+    }
+
+    .page-subtitle {
+      margin-top: $space-sm;
+      opacity: 0.95;
+    }
+
+    // Flag styling in header
+    .country-flag,
+    img.country-flag {
+      width: 48px !important;
+      height: 32px !important;
+      display: inline-block;
+      vertical-align: middle;
+      border-radius: 4px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      object-fit: cover;
+    }
+  }
+
   // Country Header
   .country-header {
     background: linear-gradient(135deg, #005f5f 0%, $accent-blue 100%); // Accessible teal
@@ -52,17 +96,16 @@
       }
     }
 
-    .country-flag {
-      width: 60px;
-      height: 40px;
+    .country-flag,
+    .flag-sm {
+      width: 48px !important;
+      height: 32px !important;
       border-radius: 8px;
       margin-right: $space-lg;
       vertical-align: middle;
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
       border: 2px solid rgba($white, 0.3);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
+      display: inline-block;
       font-weight: bold;
       font-size: 12px;
       object-fit: cover;
