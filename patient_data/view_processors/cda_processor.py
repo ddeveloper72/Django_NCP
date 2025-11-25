@@ -340,6 +340,17 @@ class CDAViewProcessor:
             enhanced_advance_directives = unified_results.get('42348-3', {}).get('items', [])
             enhanced_functional_status = unified_results.get('47420-5', {}).get('items', [])
             
+            # DEBUG: Log what's in unified_results for these sections
+            logger.info(f"[DEBUG UNIFIED] pregnancy_history (10162-6): {len(enhanced_pregnancy_history)} items")
+            logger.info(f"[DEBUG UNIFIED] social_history (29762-2): {len(enhanced_social_history)} items")
+            logger.info(f"[DEBUG UNIFIED] functional_status (47420-5): {len(enhanced_functional_status)} items")
+            if enhanced_pregnancy_history:
+                logger.info(f"[DEBUG UNIFIED] Sample pregnancy item: {enhanced_pregnancy_history[0]}")
+            if enhanced_social_history:
+                logger.info(f"[DEBUG UNIFIED] Sample social item: {enhanced_social_history[0]}")
+            if enhanced_functional_status:
+                logger.info(f"[DEBUG UNIFIED] Sample functional item: {enhanced_functional_status[0]}")
+            
             # Add all enhanced clinical data to context
             context.update({
                 'enhanced_medications': enhanced_medications,
