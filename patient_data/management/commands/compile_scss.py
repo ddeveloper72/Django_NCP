@@ -12,7 +12,7 @@ class Command(BaseCommand):
     help = 'Compile SCSS files to CSS using libsass'
 
     def handle(self, *args, **options):
-        """Compile all SCSS files to CSS"""
+        """Compile all SCSS files to CSS for production deployment"""
         # Define paths
         scss_path = Path(settings.BASE_DIR) / "static" / "scss"
         css_path = Path(settings.BASE_DIR) / "static" / "css"
