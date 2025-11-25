@@ -1995,6 +1995,19 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
   }
 }
 
+// Global flag sizing for ALL breadcrumbs (applied before specific breadcrumb styles)
+.breadcrumb {
+  .flag-sm,
+  .country-flag {
+    width: 20px !important;
+    height: 13px !important;
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 0.25rem;
+    object-fit: cover;
+  }
+}
+
 // Enhanced breadcrumb with icons support
 .breadcrumb-enhanced {
   @extend .breadcrumb;
