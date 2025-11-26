@@ -223,8 +223,10 @@ else:
     STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # WhiteNoise settings for cache control
-WHITENOISE_MAX_AGE = 31536000  # 1 year cache for static files with hashed names
-WHITENOISE_IMMUTABLE_FILE_TEST = lambda path, url: True  # All files get cache-busting hash
+# Temporarily reduced for CSS update - restore to 31536000 after breadcrumb fix deploys
+WHITENOISE_MAX_AGE = 0 if not DEVELOPMENT else 31536000
+# Temporarily disabled to force CSS refresh - restore after breadcrumb fix deploys  
+# WHITENOISE_IMMUTABLE_FILE_TEST = lambda path, url: True
 
 # Media files
 MEDIA_URL = "media/"
