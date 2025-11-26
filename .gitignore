@@ -64,6 +64,10 @@ static/css/main.css.map
 static/css/main-debug.css
 static/css/main-debug.css.map
 
+# CRITICAL: Never commit compiled CSS to SCSS source directory
+static/scss/*.css
+static/scss/*.css.map
+
 # Specifications and Documentation
 # .specs/
 
