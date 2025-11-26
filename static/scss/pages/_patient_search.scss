@@ -714,7 +714,9 @@
   position: relative;
 
   &::before {
-    content: '🚨';
+    content: '\f071'; // FontAwesome exclamation-triangle icon
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
     position: absolute;
     top: -15px;
     right: 20px;
@@ -723,6 +725,7 @@
     padding: 5px 10px;
     border-radius: 50%;
     border: 2px solid #fc8181;
+    color: #c53030;
   }
 
   .break-glass-title {
@@ -913,7 +916,7 @@
   }
 }
 
-// Break Glass Emergency Access Section
+// Break Glass Emergency Access Section (Duplicate)
 .break-glass-section {
   background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
   border: 2px solid #fc8181;
@@ -923,7 +926,9 @@
   position: relative;
 
   &::before {
-    content: '🚨';
+    content: '\f071'; // FontAwesome exclamation-triangle icon
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
     position: absolute;
     top: -15px;
     right: 20px;
@@ -932,6 +937,7 @@
     padding: 5px 10px;
     border-radius: 50%;
     border: 2px solid #fc8181;
+    color: #c53030;
   }
 
   .break-glass-title {

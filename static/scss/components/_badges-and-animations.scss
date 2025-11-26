@@ -353,7 +353,9 @@
     font-size: 1rem;
     
     &::before {
-      content: "📋 ";
+      content: "\f328 "; // FontAwesome clipboard-list icon
+      font-family: 'Font Awesome 5 Free';
+      font-weight: 900;
       margin-right: 0.5rem;
     }
   }

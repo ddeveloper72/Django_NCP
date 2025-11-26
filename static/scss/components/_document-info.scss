@@ -128,11 +128,15 @@
   }
 
   &.phone-link:before {
-    content: "📞 ";
+    content: "\f095 "; // FontAwesome phone icon
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
   }
 
   &.email-link:before {
-    content: "✉️ ";
+    content: "\f0e0 "; // FontAwesome envelope icon
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
   }
 }
 

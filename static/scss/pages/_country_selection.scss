@@ -107,7 +107,9 @@
       position: relative;
 
       &::before {
-        content: '🔍';
+        content: '\f002'; // FontAwesome search icon
+        font-family: 'Font Awesome 5 Free';
+        font-weight: 900;
         position: absolute;
         right: 20px;
         top: 50%;
