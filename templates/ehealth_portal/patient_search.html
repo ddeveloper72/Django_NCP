@@ -59,8 +59,7 @@
             <p class="mb-1">
                 <strong>Country:</strong> {{ country.name }} |
                 <strong>Fields:</strong> {{ form_fields|length }}
-                {% if ism_last_updated %}| <strong>Last Updated:</strong> {{ ism_last_updated.strftime('%Y-%m-%d %H:%M')
-                }}{% endif %}
+                {% if ism_last_updated %}| <strong>Last Updated:</strong> {{ ism_last_updated|date:"Y-m-d H:i" }}{% endif %}
             </p>
             <p class="mb-0">
                 <small>Search form configured from {{ country.name }}'s SMP server</small>
