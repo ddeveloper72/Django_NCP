@@ -58,7 +58,8 @@ venv.bak/
 *~
 
 # Compiled Static Files (CSS compiled from SCSS)
-static/css/main.css
+# NOTE: We commit main.css for Heroku deployment
+# static/css/main.css
 static/css/main.css.map
 static/css/main-debug.css
 static/css/main-debug.css.map
