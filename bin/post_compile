@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# Heroku post-compile hook - runs after dependencies are installed
+# This ensures SCSS is compiled BEFORE collectstatic runs
+
+echo "-----> Post-compile: Compiling SCSS to CSS"
+python manage.py compile_scss
+
+echo "-----> Post-compile: SCSS compilation complete"
