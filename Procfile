@@ -1,2 +1,2 @@
 web: gunicorn eu_ncp_server.wsgi --log-file -
-release: python manage.py collectstatic --noinput --clear && python manage.py migrate --noinput
+release: rm -rf staticfiles && python manage.py collectstatic --noinput --clear && python manage.py migrate --noinput
