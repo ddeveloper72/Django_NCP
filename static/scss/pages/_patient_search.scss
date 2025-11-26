@@ -153,7 +153,7 @@
       top: -10px;
       right: 20px;
       font-size: 3rem;
-      opacity: 0.1;
+      opacity: 0.25; // Increased from 0.1 for better visibility
     }
 
     h4 {
@@ -163,6 +163,7 @@
       font-weight: $font-weight-medium;
       display: flex;
       align-items: center;
+      gap: 10px; // Add spacing between icon and text
     }
 
     // Ensure dark text for good contrast on light green background
