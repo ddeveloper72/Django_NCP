@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+echo "-----> Post-compile: Removing cached staticfiles to force fresh collection"
+rm -rf $BUILD_DIR/staticfiles
+echo "-----> Post-compile: Staticfiles directory cleared"
