@@ -220,11 +220,12 @@ if DEVELOPMENT:
 if DEVELOPMENT:
     STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
 else:
-    STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+    # Use simpler storage without manifest to avoid caching issues
+    STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
 
 # WhiteNoise settings for cache control
-# Temporarily reduced for CSS update - restore to 31536000 after breadcrumb fix deploys
-WHITENOISE_MAX_AGE = 0 if not DEVELOPMENT else 31536000
+# No caching to force immediate CSS updates
+WHITENOISE_MAX_AGE = 0
 # Temporarily disabled to force CSS refresh - restore after breadcrumb fix deploys  
 # WHITENOISE_IMMUTABLE_FILE_TEST = lambda path, url: True
 
