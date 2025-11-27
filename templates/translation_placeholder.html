@@ -1,101 +1,524 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}{{ page_title }} - EU eHealth NCP Portal{% endblock %}
+{% block title %}Central Terminology Services - EU eHealth NCP Portal{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'neutral',
+            securityLevel: 'loose',
+            fontFamily: 'Arial, sans-serif',
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true,
+                curve: 'basis',
+                padding: 20
+            }
+        });
+    });
+</script>
+<style>
+    .mermaid {
+        background-color: #ffffff;
+        padding: 30px;
+        border-radius: 8px;
+        margin: 20px 0;
+        border: 1px solid #dee2e6;
+        text-align: center;
+    }
+    
+    /* Ensure Mermaid diagrams are visible */
+    .mermaid svg {
+        max-width: 100%;
+        height: auto;
+    }
+    
+    .standard-card {
+        transition: transform 0.2s;
+    }
+    .standard-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    }
+    .process-badge {
+        display: inline-block;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-weight: 600;
+        margin: 5px;
+    }
+    
+    /* Fix dark text on dark backgrounds */
+    .card-header.bg-dark h4 {
+        color: #ffffff !important;
+    }
+    
+    .card-header.bg-primary h4,
+    .card-header.bg-success h4 {
+        color: #ffffff !important;
+    }
+    
+    /* Ensure all text in colored headers is white */
+    .bg-gradient,
+    .bg-gradient * {
+        color: #ffffff !important;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
 <div class="container my-5">
-    <div class="row justify-content-center">
-        <div class="col-12 col-lg-8">
-            <!-- Under Development Card -->
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
             <div class="card shadow-lg border-0">
-                <div class="card-header bg-info text-white py-4">
+                <div class="card-header bg-gradient text-white py-4" style="background: linear-gradient(135deg, #007991 0%, #78ffd6 100%);">
                     <div class="d-flex align-items-center">
-                        <i class="fa fa-language fa-3x me-3" aria-hidden="true"></i>
+                        <i class="fa fa-exchange fa-3x me-3" aria-hidden="true"></i>
                         <div>
-                            <h2 class="mb-0">{{ service_name }}</h2>
-                            <p class="mb-0 opacity-90">Clinical Document Architecture to FHIR Conversion</p>
+                            <h1 class="mb-1">Central Terminology Services</h1>
+                            <p class="mb-0 opacity-90">Clinical Code Translation & European Healthcare Interoperability</p>
                         </div>
                     </div>
                 </div>
-                <div class="card-body p-5">
-                    <div class="text-center mb-4">
-                        <i class="fa fa-tools fa-5x text-warning mb-3" aria-hidden="true"></i>
-                        <h3 class="text-muted">Feature Under Development</h3>
-                    </div>
+            </div>
+        </div>
+    </div>
 
+    <!-- Process Overview -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4">
+                    <h3 class="mb-4">
+                        <i class="fa fa-cogs text-primary me-2" aria-hidden="true"></i>
+                        Clinical Terminology Translation Processes
+                    </h3>
+                    
                     <div class="alert alert-info" role="alert">
                         <i class="fa fa-info-circle me-2" aria-hidden="true"></i>
-                        <strong>Translation Services Coming Soon</strong>
+                        <strong>Master Value Catalogue Integration</strong>
                         <p class="mb-0 mt-2">
-                            This feature is currently being developed to provide seamless conversion between 
-                            CDA (Clinical Document Architecture) and FHIR formats for cross-border healthcare interoperability.
+                            This system leverages a Central Terminology Server with a Master Value Catalogue uploaded via the admin console.
+                            Clinical codes from CDA and FHIR R4 resources are automatically translated to display human-readable terminology
+                            across European healthcare standards (SNOMED CT, LOINC, ICD-10, ATC, UCUM).
                         </p>
+                    </div>
+
+                    <div class="row mt-4">
+                        <div class="col-md-6 mb-3">
+                            <span class="process-badge bg-primary text-white">
+                                <i class="fa fa-upload me-1" aria-hidden="true"></i> Process 1: MVC Upload
+                            </span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <span class="process-badge bg-success text-white">
+                                <i class="fa fa-search me-1" aria-hidden="true"></i> Process 2: Code Lookup
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Process 1: Master Value Catalogue Upload -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fa fa-upload me-2" aria-hidden="true"></i>
+                        Process 1: Master Value Catalogue Upload
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-4">
+                        Healthcare administrators upload EU-CTS Master Value Catalogue files through the Django admin console,
+                        populating the terminology database with standardized clinical codes and multi-language translations.
+                    </p>
+                    
+                    <div class="mermaid">
+flowchart TB
+    A["Admin Console<br/>ValueSetCatalogue"] -->|Upload MVC Excel| B["Django Admin Interface"]
+    B -->|Parse Sheets| C["Excel Parser Service"]
+    C -->|Extract Value Sets| D[("ValueSetCatalogue<br/>Database Table")]
+    C -->|Extract Concepts| E[("ValueSetConcept<br/>Database Table")]
+    C -->|Extract Translations| F[("ConceptTranslation<br/>Database Table")]
+    
+    D -->|Store| G["Value Set Metadata<br/>OID, Name, Version"]
+    E -->|Store| H["Clinical Codes<br/>Code, System OID, Status"]
+    F -->|Store| I["Multi-Language Translations<br/>EN, DE, FR, PT, etc."]
+    
+    G -.->|Links to| H
+    H -.->|Links to| I
+    
+    style A fill:#007991,stroke:#005570,stroke-width:3px,color:#fff
+    style B fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    style C fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    style D fill:#b2dfdb,stroke:#00695c,stroke-width:3px
+    style E fill:#b2dfdb,stroke:#00695c,stroke-width:3px
+    style F fill:#b2dfdb,stroke:#00695c,stroke-width:3px
+    style G fill:#fff9c4,stroke:#f57f17,stroke-width:2px
+    style H fill:#fff9c4,stroke:#f57f17,stroke-width:2px
+    style I fill:#fff9c4,stroke:#f57f17,stroke-width:2px
                     </div>
 
                     <div class="mt-4">
-                        <h4 class="mb-3">
-                            <i class="fa fa-check-circle text-success me-2" aria-hidden="true"></i>
-                            Planned Features
-                        </h4>
-                        <ul class="list-unstyled">
-                            <li class="mb-2">
-                                <i class="fa fa-arrow-right text-primary me-2" aria-hidden="true"></i>
-                                CDA to FHIR R4 document conversion
+                        <h5><i class="fa fa-database me-2 text-primary" aria-hidden="true"></i>Database Models</h5>
+                        <ul class="list-group">
+                            <li class="list-group-item">
+                                <strong>ValueSetCatalogue:</strong> Master catalog of terminology value sets (SNOMED, LOINC, ICD-10, ATC, UCUM)
                             </li>
-                            <li class="mb-2">
-                                <i class="fa fa-arrow-right text-primary me-2" aria-hidden="true"></i>
-                                FHIR to CDA document transformation
+                            <li class="list-group-item">
+                                <strong>ValueSetConcept:</strong> Individual clinical codes with OIDs, display names, and status
                             </li>
-                            <li class="mb-2">
-                                <i class="fa fa-arrow-right text-primary me-2" aria-hidden="true"></i>
-                                Medical terminology translation across European standards
+                            <li class="list-group-item">
+                                <strong>ConceptTranslation:</strong> Multi-language translations for cross-border healthcare
                             </li>
-                            <li class="mb-2">
-                                <i class="fa fa-arrow-right text-primary me-2" aria-hidden="true"></i>
-                                Format validation and compliance checking
-                            </li>
-                            <li class="mb-2">
-                                <i class="fa fa-arrow-right text-primary me-2" aria-hidden="true"></i>
-                                RESTful API for system integration
+                            <li class="list-group-item">
+                                <strong>TerminologySystem:</strong> Code system management with OID mappings
                             </li>
                         </ul>
                     </div>
-
-                    <div class="mt-4 p-4 bg-light rounded">
-                        <h5 class="mb-3">
-                            <i class="fa fa-lightbulb-o text-warning me-2" aria-hidden="true"></i>
-                            Current Capabilities
-                        </h5>
-                        <p class="text-muted mb-2">
-                            While translation services are under development, you can still:
-                        </p>
-                        <ul class="text-muted">
-                            <li>Access patient data through the <a href="/portal/">European Portal</a></li>
-                            <li>Search for patients using <a href="/patients/search/">Patient Search</a></li>
-                            <li>Manage service metadata via <a href="/smp/">SMP Dashboard</a></li>
-                            <li>View clinical documents in their original CDA format</li>
-                        </ul>
-                    </div>
-
-                    <div class="text-center mt-5">
-                        <a href="/" class="btn btn-primary btn-lg me-3">
-                            <i class="fa fa-home me-2" aria-hidden="true"></i>
-                            Return Home
-                        </a>
-                        <a href="/portal/" class="btn btn-outline-secondary btn-lg">
-                            <i class="fa fa-globe me-2" aria-hidden="true"></i>
-                            Go to Portal
-                        </a>
-                    </div>
-                </div>
-                <div class="card-footer bg-light text-muted text-center py-3">
-                    <small>
-                        <i class="fa fa-calendar-o me-1" aria-hidden="true"></i>
-                        Check back soon for updates on this feature
-                    </small>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Process 2: Clinical Code Lookup -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0">
+                        <i class="fa fa-search me-2" aria-hidden="true"></i>
+                        Process 2: Clinical Code Lookup from CDA/FHIR Resources
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-4">
+                        When processing patient clinical documents, the system extracts coded values from CDA or FHIR R4 resources
+                        and performs real-time lookups against the Master Value Catalogue to display human-readable terminology.
+                    </p>
+                    
+                    <div class="mermaid">
+flowchart TB
+    A["CDA Document"] -->|Parse XML| C["Enhanced CDA Processor"]
+    B["FHIR R4 Bundle"] -->|Parse JSON| C
+    
+    C -->|Extract Codes| D["Code Extraction<br/>SNOMED, LOINC, ICD-10"]
+    D -->|Code + System OID| E{"Central Terminology<br/>Service"}
+    
+    E -->|Query| F[("Master Value<br/>Catalogue Database")]
+    F -->|Match| G["ValueSetConcept"]
+    G -->|Get Translation| H["ConceptTranslation<br/>Target Language: EN"]
+    
+    H -->|Return Display| I["PSTableRenderer"]
+    I -->|Render| J["Patient Summary Display"]
+    
+    E -.->|Cache 1 hour| K["Django Cache"]
+    E -.->|Fallback| L["Hardcoded Mappings"]
+    
+    J -->|Show Patient| M["Clinical Data Table<br/>Human-Readable Terms"]
+    
+    style A fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    style B fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    style C fill:#007991,stroke:#005570,stroke-width:3px,color:#fff
+    style D fill:#fff9c4,stroke:#f57f17,stroke-width:2px
+    style E fill:#ffc107,stroke:#ff8f00,stroke-width:4px
+    style F fill:#b2dfdb,stroke:#00695c,stroke-width:3px
+    style G fill:#c8e6c9,stroke:#388e3c,stroke-width:2px
+    style H fill:#c8e6c9,stroke:#388e3c,stroke-width:2px
+    style I fill:#e1bee7,stroke:#7b1fa2,stroke-width:2px
+    style J fill:#f8bbd0,stroke:#c2185b,stroke-width:2px
+    style K fill:#eeeeee,stroke:#757575,stroke-width:1px
+    style L fill:#eeeeee,stroke:#757575,stroke-width:1px
+    style M fill:#4caf50,stroke:#2e7d32,stroke-width:3px,color:#fff
+                    </div>
+
+                    <div class="mt-4">
+                        <h5><i class="fa fa-code me-2 text-success" aria-hidden="true"></i>Supported Code Systems</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <ul class="list-group">
+                                    <li class="list-group-item">
+                                        <span class="badge bg-info">2.16.840.1.113883.6.96</span> SNOMED CT - Clinical Terms
+                                    </li>
+                                    <li class="list-group-item">
+                                        <span class="badge bg-primary">2.16.840.1.113883.6.1</span> LOINC - Lab & Clinical Observations
+                                    </li>
+                                    <li class="list-group-item">
+                                        <span class="badge bg-warning">2.16.840.1.113883.6.3</span> ICD-10 - Disease Classification
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <ul class="list-group">
+                                    <li class="list-group-item">
+                                        <span class="badge bg-dark">2.16.840.1.113883.6.73</span> ATC - Anatomical Therapeutic Chemical
+                                    </li>
+                                    <li class="list-group-item">
+                                        <span class="badge bg-secondary">2.16.840.1.113883.5.83</span> UCUM - Units of Measure
+                                    </li>
+                                    <li class="list-group-item">
+                                        <span class="badge bg-success">0.4.0.127.0.16.1.1.2.1</span> EDQM - Pharmaceutical Standards
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- European Standards -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-dark text-white">
+                    <h4 class="mb-0">
+                        <i class="fa fa-globe me-2" aria-hidden="true"></i>
+                        European Healthcare Interoperability Standards
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <!-- HL7 Standards -->
+                        <div class="col-md-6 mb-3">
+                            <div class="card standard-card h-100 border-primary">
+                                <div class="card-body">
+                                    <h5 class="card-title">
+                                        <i class="fa fa-file-code-o text-primary me-2" aria-hidden="true"></i>
+                                        HL7 FHIR R4
+                                    </h5>
+                                    <p class="text-muted">Fast Healthcare Interoperability Resources</p>
+                                    <ul class="small">
+                                        <li><strong>Patient Summary (IPS):</strong> International Patient Summary v2.0.0</li>
+                                        <li><strong>Resources:</strong> Patient, Observation, MedicationStatement, Condition, AllergyIntolerance</li>
+                                        <li><strong>Profiles:</strong> Pregnancy status, EDD, Outcome observations</li>
+                                        <li><strong>Compliance:</strong> HL7 FHIR R4 specification with EU extensions</li>
+                                    </ul>
+                                    <a href="https://build.fhir.org/ig/HL7/fhir-ips/" target="_blank" class="btn btn-sm btn-outline-primary">
+                                        <i class="fa fa-external-link me-1" aria-hidden="true"></i>
+                                        FHIR IPS Documentation
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- CDA Standards -->
+                        <div class="col-md-6 mb-3">
+                            <div class="card standard-card h-100 border-success">
+                                <div class="card-body">
+                                    <h5 class="card-title">
+                                        <i class="fa fa-file-text text-success me-2" aria-hidden="true"></i>
+                                        HL7 CDA R2
+                                    </h5>
+                                    <p class="text-muted">Clinical Document Architecture Release 2</p>
+                                    <ul class="small">
+                                        <li><strong>epSOS Patient Summary:</strong> European patient data exchange</li>
+                                        <li><strong>Sections:</strong> LOINC-coded clinical sections (allergies, medications, problems)</li>
+                                        <li><strong>Entries:</strong> SNOMED CT coded observations and acts</li>
+                                        <li><strong>Standards:</strong> CDA Level 3 with European extensions</li>
+                                    </ul>
+                                    <a href="http://www.hl7.org/implement/standards/product_brief.cfm?product_id=7" target="_blank" class="btn btn-sm btn-outline-success">
+                                        <i class="fa fa-external-link me-1" aria-hidden="true"></i>
+                                        CDA R2 Specification
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Patient Summary Display Guidelines -->
+                        <div class="col-md-6 mb-3">
+                            <div class="card standard-card h-100 border-info">
+                                <div class="card-body">
+                                    <h5 class="card-title">
+                                        <i class="fa fa-eye text-info me-2" aria-hidden="true"></i>
+                                        PS Display Guidelines
+                                    </h5>
+                                    <p class="text-muted">European Patient Summary Presentation</p>
+                                    <ul class="small">
+                                        <li><strong>Rendering:</strong> Structured table format for clinical sections</li>
+                                        <li><strong>Terminology Display:</strong> Human-readable translations via CTS</li>
+                                        <li><strong>LOINC Sections:</strong> 48765-2 (Allergies), 10160-0 (Medications), 11369-6 (Immunizations)</li>
+                                        <li><strong>Accessibility:</strong> WCAG 2.1 AA compliance with semantic HTML</li>
+                                    </ul>
+                                    <a href="https://art-decor.ehdsi.eu/" target="_blank" class="btn btn-sm btn-outline-info">
+                                        <i class="fa fa-external-link me-1" aria-hidden="true"></i>
+                                        eHDSI ART-DECOR
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- EU Cross-Border Interoperability -->
+                        <div class="col-md-6 mb-3">
+                            <div class="card standard-card h-100 border-warning">
+                                <div class="card-body">
+                                    <h5 class="card-title">
+                                        <i class="fa fa-exchange text-warning me-2" aria-hidden="true"></i>
+                                        epSOS / eHDSI Standards
+                                    </h5>
+                                    <p class="text-muted">European Health Digital Services Infrastructure</p>
+                                    <ul class="small">
+                                        <li><strong>Services:</strong> Patient Summary, ePrescription, eDispensation</li>
+                                        <li><strong>NCP Gateway:</strong> National Contact Point for cross-border exchange</li>
+                                        <li><strong>Value Sets:</strong> EU-CTS Master Value Catalogue with epSOS OIDs</li>
+                                        <li><strong>Security:</strong> TLS mutual authentication, SAML assertions</li>
+                                    </ul>
+                                    <a href="https://ehealthireland.ie/ehealth-infrastructure/epsos/" target="_blank" class="btn btn-sm btn-outline-warning">
+                                        <i class="fa fa-external-link me-1" aria-hidden="true"></i>
+                                        eHealth Ireland epSOS
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Implementation Details -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4">
+                    <h4 class="mb-4">
+                        <i class="fa fa-wrench text-primary me-2" aria-hidden="true"></i>
+                        Technical Implementation
+                    </h4>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5 class="text-primary">
+                                <i class="fa fa-server me-2" aria-hidden="true"></i>
+                                Service Layer
+                            </h5>
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <code>CTSService</code> - Terminology lookup wrapper
+                                </li>
+                                <li class="mb-2">
+                                    <code>TerminologyTranslator</code> - Multi-language translation service
+                                </li>
+                                <li class="mb-2">
+                                    <code>EnhancedCDAProcessor</code> - CDA document parsing with code extraction
+                                </li>
+                                <li class="mb-2">
+                                    <code>PSTableRenderer</code> - Patient Summary table rendering with CTS integration
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h5 class="text-success">
+                                <i class="fa fa-cog me-2" aria-hidden="true"></i>
+                                Features
+                            </h5>
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <i class="fa fa-check text-success me-2" aria-hidden="true"></i>
+                                    Real-time code lookup with 1-hour caching
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fa fa-check text-success me-2" aria-hidden="true"></i>
+                                    Fallback to hardcoded mappings if database lookup fails
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fa fa-check text-success me-2" aria-hidden="true"></i>
+                                    Multi-language support (EN, DE, FR, PT, etc.)
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fa fa-check text-success me-2" aria-hidden="true"></i>
+                                    Automatic code system detection via OID patterns
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Current Capabilities -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-light">
+                    <h4 class="mb-0 text-muted">
+                        <i class="fa fa-lightbulb-o me-2" aria-hidden="true"></i>
+                        Current System Capabilities
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li class="mb-3">
+                                    <i class="fa fa-check-circle text-success me-2" aria-hidden="true"></i>
+                                    <strong>Master Value Catalogue Upload:</strong> Admin console integration for MVC Excel files
+                                </li>
+                                <li class="mb-3">
+                                    <i class="fa fa-check-circle text-success me-2" aria-hidden="true"></i>
+                                    <strong>CDA Code Extraction:</strong> Automatic extraction of SNOMED, LOINC, ICD-10 codes
+                                </li>
+                                <li class="mb-3">
+                                    <i class="fa fa-check-circle text-success me-2" aria-hidden="true"></i>
+                                    <strong>FHIR R4 Processing:</strong> Patient Summary bundle parsing with terminology lookup
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li class="mb-3">
+                                    <i class="fa fa-check-circle text-success me-2" aria-hidden="true"></i>
+                                    <strong>Real-Time Translation:</strong> Database-backed clinical code display
+                                </li>
+                                <li class="mb-3">
+                                    <i class="fa fa-check-circle text-success me-2" aria-hidden="true"></i>
+                                    <strong>Patient Summary Display:</strong> PS Display Guidelines compliant rendering
+                                </li>
+                                <li class="mb-3">
+                                    <i class="fa fa-check-circle text-success me-2" aria-hidden="true"></i>
+                                    <strong>Cross-Border Data Exchange:</strong> epSOS/eHDSI NCP Gateway integration
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-success mt-3" role="alert">
+                        <i class="fa fa-info-circle me-2" aria-hidden="true"></i>
+                        <strong>Live System:</strong> Access patient clinical data with real-time terminology translation through the
+                        <a href="/portal/" class="alert-link">European Portal</a> and
+                        <a href="/patients/search/" class="alert-link">Patient Search</a>.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="row">
+        <div class="col-12 text-center">
+            <a href="/" class="btn btn-primary btn-lg me-3">
+                <i class="fa fa-home me-2" aria-hidden="true"></i>
+                Return Home
+            </a>
+            <a href="/portal/" class="btn btn-success btn-lg me-3">
+                <i class="fa fa-globe me-2" aria-hidden="true"></i>
+                European Portal
+            </a>
+            <a href="/patients/search/" class="btn btn-outline-secondary btn-lg">
+                <i class="fa fa-search me-2" aria-hidden="true"></i>
+                Patient Search
+            </a>
         </div>
     </div>
 </div>
