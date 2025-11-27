@@ -24682,6 +24682,77 @@ button.nav-link i {
   font-size: 0.75em;
 }
 
+.terminology-services-page .mermaid-container {
+  background-color: #ffffff;
+  padding: 30px;
+  border-radius: 8px;
+  margin: 20px 0;
+  border: 1px solid #e2e8f0;
+  text-align: center;
+  overflow-x: auto;
+}
+.terminology-services-page .mermaid-container svg {
+  max-width: 100%;
+  height: auto;
+  display: inline-block;
+}
+.terminology-services-page .standard-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.terminology-services-page .standard-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+.terminology-services-page .process-badge {
+  display: inline-block;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: 600;
+  margin: 5px;
+}
+.terminology-services-page .process-badge.bg-primary {
+  background-color: #005f5f !important;
+  color: #ffffff !important;
+}
+.terminology-services-page .process-badge.bg-success {
+  background-color: #22c55e !important;
+  color: #ffffff !important;
+}
+.terminology-services-page .bg-gradient {
+  background: linear-gradient(135deg, #007991 0%, #78ffd6 100%) !important;
+}
+.terminology-services-page .bg-gradient h1, .terminology-services-page .bg-gradient h2, .terminology-services-page .bg-gradient h3, .terminology-services-page .bg-gradient h4, .terminology-services-page .bg-gradient h5, .terminology-services-page .bg-gradient h6, .terminology-services-page .bg-gradient p, .terminology-services-page .bg-gradient span, .terminology-services-page .bg-gradient i {
+  color: #ffffff !important;
+}
+.terminology-services-page .card-header.bg-dark h1, .terminology-services-page .card-header.bg-dark h2, .terminology-services-page .card-header.bg-dark h3, .terminology-services-page .card-header.bg-dark h4, .terminology-services-page .card-header.bg-dark h5, .terminology-services-page .card-header.bg-dark h6, .terminology-services-page .card-header.bg-dark p, .terminology-services-page .card-header.bg-primary h1, .terminology-services-page .card-header.bg-primary h2, .terminology-services-page .card-header.bg-primary h3, .terminology-services-page .card-header.bg-primary h4, .terminology-services-page .card-header.bg-primary h5, .terminology-services-page .card-header.bg-primary h6, .terminology-services-page .card-header.bg-primary p, .terminology-services-page .card-header.bg-success h1, .terminology-services-page .card-header.bg-success h2, .terminology-services-page .card-header.bg-success h3, .terminology-services-page .card-header.bg-success h4, .terminology-services-page .card-header.bg-success h5, .terminology-services-page .card-header.bg-success h6, .terminology-services-page .card-header.bg-success p {
+  color: #ffffff !important;
+}
+.terminology-services-page .list-group-item .badge {
+  font-size: 0.75rem;
+  padding: 0.35em 0.65em;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+.terminology-services-page .standard-card {
+  border-width: 2px;
+}
+.terminology-services-page .standard-card .card-title {
+  margin-bottom: 1rem;
+}
+.terminology-services-page .standard-card .card-title i {
+  font-size: 1.5rem;
+}
+.terminology-services-page .standard-card .btn-sm {
+  margin-top: 1rem;
+}
+.terminology-services-page .implementation-section code {
+  background-color: #f7fafc;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 0.9em;
+  color: #dc2626;
+}
+
 .container {
   width: 100%;
   max-width: 1024px;

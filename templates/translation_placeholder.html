@@ -3,75 +3,26 @@
 
 {% block title %}Central Terminology Services - EU eHealth NCP Portal{% endblock %}
 
-{% block extra_head %}
-<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        mermaid.initialize({ 
-            startOnLoad: true,
-            theme: 'neutral',
-            securityLevel: 'loose',
-            fontFamily: 'Arial, sans-serif',
-            flowchart: {
-                useMaxWidth: true,
-                htmlLabels: true,
-                curve: 'basis',
-                padding: 20
-            }
-        });
-    });
-</script>
-<style>
-    .mermaid {
-        background-color: #ffffff;
-        padding: 30px;
-        border-radius: 8px;
-        margin: 20px 0;
-        border: 1px solid #dee2e6;
-        text-align: center;
-    }
-    
-    /* Ensure Mermaid diagrams are visible */
-    .mermaid svg {
-        max-width: 100%;
-        height: auto;
-    }
-    
-    .standard-card {
-        transition: transform 0.2s;
-    }
-    .standard-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-    }
-    .process-badge {
-        display: inline-block;
-        padding: 8px 16px;
-        border-radius: 20px;
-        font-weight: 600;
-        margin: 5px;
-    }
-    
-    /* Fix dark text on dark backgrounds */
-    .card-header.bg-dark h4 {
-        color: #ffffff !important;
-    }
-    
-    .card-header.bg-primary h4,
-    .card-header.bg-success h4 {
-        color: #ffffff !important;
-    }
-    
-    /* Ensure all text in colored headers is white */
-    .bg-gradient,
-    .bg-gradient * {
-        color: #ffffff !important;
-    }
-</style>
 {% endblock %}
 
 {% block content %}
-<div class="container my-5">
+<script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ 
+        startOnLoad: true,
+        theme: 'neutral',
+        securityLevel: 'loose',
+        fontFamily: 'Arial, sans-serif',
+        flowchart: {
+            useMaxWidth: true,
+            htmlLabels: true,
+            curve: 'basis',
+            padding: 20
+        }
+    });
+</script>
+
+<div class="container my-5 terminology-services-page">
     <!-- Header Section -->
     <div class="row mb-4">
         <div class="col-12">
@@ -166,6 +117,7 @@ flowchart TB
     style G fill:#fff9c4,stroke:#f57f17,stroke-width:2px
     style H fill:#fff9c4,stroke:#f57f17,stroke-width:2px
     style I fill:#fff9c4,stroke:#f57f17,stroke-width:2px
+                        </pre>
                     </div>
 
                     <div class="mt-4">
@@ -206,7 +158,8 @@ flowchart TB
                         and performs real-time lookups against the Master Value Catalogue to display human-readable terminology.
                     </p>
                     
-                    <div class="mermaid">
+                    <div class="mermaid-container">
+                        <pre class="mermaid">
 flowchart TB
     A["CDA Document"] -->|Parse XML| C["Enhanced CDA Processor"]
     B["FHIR R4 Bundle"] -->|Parse JSON| C
@@ -239,6 +192,7 @@ flowchart TB
     style K fill:#eeeeee,stroke:#757575,stroke-width:1px
     style L fill:#eeeeee,stroke:#757575,stroke-width:1px
     style M fill:#4caf50,stroke:#2e7d32,stroke-width:3px,color:#fff
+                        </pre>
                     </div>
 
                     <div class="mt-4">

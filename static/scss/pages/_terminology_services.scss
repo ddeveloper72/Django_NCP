@@ -1,0 +1,111 @@
+// ========================================
+// Terminology Services Page Styles
+// Central Terminology Server Documentation
+// ========================================
+
+.terminology-services-page {
+    // Mermaid diagram container
+    .mermaid-container {
+        background-color: $white;
+        padding: 30px;
+        border-radius: 8px;
+        margin: 20px 0;
+        border: 1px solid $neutral-lighter;
+        text-align: center;
+        overflow-x: auto;
+        
+        // Ensure diagrams are responsive
+        svg {
+            max-width: 100%;
+            height: auto;
+            display: inline-block;
+        }
+    }
+    
+    // Standard cards with hover effect
+    .standard-card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        
+        &:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+    }
+    
+    // Process badges
+    .process-badge {
+        display: inline-block;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-weight: 600;
+        margin: 5px;
+        
+        &.bg-primary {
+            background-color: $primary-color !important;
+            color: $white !important;
+        }
+        
+        &.bg-success {
+            background-color: $success-green !important;
+            color: $white !important;
+        }
+    }
+    
+    // Gradient header
+    .bg-gradient {
+        background: linear-gradient(135deg, #007991 0%, #78ffd6 100%) !important;
+        
+        h1, h2, h3, h4, h5, h6, p, span, i {
+            color: $white !important;
+        }
+    }
+    
+    // Dark header text fixes
+    .card-header {
+        &.bg-dark,
+        &.bg-primary,
+        &.bg-success {
+            h1, h2, h3, h4, h5, h6, p {
+                color: $white !important;
+            }
+        }
+    }
+    
+    // Code system badges in lists
+    .list-group-item {
+        .badge {
+            font-size: 0.75rem;
+            padding: 0.35em 0.65em;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+    }
+    
+    // European standards cards
+    .standard-card {
+        border-width: 2px;
+        
+        .card-title {
+            margin-bottom: 1rem;
+            
+            i {
+                font-size: 1.5rem;
+            }
+        }
+        
+        .btn-sm {
+            margin-top: 1rem;
+        }
+    }
+    
+    // Technical implementation section
+    .implementation-section {
+        code {
+            background-color: $neutral-lightest;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.9em;
+            color: $error-red;
+        }
+    }
+}
