@@ -11,9 +11,23 @@
 
   // Alert variants
   &.alert-info {
-    background-color: $light-blue;
-    border-color: rgba($primary-blue, 0.3);
-    color: $primary-blue;
+    // Bootstrap default uses dark teal bg (#0c5460)
+    // Override with WCAG AA compliant white text
+    background-color: #0c5460 !important;
+    border-color: rgba(#0c5460, 0.3);
+    color: $white !important;
+    
+    // Ensure all nested elements are white
+    .alert-heading,
+    .alert-content,
+    h1, h2, h3, h4, h5, h6, p, span, div {
+      color: $white !important;
+    }
+    
+    // Icons must be white
+    i, .fa, .fas, .far, .fab {
+      color: $white !important;
+    }
   }
 
   &.alert-success {

@@ -9747,9 +9747,17 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
   position: relative;
 }
 .alert.alert-info {
-  background-color: #e8f6f7;
-  border-color: rgba(0, 95, 95, 0.3);
-  color: #005f5f;
+  background-color: #0c5460 !important;
+  border-color: rgba(12, 84, 96, 0.3);
+  color: #ffffff !important;
+}
+.alert.alert-info .alert-heading,
+.alert.alert-info .alert-content,
+.alert.alert-info h1, .alert.alert-info h2, .alert.alert-info h3, .alert.alert-info h4, .alert.alert-info h5, .alert.alert-info h6, .alert.alert-info p, .alert.alert-info span, .alert.alert-info div {
+  color: #ffffff !important;
+}
+.alert.alert-info i, .alert.alert-info .fa, .alert.alert-info .fas, .alert.alert-info .far, .alert.alert-info .fab {
+  color: #ffffff !important;
 }
 .alert.alert-success {
   background-color: #e8f5e8;
