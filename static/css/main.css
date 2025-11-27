@@ -24721,17 +24721,32 @@ button.nav-link i {
 .terminology-services-page .bg-gradient {
   background: linear-gradient(135deg, #007991 0%, #78ffd6 100%) !important;
 }
-.terminology-services-page .bg-gradient h1, .terminology-services-page .bg-gradient h2, .terminology-services-page .bg-gradient h3, .terminology-services-page .bg-gradient h4, .terminology-services-page .bg-gradient h5, .terminology-services-page .bg-gradient h6, .terminology-services-page .bg-gradient p, .terminology-services-page .bg-gradient span, .terminology-services-page .bg-gradient i {
+.terminology-services-page .bg-gradient h1, .terminology-services-page .bg-gradient h2, .terminology-services-page .bg-gradient h3, .terminology-services-page .bg-gradient h4, .terminology-services-page .bg-gradient h5, .terminology-services-page .bg-gradient h6, .terminology-services-page .bg-gradient p, .terminology-services-page .bg-gradient span, .terminology-services-page .bg-gradient i, .terminology-services-page .bg-gradient .fa, .terminology-services-page .bg-gradient .fas, .terminology-services-page .bg-gradient .far {
   color: #ffffff !important;
 }
-.terminology-services-page .card-header.bg-dark h1, .terminology-services-page .card-header.bg-dark h2, .terminology-services-page .card-header.bg-dark h3, .terminology-services-page .card-header.bg-dark h4, .terminology-services-page .card-header.bg-dark h5, .terminology-services-page .card-header.bg-dark h6, .terminology-services-page .card-header.bg-dark p, .terminology-services-page .card-header.bg-primary h1, .terminology-services-page .card-header.bg-primary h2, .terminology-services-page .card-header.bg-primary h3, .terminology-services-page .card-header.bg-primary h4, .terminology-services-page .card-header.bg-primary h5, .terminology-services-page .card-header.bg-primary h6, .terminology-services-page .card-header.bg-primary p, .terminology-services-page .card-header.bg-success h1, .terminology-services-page .card-header.bg-success h2, .terminology-services-page .card-header.bg-success h3, .terminology-services-page .card-header.bg-success h4, .terminology-services-page .card-header.bg-success h5, .terminology-services-page .card-header.bg-success h6, .terminology-services-page .card-header.bg-success p {
+.terminology-services-page .card-header.bg-dark h1, .terminology-services-page .card-header.bg-dark h2, .terminology-services-page .card-header.bg-dark h3, .terminology-services-page .card-header.bg-dark h4, .terminology-services-page .card-header.bg-dark h5, .terminology-services-page .card-header.bg-dark h6, .terminology-services-page .card-header.bg-dark p, .terminology-services-page .card-header.bg-dark span, .terminology-services-page .card-header.bg-primary h1, .terminology-services-page .card-header.bg-primary h2, .terminology-services-page .card-header.bg-primary h3, .terminology-services-page .card-header.bg-primary h4, .terminology-services-page .card-header.bg-primary h5, .terminology-services-page .card-header.bg-primary h6, .terminology-services-page .card-header.bg-primary p, .terminology-services-page .card-header.bg-primary span, .terminology-services-page .card-header.bg-success h1, .terminology-services-page .card-header.bg-success h2, .terminology-services-page .card-header.bg-success h3, .terminology-services-page .card-header.bg-success h4, .terminology-services-page .card-header.bg-success h5, .terminology-services-page .card-header.bg-success h6, .terminology-services-page .card-header.bg-success p, .terminology-services-page .card-header.bg-success span, .terminology-services-page .card-header.bg-info h1, .terminology-services-page .card-header.bg-info h2, .terminology-services-page .card-header.bg-info h3, .terminology-services-page .card-header.bg-info h4, .terminology-services-page .card-header.bg-info h5, .terminology-services-page .card-header.bg-info h6, .terminology-services-page .card-header.bg-info p, .terminology-services-page .card-header.bg-info span, .terminology-services-page .card-header.bg-secondary h1, .terminology-services-page .card-header.bg-secondary h2, .terminology-services-page .card-header.bg-secondary h3, .terminology-services-page .card-header.bg-secondary h4, .terminology-services-page .card-header.bg-secondary h5, .terminology-services-page .card-header.bg-secondary h6, .terminology-services-page .card-header.bg-secondary p, .terminology-services-page .card-header.bg-secondary span {
   color: #ffffff !important;
+}
+.terminology-services-page .card-header.bg-dark i, .terminology-services-page .card-header.bg-dark .fa, .terminology-services-page .card-header.bg-dark .fas, .terminology-services-page .card-header.bg-dark .far, .terminology-services-page .card-header.bg-dark .fab, .terminology-services-page .card-header.bg-primary i, .terminology-services-page .card-header.bg-primary .fa, .terminology-services-page .card-header.bg-primary .fas, .terminology-services-page .card-header.bg-primary .far, .terminology-services-page .card-header.bg-primary .fab, .terminology-services-page .card-header.bg-success i, .terminology-services-page .card-header.bg-success .fa, .terminology-services-page .card-header.bg-success .fas, .terminology-services-page .card-header.bg-success .far, .terminology-services-page .card-header.bg-success .fab, .terminology-services-page .card-header.bg-info i, .terminology-services-page .card-header.bg-info .fa, .terminology-services-page .card-header.bg-info .fas, .terminology-services-page .card-header.bg-info .far, .terminology-services-page .card-header.bg-info .fab, .terminology-services-page .card-header.bg-secondary i, .terminology-services-page .card-header.bg-secondary .fa, .terminology-services-page .card-header.bg-secondary .fas, .terminology-services-page .card-header.bg-secondary .far, .terminology-services-page .card-header.bg-secondary .fab {
+  color: #ffffff !important;
+}
+.terminology-services-page .card-body:has(.bg-info) *, .terminology-services-page .card-body:has(.bg-primary) *, .terminology-services-page .card-body:has(.bg-success) * {
+  color: inherit;
+}
+.terminology-services-page .alert-info i, .terminology-services-page .alert-info .fa, .terminology-services-page .alert-info .fas, .terminology-services-page .alert-info .far {
+  color: inherit !important;
 }
 .terminology-services-page .list-group-item .badge {
   font-size: 0.75rem;
   padding: 0.35em 0.65em;
   margin-right: 8px;
   vertical-align: middle;
+}
+.terminology-services-page .list-group-item .badge.bg-info, .terminology-services-page .list-group-item .badge.bg-primary, .terminology-services-page .list-group-item .badge.bg-secondary, .terminology-services-page .list-group-item .badge.bg-success, .terminology-services-page .list-group-item .badge.bg-dark {
+  color: #ffffff !important;
+}
+.terminology-services-page .list-group-item .badge.bg-warning, .terminology-services-page .list-group-item .badge.bg-light {
+  color: #2d3748 !important;
 }
 .terminology-services-page .standard-card {
   border-width: 2px;
@@ -25182,5 +25197,3 @@ small.text-secondary-accessible {
   font-weight: 500 !important;
   opacity: 1 !important;
 }
-
-/*# sourceMappingURL=main.css.map */
