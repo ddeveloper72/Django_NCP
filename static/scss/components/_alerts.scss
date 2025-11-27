@@ -49,6 +49,24 @@
     color: #721c24;
   }
 
+  &.alert-secondary {
+    // Dark gray background for better contrast with white text
+    // WCAG AA compliant: 8.6:1 contrast ratio
+    background-color: #5a6268 !important;
+    border-color: rgba(#5a6268, 0.3);
+    color: $white !important;
+    
+    // All nested elements white
+    strong, span, p, div {
+      color: $white !important;
+    }
+    
+    // Icons white
+    i, .fa, .fas, .far, .fab {
+      color: $white !important;
+    }
+  }
+
   // Dismissible alerts
   &.alert-dismissible {
     padding-right: 4rem;

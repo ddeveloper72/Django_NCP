@@ -9774,6 +9774,17 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
   border-color: rgba(220, 38, 38, 0.3);
   color: #721c24;
 }
+.alert.alert-secondary {
+  background-color: #5a6268 !important;
+  border-color: rgba(90, 98, 104, 0.3);
+  color: #ffffff !important;
+}
+.alert.alert-secondary strong, .alert.alert-secondary span, .alert.alert-secondary p, .alert.alert-secondary div {
+  color: #ffffff !important;
+}
+.alert.alert-secondary i, .alert.alert-secondary .fa, .alert.alert-secondary .fas, .alert.alert-secondary .far, .alert.alert-secondary .fab {
+  color: #ffffff !important;
+}
 .alert.alert-dismissible {
   padding-right: 4rem;
 }
