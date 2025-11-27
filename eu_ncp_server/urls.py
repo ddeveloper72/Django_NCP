@@ -236,6 +236,21 @@ def emergency_session_cleanup(request):
         )
 
 
+def translation_placeholder_view(request):
+    """Placeholder view for translation services (under development)"""
+    from django.contrib import messages
+    
+    messages.info(
+        request, 
+        "Translation services are currently under development. This feature will be available soon."
+    )
+    return render(request, "translation_placeholder.html", {
+        "page_title": "CDA Translation Services",
+        "service_name": "CDA to FHIR Translation",
+        "coming_soon": True
+    })
+
+
 urlpatterns = [
     path("", home_view, name="home"),
     path("api/update-smp-source/", update_smp_source, name="update_smp_source"),
@@ -274,6 +289,8 @@ urlpatterns = [
     path("smp/", include("smp_client.urls")),
     # Patient data management
     path("patients/", include("patient_data.urls")),
+    # Translation services - placeholder for under development feature
+    path("translation/", translation_placeholder_view, name="translation_services"),
     # Translation services API (temporarily disabled due to import errors)
     # path("api/translation/", include("translation_services.urls")),
 ]

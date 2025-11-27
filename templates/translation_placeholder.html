@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ page_title }} - EU eHealth NCP Portal{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8">
+            <!-- Under Development Card -->
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-info text-white py-4">
+                    <div class="d-flex align-items-center">
+                        <i class="fa fa-language fa-3x me-3" aria-hidden="true"></i>
+                        <div>
+                            <h2 class="mb-0">{{ service_name }}</h2>
+                            <p class="mb-0 opacity-90">Clinical Document Architecture to FHIR Conversion</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <i class="fa fa-tools fa-5x text-warning mb-3" aria-hidden="true"></i>
+                        <h3 class="text-muted">Feature Under Development</h3>
+                    </div>
+
+                    <div class="alert alert-info" role="alert">
+                        <i class="fa fa-info-circle me-2" aria-hidden="true"></i>
+                        <strong>Translation Services Coming Soon</strong>
+                        <p class="mb-0 mt-2">
+                            This feature is currently being developed to provide seamless conversion between 
+                            CDA (Clinical Document Architecture) and FHIR formats for cross-border healthcare interoperability.
+                        </p>
+                    </div>
+
+                    <div class="mt-4">
+                        <h4 class="mb-3">
+                            <i class="fa fa-check-circle text-success me-2" aria-hidden="true"></i>
+                            Planned Features
+                        </h4>
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <i class="fa fa-arrow-right text-primary me-2" aria-hidden="true"></i>
+                                CDA to FHIR R4 document conversion
+                            </li>
+                            <li class="mb-2">
+                                <i class="fa fa-arrow-right text-primary me-2" aria-hidden="true"></i>
+                                FHIR to CDA document transformation
+                            </li>
+                            <li class="mb-2">
+                                <i class="fa fa-arrow-right text-primary me-2" aria-hidden="true"></i>
+                                Medical terminology translation across European standards
+                            </li>
+                            <li class="mb-2">
+                                <i class="fa fa-arrow-right text-primary me-2" aria-hidden="true"></i>
+                                Format validation and compliance checking
+                            </li>
+                            <li class="mb-2">
+                                <i class="fa fa-arrow-right text-primary me-2" aria-hidden="true"></i>
+                                RESTful API for system integration
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="mt-4 p-4 bg-light rounded">
+                        <h5 class="mb-3">
+                            <i class="fa fa-lightbulb-o text-warning me-2" aria-hidden="true"></i>
+                            Current Capabilities
+                        </h5>
+                        <p class="text-muted mb-2">
+                            While translation services are under development, you can still:
+                        </p>
+                        <ul class="text-muted">
+                            <li>Access patient data through the <a href="/portal/">European Portal</a></li>
+                            <li>Search for patients using <a href="/patients/search/">Patient Search</a></li>
+                            <li>Manage service metadata via <a href="/smp/">SMP Dashboard</a></li>
+                            <li>View clinical documents in their original CDA format</li>
+                        </ul>
+                    </div>
+
+                    <div class="text-center mt-5">
+                        <a href="/" class="btn btn-primary btn-lg me-3">
+                            <i class="fa fa-home me-2" aria-hidden="true"></i>
+                            Return Home
+                        </a>
+                        <a href="/portal/" class="btn btn-outline-secondary btn-lg">
+                            <i class="fa fa-globe me-2" aria-hidden="true"></i>
+                            Go to Portal
+                        </a>
+                    </div>
+                </div>
+                <div class="card-footer bg-light text-muted text-center py-3">
+                    <small>
+                        <i class="fa fa-calendar-o me-1" aria-hidden="true"></i>
+                        Check back soon for updates on this feature
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
