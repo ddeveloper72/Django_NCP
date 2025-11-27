@@ -81,23 +81,50 @@
         }
     }
     
-    // Process Overview Section - dark background fix
-    .card-body {
-        // Ensure dark backgrounds have white text
-        &:has(.bg-info),
-        &:has(.bg-primary),
-        &:has(.bg-success) {
-            * {
-                color: inherit;
+    // Django messages framework styling - WCAG AA
+    .alert {
+        // All alert types with dark backgrounds need white text
+        &.alert-info,
+        &.alert-primary,
+        &.alert-secondary,
+        &.alert-dark {
+            color: $white !important;
+            
+            // All nested elements white
+            *, p, strong, span, a {
+                color: $white !important;
+            }
+            
+            // All icons white
+            i, .fa, .fas, .far, .fab {
+                color: $white !important;
+            }
+            
+            // Links need underline for visibility
+            a {
+                text-decoration: underline;
+                
+                &:hover {
+                    color: $neutral-lighter !important;
+                }
             }
         }
     }
     
-    // Alert info boxes with proper contrast
+    // Alert info boxes with proper contrast - WCAG AA
     .alert-info {
-        // Ensure icons are visible
-        i, .fa, .fas, .far {
-            color: inherit !important;
+        // Bootstrap alert-info has dark background (#0c5460)
+        // Requires white text for 7.5:1 contrast ratio
+        color: $white !important;
+        
+        // All text elements white
+        p, strong, span {
+            color: $white !important;
+        }
+        
+        // Icons must be white on dark background
+        i, .fa, .fas, .far, .fab {
+            color: $white !important;
         }
     }
     

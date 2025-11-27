@@ -24730,11 +24730,29 @@ button.nav-link i {
 .terminology-services-page .card-header.bg-dark i, .terminology-services-page .card-header.bg-dark .fa, .terminology-services-page .card-header.bg-dark .fas, .terminology-services-page .card-header.bg-dark .far, .terminology-services-page .card-header.bg-dark .fab, .terminology-services-page .card-header.bg-primary i, .terminology-services-page .card-header.bg-primary .fa, .terminology-services-page .card-header.bg-primary .fas, .terminology-services-page .card-header.bg-primary .far, .terminology-services-page .card-header.bg-primary .fab, .terminology-services-page .card-header.bg-success i, .terminology-services-page .card-header.bg-success .fa, .terminology-services-page .card-header.bg-success .fas, .terminology-services-page .card-header.bg-success .far, .terminology-services-page .card-header.bg-success .fab, .terminology-services-page .card-header.bg-info i, .terminology-services-page .card-header.bg-info .fa, .terminology-services-page .card-header.bg-info .fas, .terminology-services-page .card-header.bg-info .far, .terminology-services-page .card-header.bg-info .fab, .terminology-services-page .card-header.bg-secondary i, .terminology-services-page .card-header.bg-secondary .fa, .terminology-services-page .card-header.bg-secondary .fas, .terminology-services-page .card-header.bg-secondary .far, .terminology-services-page .card-header.bg-secondary .fab {
   color: #ffffff !important;
 }
-.terminology-services-page .card-body:has(.bg-info) *, .terminology-services-page .card-body:has(.bg-primary) *, .terminology-services-page .card-body:has(.bg-success) * {
-  color: inherit;
+.terminology-services-page .alert.alert-info, .terminology-services-page .alert.alert-primary, .terminology-services-page .alert.alert-secondary, .terminology-services-page .alert.alert-dark {
+  color: #ffffff !important;
 }
-.terminology-services-page .alert-info i, .terminology-services-page .alert-info .fa, .terminology-services-page .alert-info .fas, .terminology-services-page .alert-info .far {
-  color: inherit !important;
+.terminology-services-page .alert.alert-info *, .terminology-services-page .alert.alert-info p, .terminology-services-page .alert.alert-info strong, .terminology-services-page .alert.alert-info span, .terminology-services-page .alert.alert-info a, .terminology-services-page .alert.alert-primary *, .terminology-services-page .alert.alert-primary p, .terminology-services-page .alert.alert-primary strong, .terminology-services-page .alert.alert-primary span, .terminology-services-page .alert.alert-primary a, .terminology-services-page .alert.alert-secondary *, .terminology-services-page .alert.alert-secondary p, .terminology-services-page .alert.alert-secondary strong, .terminology-services-page .alert.alert-secondary span, .terminology-services-page .alert.alert-secondary a, .terminology-services-page .alert.alert-dark *, .terminology-services-page .alert.alert-dark p, .terminology-services-page .alert.alert-dark strong, .terminology-services-page .alert.alert-dark span, .terminology-services-page .alert.alert-dark a {
+  color: #ffffff !important;
+}
+.terminology-services-page .alert.alert-info i, .terminology-services-page .alert.alert-info .fa, .terminology-services-page .alert.alert-info .fas, .terminology-services-page .alert.alert-info .far, .terminology-services-page .alert.alert-info .fab, .terminology-services-page .alert.alert-primary i, .terminology-services-page .alert.alert-primary .fa, .terminology-services-page .alert.alert-primary .fas, .terminology-services-page .alert.alert-primary .far, .terminology-services-page .alert.alert-primary .fab, .terminology-services-page .alert.alert-secondary i, .terminology-services-page .alert.alert-secondary .fa, .terminology-services-page .alert.alert-secondary .fas, .terminology-services-page .alert.alert-secondary .far, .terminology-services-page .alert.alert-secondary .fab, .terminology-services-page .alert.alert-dark i, .terminology-services-page .alert.alert-dark .fa, .terminology-services-page .alert.alert-dark .fas, .terminology-services-page .alert.alert-dark .far, .terminology-services-page .alert.alert-dark .fab {
+  color: #ffffff !important;
+}
+.terminology-services-page .alert.alert-info a, .terminology-services-page .alert.alert-primary a, .terminology-services-page .alert.alert-secondary a, .terminology-services-page .alert.alert-dark a {
+  text-decoration: underline;
+}
+.terminology-services-page .alert.alert-info a:hover, .terminology-services-page .alert.alert-primary a:hover, .terminology-services-page .alert.alert-secondary a:hover, .terminology-services-page .alert.alert-dark a:hover {
+  color: #e2e8f0 !important;
+}
+.terminology-services-page .alert-info {
+  color: #ffffff !important;
+}
+.terminology-services-page .alert-info p, .terminology-services-page .alert-info strong, .terminology-services-page .alert-info span {
+  color: #ffffff !important;
+}
+.terminology-services-page .alert-info i, .terminology-services-page .alert-info .fa, .terminology-services-page .alert-info .fas, .terminology-services-page .alert-info .far, .terminology-services-page .alert-info .fab {
+  color: #ffffff !important;
 }
 .terminology-services-page .list-group-item .badge {
   font-size: 0.75rem;
