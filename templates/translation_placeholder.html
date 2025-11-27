@@ -3,8 +3,6 @@
 
 {% block title %}Central Terminology Services - EU eHealth NCP Portal{% endblock %}
 
-{% endblock %}
-
 {% block content %}
 <script type="module">
     import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
@@ -56,7 +54,7 @@
                         <p class="mb-0 mt-2">
                             This system leverages a Central Terminology Server with a Master Value Catalogue uploaded via the admin console.
                             Clinical codes from CDA and FHIR R4 resources are automatically translated to display human-readable terminology
-                            across European healthcare standards (SNOMED CT, LOINC, ICD-10, ATC, UCUM).
+                            across European healthcare standards using terminology provided by clinical terminology specialists.
                         </p>
                     </div>
 
@@ -124,7 +122,7 @@ flowchart TB
                         <h5><i class="fa fa-database me-2 text-primary" aria-hidden="true"></i>Database Models</h5>
                         <ul class="list-group">
                             <li class="list-group-item">
-                                <strong>ValueSetCatalogue:</strong> Master catalog of terminology value sets (SNOMED, LOINC, ICD-10, ATC, UCUM)
+                                <strong>ValueSetCatalogue:</strong> Master catalog of terminology value sets provided by clinical terminology specialists
                             </li>
                             <li class="list-group-item">
                                 <strong>ValueSetConcept:</strong> Individual clinical codes with OIDs, display names, and status
@@ -164,7 +162,7 @@ flowchart TB
     A["CDA Document"] -->|Parse XML| C["Enhanced CDA Processor"]
     B["FHIR R4 Bundle"] -->|Parse JSON| C
     
-    C -->|Extract Codes| D["Code Extraction<br/>SNOMED, LOINC, ICD-10"]
+    C -->|Extract Codes| D["Code Extraction<br/>From Clinical Documents"]
     D -->|Code + System OID| E{"Central Terminology<br/>Service"}
     
     E -->|Query| F[("Master Value<br/>Catalogue Database")]
@@ -175,7 +173,6 @@ flowchart TB
     I -->|Render| J["Patient Summary Display"]
     
     E -.->|Cache 1 hour| K["Django Cache"]
-    E -.->|Fallback| L["Hardcoded Mappings"]
     
     J -->|Show Patient| M["Clinical Data Table<br/>Human-Readable Terms"]
     
@@ -196,34 +193,15 @@ flowchart TB
                     </div>
 
                     <div class="mt-4">
-                        <h5><i class="fa fa-code me-2 text-success" aria-hidden="true"></i>Supported Code Systems</h5>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <ul class="list-group">
-                                    <li class="list-group-item">
-                                        <span class="badge bg-info">2.16.840.1.113883.6.96</span> SNOMED CT - Clinical Terms
-                                    </li>
-                                    <li class="list-group-item">
-                                        <span class="badge bg-primary">2.16.840.1.113883.6.1</span> LOINC - Lab & Clinical Observations
-                                    </li>
-                                    <li class="list-group-item">
-                                        <span class="badge bg-warning">2.16.840.1.113883.6.3</span> ICD-10 - Disease Classification
-                                    </li>
-                                </ul>
-                            </div>
-                            <div class="col-md-6">
-                                <ul class="list-group">
-                                    <li class="list-group-item">
-                                        <span class="badge bg-dark">2.16.840.1.113883.6.73</span> ATC - Anatomical Therapeutic Chemical
-                                    </li>
-                                    <li class="list-group-item">
-                                        <span class="badge bg-secondary">2.16.840.1.113883.5.83</span> UCUM - Units of Measure
-                                    </li>
-                                    <li class="list-group-item">
-                                        <span class="badge bg-success">0.4.0.127.0.16.1.1.2.1</span> EDQM - Pharmaceutical Standards
-                                    </li>
-                                </ul>
-                            </div>
+                        <h5><i class="fa fa-code me-2 text-success" aria-hidden="true"></i>Code System Management</h5>
+                        <p class="text-muted">
+                            Supported code systems are determined by the Master Value Catalogue provided by clinical terminology specialists.
+                            The system dynamically supports any OID-based terminology system included in the uploaded catalogue.
+                        </p>
+                        <div class="alert alert-secondary" role="alert">
+                            <i class="fa fa-upload me-2" aria-hidden="true"></i>
+                            <strong>Note:</strong> Code systems, OIDs, and terminology mappings are managed exclusively through the 
+                            Master Value Catalogue upload process by authorized clinical terminology specialists.
                         </div>
                     </div>
                 </div>
