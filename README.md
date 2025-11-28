@@ -354,6 +354,36 @@ This project demonstrates EU eHealth specifications:
 
 Implements healthcare data protection and privacy best practices for educational purposes.
 
+### EU AI Act Compliance
+
+This application was developed with AI assistance (Claude Sonnet 4.5) and complies with the EU AI Act:
+
+**Risk Classification**: ✅ **Minimal Risk System**
+- Demonstration/educational application (not for clinical decision-making)
+- No autonomous medical diagnosis or treatment recommendations
+- No automated patient risk assessment
+- Human healthcare professionals remain fully in control
+
+**AI Usage Transparency**:
+- AI-assisted code generation for development efficiency
+- All code reviewed and validated by human developers
+- No AI-powered clinical decision support features
+- No automated processing of patient health data for predictions
+
+**Data Protection**:
+- GDPR-compliant data handling patterns
+- No training on patient data
+- Demonstration data only (no real patient information)
+- Full audit trails for all data access
+
+**Human Oversight**:
+- Healthcare professionals make all clinical decisions
+- AI assistance limited to software development only
+- No autonomous healthcare functions
+- Clear documentation of AI-assisted development
+
+For production healthcare systems, additional EU AI Act compliance measures would be required, including conformity assessments and regulatory approval for high-risk AI systems.
+
 ---
 
 ## 🔗 Related Projects
