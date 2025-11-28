@@ -1,13 +1,15 @@
 # Django_NCP - European eHealth National Contact Point
 
-**Production-grade Django 5.2 application for EU cross-border healthcare data exchange**
+**Django 5.2 demonstration application for EU cross-border healthcare data exchange**
 
 [![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 [![Django 5.2](https://img.shields.io/badge/django-5.2-green.svg)](https://www.djangoproject.com/)
 [![FHIR R4](https://img.shields.io/badge/FHIR-R4-orange.svg)](https://www.hl7.org/fhir/R4/)
-[![License](https://img.shields.io/badge/license-Healthcare-lightgrey.svg)](LICENSE)
+[![Demo](https://img.shields.io/badge/status-demonstration-yellow.svg)](README.md)
 
-European healthcare interoperability platform implementing epSOS/eHDSI standards for Patient Summary, ePrescription, eDispensation, and cross-border clinical data exchange.
+> **⚠️ DEMONSTRATION APPLICATION**: This project demonstrates EU healthcare interoperability concepts. Not intended for production clinical use.
+
+Implements epSOS/eHDSI standards for **Patient Summary** and cross-border clinical data exchange using CDA and FHIR R4.
 
 ---
 
@@ -63,19 +65,21 @@ graph TB
     style Azure fill:#0078d4,color:#fff
 ```
 
-## 🎯 Core Capabilities
+## 🎯 Demonstration Capabilities
 
-### Healthcare Data Exchange
-- **Patient Summary (PS)** - IPS-compliant cross-border patient summaries
-- **ePrescription (eP)** - Electronic prescription exchange across EU
-- **eDispensation (eD)** - Pharmacy dispensation records
-- **Laboratory Results** - Clinical lab data integration
-- **Hospital Discharge** - Care continuity documentation
-- **Medical Imaging** - Radiology report exchange
+### Supported Services (Demo)
+- ✅ **Patient Summary (PS)** - IPS-compliant cross-border patient summaries
+- ✅ **Laboratory Results** - Clinical lab data integration
+- ✅ **Hospital Discharge** - Care continuity documentation
+- ✅ **Medical Imaging** - Radiology report exchange
+
+### Future Development
+- 🔄 **ePrescription (eP)** - Electronic prescription exchange (not yet implemented)
+- 🔄 **eDispensation (eD)** - Pharmacy dispensation records (not yet implemented)
 
 ### Clinical Document Processing
 - **CDA R2** - Level 1 (PDF) and Level 3 (structured) parsing
-- **FHIR R4** - Azure Healthcare APIs integration
+- **FHIR R4** - Azure Healthcare APIs integration (demo)
 - **Terminology** - Master Value Catalogue for code translation
 - **Multi-language** - English/Irish clinical terminology support
 
@@ -160,13 +164,13 @@ graph LR
 ### Module Overview
 
 | Module | Purpose | Key Features |
-|--------|---------|--------------|
+|--------|---------|--------------||
 | `ehealth_portal/` | Patient portal UI | Patient search, document display, session management |
-| `ncp_gateway/` | Cross-border API | Country models, patient lookup, NCP-to-NCP communication |
+| `ncp_gateway/` | Cross-border API | Country models, patient lookup, NCP-to-NCP communication (demo) |
 | `patient_data/` | Clinical data | Demographics, CDA parsing, FHIR integration |
-| `fhir_services/` | FHIR R4 admin | PS/eP/eD management, Azure FHIR connectivity |
+| `fhir_services/` | FHIR R4 admin | Patient Summary management, Azure FHIR connectivity (demo) |
 | `authentication/` | User security | HSE-themed login, RBAC, healthcare professional auth |
-| `smp_client/` | SMP integration | Certificate validation, service metadata |
+| `smp_client/` | SMP integration | Certificate validation, service metadata (demo) |
 | `translation_manager/` | Terminology | MVC integration, code system management |
 
 ## 🔐 Security & Compliance
@@ -297,15 +301,15 @@ sequenceDiagram
 
 ---
 
-## 🌍 EU Member State Integration
+## 🌍 EU Member State Integration (Demo)
 
-| Country | Status | OID | Supported Services |
-|---------|--------|-----|-------------------|
-| 🇮🇪 Ireland | ✅ Active | 2.16.372.1.100.1.1 | PS, eP, eD |
-| 🇧🇪 Belgium | ✅ Active | 2.16.840.1.113883.1.1 | PS, eP |
-| 🇵🇹 Portugal | ✅ Active | 2.16.620.1.101.10.1 | PS |
-| 🇩🇪 Germany | 🔄 Planned | - | - |
-| 🇫🇷 France | 🔄 Planned | - | - |
+| Country | Status | OID | Demonstrated Services |
+|---------|--------|-----|-----------------------|
+| 🇮🇪 Ireland | 🧪 Demo | 2.16.372.1.100.1.1 | PS (Patient Summary) |
+| 🇧🇪 Belgium | 🧪 Demo | 2.16.840.1.113883.1.1 | PS (Patient Summary) |
+| 🇵🇹 Portugal | 🧪 Demo | 2.16.620.1.101.10.1 | PS (Patient Summary) |
+
+> **Note**: This demonstrates cross-border data exchange concepts. Not connected to actual national healthcare systems.
 
 ---
 
@@ -340,13 +344,15 @@ See [Testing Standards](.specs/testing-and-modular-code-standards.md) for detail
 
 ## 📜 License & Compliance
 
-This project implements EU eHealth specifications and follows:
-- **GDPR** - General Data Protection Regulation
-- **epSOS/eHDSI** - European Health Digital Services Infrastructure
+**⚠️ DEMONSTRATION PURPOSES ONLY** - Not for production clinical use.
+
+This project demonstrates EU eHealth specifications:
+- **GDPR** - General Data Protection Regulation compliance patterns
+- **epSOS/eHDSI** - European Health Digital Services Infrastructure standards
 - **FHIR R4** - HL7 Fast Healthcare Interoperability Resources
 - **CDA R2** - Clinical Document Architecture
 
-Healthcare data protection and patient privacy are paramount.
+Implements healthcare data protection and privacy best practices for educational purposes.
 
 ---
 
