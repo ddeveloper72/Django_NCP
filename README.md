@@ -6,8 +6,11 @@
 [![Django 5.2](https://img.shields.io/badge/django-5.2-green.svg)](https://www.djangoproject.com/)
 [![FHIR R4](https://img.shields.io/badge/FHIR-R4-orange.svg)](https://www.hl7.org/fhir/R4/)
 [![Demo](https://img.shields.io/badge/status-demonstration-yellow.svg)](README.md)
+[![Live Demo](https://img.shields.io/badge/demo-live-brightgreen.svg)](https://django-ncp-794688432a7f.herokuapp.com/)
 
 > **⚠️ DEMONSTRATION APPLICATION**: This project demonstrates EU healthcare interoperability concepts. Not intended for production clinical use.
+
+**🌐 Live Demo**: [https://django-ncp-794688432a7f.herokuapp.com/](https://django-ncp-794688432a7f.herokuapp.com/)
 
 Implements epSOS/eHDSI standards for **Patient Summary** and cross-border clinical data exchange using CDA and FHIR R4.
 
